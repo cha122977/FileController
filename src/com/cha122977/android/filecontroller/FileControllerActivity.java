@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -151,8 +152,10 @@ public class FileControllerActivity extends Activity {
     }
     
     private void openTopOptionsDialog(int position){//run this function when top listView clickItemLongClick(it will show menu to choose action)
+    	final String selectedFilePath = topFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_option);
-    	s[0] += " " + tv_bottomDir.getText().toString();
+    	s[1] += " " + tv_bottomDir.getText().toString();//set the string of item
+    	s[2] += " " + tv_bottomDir.getText().toString();
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(topFilePath.get(position));
 		builder.setItems(s, new DialogInterface.OnClickListener() {
@@ -164,6 +167,7 @@ public class FileControllerActivity extends Activity {
 					break;
 				case 1://Move
 					//TODO Move function
+					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 2://Copy
 					//TODO copy file to the other side
@@ -189,6 +193,16 @@ public class FileControllerActivity extends Activity {
 
     
     //-----------<File Option function--------//
+    private void moveFile(String movedFile, String target){
+    	File file = new File(movedFile);
+    	Log.d("TAG", movedFile);
+    	File targetFile = new File(target);
+    	Log.d("TAG", target);
+    	boolean a = file.renameTo(targetFile);
+    	Log.d("TAG", "Result of renameTo: " + a);
+    	Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_SHORT);
+    }
+    
     private void renameFile(String renamedFile){
     	File file = new File(renamedFile);
     	//TODO open a dialog and a editText to write new name.
