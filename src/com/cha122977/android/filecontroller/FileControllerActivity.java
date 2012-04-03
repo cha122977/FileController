@@ -38,6 +38,8 @@ public class FileControllerActivity extends Activity {
         initial();
         setListener();
         
+//        gete
+        
         openTopFile(ROOT);//at initial: open the SD-card root
         openBottomFile(ROOT);//at initial: open the SD-card root
     }
