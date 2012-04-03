@@ -1,6 +1,11 @@
 package com.cha122977.android.filecontroller;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +43,13 @@ public class FileControllerActivity extends Activity {
         initial();
         setListener();
         
-//        gete
+//        File f = Environment.getExternalStorageDirectory
+        File f = new File("/sdcard/");
+        String x = f.getAbsolutePath();
+        String y = f.getPath();
         
-        openTopFile(ROOT);//at initial: open the SD-card root
-        openBottomFile(ROOT);//at initial: open the SD-card root
+        openTopFile(x);//at initial: open the SD-card root
+        openBottomFile(y);//at initial: open the SD-card root
     }
     private void setView(){
     	tv_topDir = (TextView)findViewById(R.id.topTextView);
@@ -173,6 +181,7 @@ public class FileControllerActivity extends Activity {
 					break;
 				case 2://Copy
 					//TODO copy file to the other side
+					copyFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 3://Delete
 					//TODO delete file, on more Dialog to make sure the user want to delete the file
@@ -210,11 +219,43 @@ public class FileControllerActivity extends Activity {
     	//TODO open a dialog and a editText to write new name.
     	
     }
-    private void copyFile(String copieer, String target){
-    	File file = new File(copieer);
-    	
+    private void copyFile(String copieer, String target){ 
+    	InputStream in;
+    	OutputStream out;
+    	//find the file name of copied file name
+    	int nameIndex = copieer.lastIndexOf("/");
+    	String copieerFileName = copieer.substring(nameIndex+1);
+    	//TODO Avoid replace the presence data which have the same file name in target directory
+    	try{
+    		Log.d("TAG", "Copieer: " + copieer +", Target: " + target);
+    		in = new FileInputStream(copieer);
+    		Log.d("TAG", "Created in Succeed");
+    		out = new FileOutputStream(target + "/" + copieerFileName);
+    		Log.d("TAG", "Created out Succeed");
+    		
+	    	byte[] buffer = new byte[1024];
+	        int read;
+	        while((read = in.read(buffer)) != -1){
+	          out.write(buffer, 0, read);
+	        }
+	        Log.d("TAG", "write data over");
+	        in.close();
+	        out.flush();
+	        out.close();
+	        Log.d("TAG", "Copy File Succeed");
+	        
+	        openBottomFile(target);//use to refresh data
+    	} catch(IOException e){
+    		Log.d("TAG", "Copy File Error");
+    		Toast.makeText(getApplicationContext(), "Copy File Error", Toast.LENGTH_LONG);
+    	} finally{
+    		in = null;
+    		out = null;
+    	}
     }
     //------------File Option function/>-----//
+    
+    //------------Be call in File Option function-----//
     
     private void openDeleteCheckDialog(){
     	new AlertDialog.Builder(this)
