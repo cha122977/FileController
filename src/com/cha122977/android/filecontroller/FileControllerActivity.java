@@ -3,9 +3,6 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,7 +156,7 @@ public class FileControllerActivity extends Activity {
     
     private void openTopOptionsDialog(int position){//run this function when top listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = topFilePath.get(position);
-    	String[] s = getResources().getStringArray(R.array.alert_option);
+    	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
     	s[1] += " " + tv_bottomDir.getText().toString();//set the string of item
     	s[2] += " " + tv_bottomDir.getText().toString();
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -172,7 +169,7 @@ public class FileControllerActivity extends Activity {
 					//TODO Rename the file
 					break;
 				case 1://Move
-					//TODO Move function
+					//TODO Move function, 80% complete.
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 2://Copy
@@ -186,9 +183,10 @@ public class FileControllerActivity extends Activity {
 				case 4://Cancel
 					//Do nothing
 					break;
+				default:
+					//Do nothing
+					break;
 				}
-				//test line
-				Toast.makeText(getApplicationContext(), which+"", Toast.LENGTH_SHORT).show();
 			}
 		});
 		builder.show();
@@ -215,51 +213,54 @@ public class FileControllerActivity extends Activity {
     	//TODO open a dialog and a editText to write new name.
     	
     }
-    private void copyFile(String copieer, String target){ //copy file to target(directory) as same name.
-    	InputStream in;
-    	OutputStream out;
+    private void copyFile(final String copieer, final String target){ //copy file to target(directory) as same name.
     	//find the file name of copied file name
     	int nameIndex = copieer.lastIndexOf("/");
     	String copieerFileName = copieer.substring(nameIndex+1);
-    	//TODO Avoid replace the presence data which have the same file name in target directory
-    	String completeTargetFilePath = target + "/" + copieerFileName;
+    	final String completeTargetFilePath = target + copieerFileName;//[aaa/bbb/ccc.xxx]
+    	//Avoid replace the presence data which have the same file name in target directory
     	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
-	    	try{
-	    		Log.d("TAG", "Copieer: " + copieer +", Target: " + target);
-	    		in = new FileInputStream(copieer);
-	    		Log.d("TAG", "Created in Succeed");
-	    		out = new FileOutputStream(target + "/" + copieerFileName);
-	    		Log.d("TAG", "Created out Succeed");
-	    		
-		    	byte[] buffer = new byte[1024];
-		        int read;
-		        while((read = in.read(buffer)) != -1){
-		          out.write(buffer, 0, read);
-		        }
-		        Log.d("TAG", "write data over");
-		        in.close();
-		        out.flush();
-		        out.close();
-		        Log.d("TAG", "Copy File Succeed");
-		        
-		        openBottomFile(target);//use to refresh data
-	    	} catch(IOException e){
-	    		Log.d("TAG", "Copy File Error");
-	    		Toast.makeText(getApplicationContext(), "Copy File Error", Toast.LENGTH_LONG);
-	    	} finally{
-	    		in = null;
-	    		out = null;
-	    	}
-    	} else {//have same name file.
-    		//TODO open an alert have item: 1. still copy, replace the file; 
-    		//								2. still copy, but change name; (new name: [old name + "(x)"] ), x is {1,2,3....} 
-    		//								3. cancel.
-    		
+    		pureCopyFile(copieer, completeTargetFilePath);//copy file
+    	} else {//have same file name in target directory.
+        	String[] s = getResources().getStringArray(R.array.alert_sameFileNameOption);
+        	s[0] += completeTargetFilePath;//setting pre-replaced file name
+        	int fileNameCounter=1;
+        	final String newFileName;
+        	String temp;//use to find usable fileName.
+        	while(true){
+        		temp = copieerFileName + "(" + fileNameCounter + ")";
+        		if(new File(target + temp).exists() == false){//new file name is independence
+        			newFileName = temp;
+        			temp = null;
+        			break;
+        		}
+        		fileNameCounter++;
+        	}
+        	s[1] += newFileName;//setting new fileName to option.
+        	 
+        	AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
+    		builder.setItems(s, new DialogInterface.OnClickListener() {
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				switch(which){
+    				case 0://Replace file: 
+    					pureCopyFile(copieer, completeTargetFilePath);
+    					break;
+    				case 1://Copied file rename as: 
+    					pureCopyFile(copieer, target + newFileName);
+    					break;
+    				case 2://Cancel
+    					//Do nothing
+    					break;
+    				default:
+    					//Do nothing
+    				}
+    				//test line
+    			}
+    		});
+    		builder.show();
     	}
     }
-    //------------File Option function/>-----//
-    
-    //------------Be call in File Option function-----//
     
     private void openDeleteCheckDialog(){
     	new AlertDialog.Builder(this)
@@ -279,6 +280,43 @@ public class FileControllerActivity extends Activity {
 					}
 				})
 				.show();
+    }
+    //------------File Option function/>-----//
+    
+    //------------Be call in File Option function-----//
+    
+    private void pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
+    	//TODO if file is very large, maybe need progress bar to show the copy progress.
+    	FileInputStream in;
+    	FileOutputStream out;
+    	byte[] buffer;
+    	try {
+			in = new FileInputStream(copieerFilePath);
+			out = new FileOutputStream(targetFilePath);
+			buffer = new byte[1024];
+	        int read;
+	        while((read = in.read(buffer)) != -1){
+	          out.write(buffer, 0, read);
+	        }
+	        Log.d("TAG", "write data over");
+	        in.close();
+	        out.flush();
+	        out.close();
+	        Log.d("TAG", "Copy File Succeed");
+	        //show information to user.
+	        Toast.makeText(getApplicationContext(), "Copy file succeed", Toast.LENGTH_SHORT);
+	        
+	        //refresh list.
+	        openTopFile(tv_topDir.getText().toString());
+	        openBottomFile(tv_bottomDir.getText().toString());
+		} catch (Exception e) {
+			Toast.makeText(getApplicationContext(), "Copy file " + copieerFilePath + " to " + targetFilePath + " error", Toast.LENGTH_SHORT);
+			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");	
+		} finally {
+	        in = null;
+	        out = null;
+	        buffer = null;
+		}
     }
     
     private File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 

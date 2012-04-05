@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FileController</string>
-    <string-array name="alert_option">
+    <string-array name="alert_fileSelectedOption">
         <item>Rename</item>
         <item>Move to: </item>
         <item>Copy to: </item>
         <item>Delete</item>
+        <item>Cancel</item>
+    </string-array>
+    
+    <string-array name="alert_sameFileNameOption">
+        <item>Replace </item>
+        <item>Copied file rename as </item>
         <item>Cancel</item>
     </string-array>
 
