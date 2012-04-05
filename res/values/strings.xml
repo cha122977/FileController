@@ -12,7 +12,7 @@
     <string-array name="alert_sameFileNameOption">
         <item>Replace </item>
         <item>Copied file rename as </item>
-        <item>Cancel</item>
+        <item>Cancel copy</item>
     </string-array>
 
 </resources>

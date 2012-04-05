@@ -236,9 +236,10 @@ public class FileControllerActivity extends Activity {
         		}
         		fileNameCounter++;
         	}
-        	s[1] += newFileName;//setting new fileName to option.
+        	s[1] += "\n" + newFileName;//setting new fileName to option.
         	 
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
+        	builder.setTitle("Target directory already have\nthis file name.");
     		builder.setItems(s, new DialogInterface.OnClickListener() {
     			@Override
     			public void onClick(DialogInterface dialog, int which) {
@@ -249,7 +250,7 @@ public class FileControllerActivity extends Activity {
     				case 1://Copied file rename as: 
     					pureCopyFile(copieer, target + newFileName);
     					break;
-    				case 2://Cancel
+    				case 2://Cancel copy
     					//Do nothing
     					break;
     				default:
