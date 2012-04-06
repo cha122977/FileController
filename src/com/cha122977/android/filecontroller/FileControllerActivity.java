@@ -211,7 +211,7 @@ public class FileControllerActivity extends Activity {
     	Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_SHORT).show();
     }
     
-    private void renameFile(final String renamedFilePath){
+    private void renameFile(final String renamedFilePath){//use to show dialog to get new file name, positive button will call function to rename file.
     	//show a dialog to get new name.
     	LayoutInflater inflater = LayoutInflater.from(this);
     	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
@@ -236,27 +236,6 @@ public class FileControllerActivity extends Activity {
         builder.show();
     }
     
-    private void checkFileNameAndRename(String renamedFilePath, String newFileName){
-    	File newFile = new File(new File(renamedFilePath).getParent() +"/"+ newFileName);
-    	if(newFile.exists()){
-    		Toast.makeText(getApplicationContext(), newFileName + " is already exist, choose other name.", Toast.LENGTH_LONG).show();
-    	} else {
-    		File renamedFile = new File(renamedFilePath);
-    		boolean result = renamedFile.renameTo(newFile);
-    		Log.d("TAG", "rename file result: " + result );
-    		if(result==true){
-    			Toast.makeText(getApplicationContext(), "Rename file succeed", Toast.LENGTH_SHORT).show();
-    		} else{
-    			Toast.makeText(getApplicationContext(), "Rename file failure", Toast.LENGTH_SHORT).show();
-    		}
-    		renamedFile = null;
-    		
-    		//refresh listView.
-    		openTopFile(tv_topDir.getText().toString());
-    		openBottomFile(tv_bottomDir.getText().toString());
-    	}
-    	newFile = null;
-    }
     private void copyFile(final String copieer, final String target){ //copy file to target(directory) as same name.
     	//find the file name of copied file name
     	int nameIndex = copieer.lastIndexOf("/");
@@ -329,6 +308,28 @@ public class FileControllerActivity extends Activity {
     //------------File Option function/>-----//
     
     //------------Be call in File Option function-----//
+    
+    private void checkFileNameAndRename(String renamedFilePath, String newFileName){//check if file name is exist and rename file
+    	File newFile = new File(new File(renamedFilePath).getParent() +"/"+ newFileName);
+    	if(newFile.exists()){
+    		Toast.makeText(getApplicationContext(), newFileName + " is already exist, choose other name.", Toast.LENGTH_LONG).show();
+    	} else {
+    		File renamedFile = new File(renamedFilePath);
+    		boolean result = renamedFile.renameTo(newFile);
+    		Log.d("TAG", "rename file result: " + result );
+    		if(result==true){
+    			Toast.makeText(getApplicationContext(), "Rename file succeed", Toast.LENGTH_SHORT).show();
+    		} else{
+    			Toast.makeText(getApplicationContext(), "Rename file failure", Toast.LENGTH_SHORT).show();
+    		}
+    		renamedFile = null;
+    		
+    		//refresh listView.
+    		openTopFile(tv_topDir.getText().toString());
+    		openBottomFile(tv_bottomDir.getText().toString());
+    	}
+    	newFile = null;
+    }
     
     private void pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
     	//TODO if file is very large, maybe need progress bar to show the copy progress.
