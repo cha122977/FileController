@@ -11,12 +11,14 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -166,14 +168,15 @@ public class FileControllerActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				switch(which){
 				case 0://Rename
-					//TODO Rename the file
+					//Rename the file
+					renameFile(selectedFilePath);
 					break;
 				case 1://Move
 					//TODO Move function, 80% complete.
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 2://Copy
-					//TODO copy file to the other side
+					//copy file to the other side
 					copyFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 3://Delete
@@ -205,13 +208,54 @@ public class FileControllerActivity extends Activity {
     	Log.d("TAG", target);
     	boolean a = file.renameTo(targetFile);
     	Log.d("TAG", "Result of renameTo: " + a);
-    	Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_SHORT);
+    	Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_SHORT).show();
     }
     
-    private void renameFile(String renamedFile){
-    	File file = new File(renamedFile);
-    	//TODO open a dialog and a editText to write new name.
-    	
+    private void renameFile(final String renamedFilePath){
+    	//show a dialog to get new name.
+    	LayoutInflater inflater = LayoutInflater.from(this);
+    	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
+    	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.renameInput);
+    	et_renameInput.setText(new File(renamedFilePath).getName());
+    	//TODO 反白檔名部份，使改檔名更快
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
+        builder.setCancelable(false);   
+        builder.setTitle("Rename File");  
+        builder.setView(renameDialogView);  
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {  
+        			public void onClick(DialogInterface dialog, int whichButton) {  
+        				checkFileNameAndRename(renamedFilePath, et_renameInput.getText().toString());
+                    }  
+                });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    	//do nothing
+                    	Toast.makeText(getApplicationContext(), "Rename cancel", Toast.LENGTH_SHORT).show();
+                    }  
+                });  
+        builder.show();
+    }
+    
+    private void checkFileNameAndRename(String renamedFilePath, String newFileName){
+    	File newFile = new File(new File(renamedFilePath).getParent() +"/"+ newFileName);
+    	if(newFile.exists()){
+    		Toast.makeText(getApplicationContext(), newFileName + " is already exist, choose other name.", Toast.LENGTH_LONG).show();
+    	} else {
+    		File renamedFile = new File(renamedFilePath);
+    		boolean result = renamedFile.renameTo(newFile);
+    		Log.d("TAG", "rename file result: " + result );
+    		if(result==true){
+    			Toast.makeText(getApplicationContext(), "Rename file succeed", Toast.LENGTH_SHORT).show();
+    		} else{
+    			Toast.makeText(getApplicationContext(), "Rename file failure", Toast.LENGTH_SHORT).show();
+    		}
+    		renamedFile = null;
+    		
+    		//refresh listView.
+    		openTopFile(tv_topDir.getText().toString());
+    		openBottomFile(tv_bottomDir.getText().toString());
+    	}
+    	newFile = null;
     }
     private void copyFile(final String copieer, final String target){ //copy file to target(directory) as same name.
     	//find the file name of copied file name
@@ -305,13 +349,13 @@ public class FileControllerActivity extends Activity {
 	        out.close();
 	        Log.d("TAG", "Copy File Succeed");
 	        //show information to user.
-	        Toast.makeText(getApplicationContext(), "Copy file succeed", Toast.LENGTH_SHORT);
+	        Toast.makeText(getApplicationContext(), "Copy file succeed", Toast.LENGTH_SHORT).show();
 	        
 	        //refresh list.
 	        openTopFile(tv_topDir.getText().toString());
 	        openBottomFile(tv_bottomDir.getText().toString());
 		} catch (Exception e) {
-			Toast.makeText(getApplicationContext(), "Copy file " + copieerFilePath + " to " + targetFilePath + " error", Toast.LENGTH_SHORT);
+			Toast.makeText(getApplicationContext(), "Copy file " + copieerFilePath + " to " + targetFilePath + " error", Toast.LENGTH_SHORT).show();
 			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");	
 		} finally {
 	        in = null;
