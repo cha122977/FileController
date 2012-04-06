@@ -167,16 +167,14 @@ public class FileControllerActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				switch(which){
-				case 0://Rename
-					//Rename the file
+				case 0://Rename file.
 					renameFile(selectedFilePath);
 					break;
 				case 1://Move
 					//TODO Move function, 80% complete.
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
-				case 2://Copy
-					//copy file to the other side
+				case 2://Copy file to other side.
 					copyFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 3://Delete
@@ -202,13 +200,28 @@ public class FileControllerActivity extends Activity {
     
     //-----------<File Option function--------//
     private void moveFile(String movedFile, String target){
-    	File file = new File(movedFile);
-    	Log.d("TAG", movedFile);
-    	File targetFile = new File(target);
-    	Log.d("TAG", target);
-    	boolean a = file.renameTo(targetFile);
-    	Log.d("TAG", "Result of renameTo: " + a);
-    	Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_SHORT).show();
+    	File file = new File(movedFile);//source file
+    	File targetFilePath = new File(target + new File(movedFile).getName());
+    	Log.d("TAG", "Target file path = " + targetFilePath.getPath());
+    	if(targetFilePath.exists()){//Already have same name file in target directory.
+    		//TODO switch function to selected: 1. replace
+    		//									2. move but rename  -2.1. [oldname(x)] x={1,2,3...}
+    		//														-2.2. [user rename]
+    		//									3. cancel
+    		Toast.makeText(getApplicationContext(), "Existing file name in target directory", Toast.LENGTH_LONG).show();
+    	} else { //there is no same name file
+    		boolean result = file.renameTo(targetFilePath);
+    		if(result == true){//copy succeed
+    			Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_LONG).show();
+    			//refresh list view
+    			openTopFile(tv_topDir.getText().toString());
+    			openBottomFile(tv_bottomDir.getText().toString());
+    		} else {//copy failure
+    			Toast.makeText(getApplicationContext(), "Move file failure", Toast.LENGTH_LONG).show();
+    		}
+    	}
+    	file = null;
+    	targetFilePath = null;
     }
     
     private void renameFile(final String renamedFilePath){//use to show dialog to get new file name, positive button will call function to rename file.
