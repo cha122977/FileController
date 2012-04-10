@@ -23,6 +23,8 @@ public class FileListAdapter extends BaseAdapter {
 	private Bitmap mIcon2;//folder
 	private Bitmap mIcon3;//file
 	private Bitmap mIcon4;//audio
+	private Bitmap mIcon5;//video
+	private Bitmap mIcon6;//picture
 	
 	public FileListAdapter(Context context, List<String> filePath) {
 		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
@@ -32,6 +34,8 @@ public class FileListAdapter extends BaseAdapter {
 		mIcon2=BitmapFactory.decodeResource(context.getResources(), R.drawable.folder);
 		mIcon3=BitmapFactory.decodeResource(context.getResources(), R.drawable.file);
 		mIcon4=BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
+		mIcon5=BitmapFactory.decodeResource(context.getResources(), R.drawable.video);
+		mIcon6=BitmapFactory.decodeResource(context.getResources(), R.drawable.image);
 	}
 
 	@Override
@@ -64,14 +68,25 @@ public class FileListAdapter extends BaseAdapter {
 		}
 		
 		File f = new File(filePath.get(position).toString());
-		if (f.isDirectory()){
+		switch(getMIMEType(f)){
+		case 2://directory
 			holder.icon.setImageBitmap(mIcon2);
-		}else{
-			if(getMIMEType(f).equals("audio")){
-				holder.icon.setImageBitmap(mIcon4);
-			}else{
-				holder.icon.setImageBitmap(mIcon3);
-			}
+			break;
+		case 3://file
+			holder.icon.setImageBitmap(mIcon3);
+			break;
+		case 4://music
+			holder.icon.setImageBitmap(mIcon4);
+			break;
+		case 5://video
+			holder.icon.setImageBitmap(mIcon5);
+			break;
+		case 6://image
+			holder.icon.setImageBitmap(mIcon6);
+			break;
+		default://actually, this will not happen.
+			holder.icon.setImageBitmap(mIcon3);
+			break;
 		}
 		holder.text.setText(f.getName());
 		
@@ -84,8 +99,16 @@ public class FileListAdapter extends BaseAdapter {
 	}
 	
 	/* 判斷檔案MimeType的method */
-	private String getMIMEType(File f){
-	    String type="";
+	private final int TYPE_DIRECTORY = 2;//directory icon(not open)
+	private final int TYPE_UNKNOWN = 3;//file icon(unknown type)
+	private final int TYPE_AUDIO = 4;
+	private final int TYPE_VIDEO = 5;
+	private final int TYPE_IMAGE = 6;
+	
+	private int getMIMEType(File f){
+		if(f.isDirectory()){
+			return TYPE_DIRECTORY;
+		}
 	    String fName=f.getName();
 	    /* 取得副檔名 */
 	    String end=fName.substring(fName.lastIndexOf(".")+1,
@@ -95,23 +118,22 @@ public class FileListAdapter extends BaseAdapter {
 	    if(end.equals("m4a")||end.equals("mp3")||end.equals("mid")||
 	       end.equals("xmf")||end.equals("ogg")||end.equals("wav"))
 	    {
-	      type = "audio"; 
+	      return TYPE_AUDIO;
 	    }
 	    else if(end.equals("3gp")||end.equals("mp4"))
 	    {
-	      type = "video";
+	      return TYPE_VIDEO;
 	    }
 	    else if(end.equals("jpg")||end.equals("gif")||end.equals("png")||
 	            end.equals("jpeg")||end.equals("bmp"))
 	    {
-	      type = "image";
+	      return TYPE_IMAGE;
 	    }
 	    else
 	    {
-	      type="*";
+	      //return ???
 	    }
 	    /* 如果無法直接開啟，就跳出軟體清單給使用者選擇 */
-//	    type += "/*"; 
-	    return type; 
+	    return TYPE_UNKNOWN;
 	}
 }

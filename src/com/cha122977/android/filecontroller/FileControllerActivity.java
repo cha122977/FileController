@@ -574,4 +574,6 @@ public class FileControllerActivity extends Activity {
     	openTopFile(tv_topDir.getText().toString());
     	openBottomFile(tv_bottomDir.getText().toString());
     }
+	
+
 }
