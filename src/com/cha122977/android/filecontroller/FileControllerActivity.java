@@ -12,6 +12,8 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -179,7 +181,7 @@ public class FileControllerActivity extends Activity {
 					break;
 				case 3://Delete
 					//TODO delete file, on more Dialog to make sure the user want to delete the file
-					openDeleteCheckDialog();
+					openDeleteCheckDialog(selectedFilePath);
 					break;
 				case 4://Cancel
 					//Do nothing
@@ -315,17 +317,9 @@ public class FileControllerActivity extends Activity {
     	}
     }
     
-    private void openDeleteCheckDialog(){
-    	new AlertDialog.Builder(this)
-    			.setTitle("ALERT")
-    			.setMessage("The file will be removed forever.\n" + "This command can't be undo")
-    			.setPositiveButton("Delete", new DialogInterface.OnClickListener(){
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Toast.makeText(getApplicationContext(), "File XXX removed", Toast.LENGTH_SHORT).show();
-						//TODO remove file
-					}
-				})
+    private void openDeleteCheckDialog(final String selectedPath){
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setTitle("ALERT")
 				.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -333,6 +327,25 @@ public class FileControllerActivity extends Activity {
 					}
 				})
 				.show();
+    	if(new File(selectedPath).isFile()){//if selected one is file
+    		builder.setMessage("The file will be removed forever.\n" + "This command can't be undo.")
+		    		.setPositiveButton("Delete", new DialogInterface.OnClickListener(){
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							pureDeleteFile(selectedPath);
+						}
+					})
+    				.show();
+    	} else {//if selected one is directory
+    		builder.setMessage("All file in this directory will also be deleted.\n" + "This command can't be undo.")
+		    		.setPositiveButton("Delete", new DialogInterface.OnClickListener(){
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							pureDeleteDirectory(selectedPath);
+						}
+					})
+					.show();
+    	}
     }
     //------------File Option function/>-----//
     
@@ -424,21 +437,67 @@ public class FileControllerActivity extends Activity {
     	return fList;
     }
     
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		
-//		return super.onCreateOptionsMenu(menu);
-//	}
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		switch(item.getItemId()){
-//		case Menu.FIRST:
-//			break;
-//		case Menu.FIRST+1://make device discoverable in 60 second.
-//			break;
-//		default:
-//			break;
-//		}
-//		return super.onOptionsItemSelected(item);
-//	}
+    private void pureDeleteFile(String beDeletedFilePath){
+    	File f = new File(beDeletedFilePath);
+    	boolean result = f.delete();
+    	if(result == true){
+    		Toast.makeText(getApplicationContext(), beDeletedFilePath + " was deleted succeed", Toast.LENGTH_LONG).show();
+    	} else {
+    		Toast.makeText(getApplicationContext(), "File delete failure", Toast.LENGTH_LONG).show();
+    	}
+    	f = null;
+    	//refresh listView.
+		openTopFile(tv_topDir.getText().toString());
+		openBottomFile(tv_bottomDir.getText().toString());
+    }
+    
+    private void pureDeleteDirectory(String beDeletedPath){
+    	if(deleteDirectoryNested(beDeletedPath) == true){
+    		//refresh listView.
+    		openTopFile(tv_topDir.getText().toString());
+    		openBottomFile(tv_bottomDir.getText().toString());
+    		Toast.makeText(getApplicationContext(), "Delete directory succeed.", Toast.LENGTH_LONG).show();
+    	} else {
+    		Toast.makeText(getApplicationContext(), "Delete directory failure.", Toast.LENGTH_LONG).show();
+    	}
+    }
+    private boolean deleteDirectoryNested(String inputPath){
+    	File f = new File(inputPath);
+    	if(f.isFile()){//path is file
+    		return f.delete();
+    	} else {//path is directory
+    		File[] fl = f.listFiles();
+    		for(File i: fl){
+    			if(deleteDirectoryNested(i.getAbsolutePath()) == false){
+    				return false;
+    			}
+    		}
+    		return true;
+    	}
+    }
+    
+    
+    //---------Create menu.-------//
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(0, Menu.FIRST  , 1, "Create new directory at TOP directory")
+				.setIcon(R.drawable.folder);
+		menu.add(0, Menu.FIRST+1, 2, "Create new directory at BOTTOM directory")
+				.setIcon(R.drawable.folder);
+		menu.add(0, Menu.FIRST+2, 3, "About...")
+				.setIcon(android.R.drawable.ic_dialog_alert);
+		return super.onCreateOptionsMenu(menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case Menu.FIRST:
+			break;
+		case Menu.FIRST+1://make device discoverable in 60 second.
+			break;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 }
