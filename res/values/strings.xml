@@ -53,12 +53,14 @@
         <item>Delete</item>
         <item>Cancel</item>
     </string-array>
+    
     <!-- use when copy file and target directory have same name file -->
     <string-array name="alert_sameFileNameOption">
         <item>Replace </item>
         <item>Copied file rename as </item>
         <item>Cancel copy</item>
     </string-array>
+    
 	<!-- use when move file and target directory have same name file -->
     <string-array name="alert_moveFileSameName">
         <item>Replace it</item>

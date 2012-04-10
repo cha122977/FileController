@@ -326,7 +326,7 @@ public class FileControllerActivity extends Activity {
         	String temp;//use to find usable fileName.
         	while(true){
         		temp = copieerFileName + "(" + fileNameCounter + ")";
-        		if(new File(target + temp).exists() == false){//new file name is independence
+        		if(new File(target + "/" + temp).exists() == false){//new file name is independence
         			newFileName = temp;
         			temp = null;
         			break;
@@ -345,7 +345,7 @@ public class FileControllerActivity extends Activity {
     					pureCopyFile(copieer, completeTargetFilePath);
     					break;
     				case 1://Copied file rename as: 
-    					pureCopyFile(copieer, target + newFileName);
+    					pureCopyFile(copieer, target +"/"+ newFileName);
     					break;
     				case 2://Cancel copy
     					//Do nothing
