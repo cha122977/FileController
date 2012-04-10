@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FileController</string>
+    <string name="app_name">File Controller</string>
+    <string name="isFile">This is File</string>
+    <string name="noPermission">No Permission</string>
+    <string name="replaceSucceed">Replace file succeed</string>
+    <string name="replaceFailure">Replace file failure</string>
+    <string name="moveFileSucceed">Move file succeed</string>
+    <string name="moveFileFailure">Move file failure</string>
+    <string name="moveFileCancel">Move File Cancel</string>
+    <string name="alertTitle_renameFile">Rename File</string>
+    <string name="alertButton_ok">OK</string>
+    <string name="alertButton_cancel">Cancel</string>
+    <string name="renameFileCancel">Rename cancel</string>
+    <string name="copyFileSameName">Already have this file.</string>
+    <string name="alertTitle_deletedFile">Delete File</string>
+    <string name="actionCancel">Cancel</string>
+    <string name="alertMessage_deleteFile">The file will removed forever.</string>
+    <string name="alertMessage_deleteDirectory">All file in this directory will also be deleted.</string>
+    <string name="alertButton_delete">Delete</string>
+    <string name="rename_fileAlreadyExist"> is already exist, choose other name.</string>
+    
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
         <item>Rename</item>

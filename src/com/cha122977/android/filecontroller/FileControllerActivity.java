@@ -90,7 +90,7 @@ public class FileControllerActivity extends Activity {
 				if(f.isDirectory()){
 					openTopFile(topFilePath.get(arg2));
 				}else{
-					Toast.makeText(getApplicationContext(), "This is File", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -102,7 +102,7 @@ public class FileControllerActivity extends Activity {
 				if(f.isDirectory()){
 					openBottomFile(bottomFilePath.get(arg2));
 				}else{
-					Toast.makeText(getApplicationContext(), "This is File", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -143,7 +143,7 @@ public class FileControllerActivity extends Activity {
 		    			openTopFile(dir.substring(0, indexHelper));
 		    		}
 	    		} else {//can't read file because file cannot be read(no permission)
-	    			Toast.makeText(this, "No Permission", Toast.LENGTH_SHORT).show();
+	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
 	    		}
 		    }
 	    	f = null;
@@ -168,7 +168,7 @@ public class FileControllerActivity extends Activity {
 		    			openBottomFile(dir.substring(0, indexHelper));
 		    		}
 	    		} else {//can't read file because file cannot be read(no permission)
-	    			Toast.makeText(this, "No Permission", Toast.LENGTH_SHORT).show();
+	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
 	    		}
 	    	}
 	    	f = null;
@@ -190,14 +190,12 @@ public class FileControllerActivity extends Activity {
 					renameFile(selectedFilePath);
 					break;
 				case 1://Move
-					//TODO Move function, 80% complete.
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 2://Copy file to other side.
 					copyFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
 				case 3://Delete
-					//TODO delete file, on more Dialog to make sure the user want to delete the file
 					openDeleteCheckDialog(selectedFilePath);
 					break;
 				case 4://Cancel
@@ -213,9 +211,39 @@ public class FileControllerActivity extends Activity {
     }
     
     private void openButtomOptionsDialog(int position){//run this function when buttom listView clickItemLongClick(it will show menu to choose action)
-    	
+    	final String selectedFilePath = bottomFilePath.get(position);
+    	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
+    	s[1] += " " + tv_topDir.getText().toString();//set the string of item
+    	s[2] += " " + tv_topDir.getText().toString();
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(bottomFilePath.get(position));
+		builder.setItems(s, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch(which){
+				case 0://Rename file.
+					renameFile(selectedFilePath);
+					break;
+				case 1://Move
+					moveFile(selectedFilePath, tv_topDir.getText().toString());
+					break;
+				case 2://Copy file to other side.
+					copyFile(selectedFilePath, tv_topDir.getText().toString());
+					break;
+				case 3://Delete
+					openDeleteCheckDialog(selectedFilePath);
+					break;
+				case 4://Cancel
+					//Do nothing
+					break;
+				default:
+					//Do nothing
+					break;
+				}
+			}
+		});
+		builder.show();
     }
-
     
     //-----------<File Option function--------//
     private void moveFile(String movedFile, String target){
@@ -223,8 +251,6 @@ public class FileControllerActivity extends Activity {
     	final File targetFilePath = new File(target + "/" + (new File(movedFile).getName()));
     	Log.d("TAG", "Target file path = " + targetFilePath.getPath());
     	if(targetFilePath.exists()){//Already have same name file in target directory.
-    		//TODO switch function to selected: 1. replace
-    		//									2. cancel
     		AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
         	builder.setTitle("Target directory already have\nthis file name.");
     		builder.setItems(R.array.alert_moveFileSameName, new DialogInterface.OnClickListener() {
@@ -233,11 +259,16 @@ public class FileControllerActivity extends Activity {
     				switch(which){
     				case 0://Replace file: 
     					boolean result = file.renameTo(targetFilePath);
-    					Toast.makeText(getApplicationContext(), "Rename File Result: " + result, Toast.LENGTH_LONG).show();
+    					if(result == true){
+    						Toast.makeText(getApplicationContext(), R.string.replaceSucceed, Toast.LENGTH_LONG).show();
+    					} else {
+    						Toast.makeText(getApplicationContext(), R.string.replaceSucceed, Toast.LENGTH_LONG).show();
+    					}
+    					refreshListView();
     					break;
     				case 1://Cancel 
     					//Do nothing
-    					Toast.makeText(getApplicationContext(), "Move File Cancel", Toast.LENGTH_LONG);
+    					Toast.makeText(getApplicationContext(), R.string.moveFileCancel, Toast.LENGTH_LONG);
     					break;
     				default:
     					//Do nothing
@@ -249,14 +280,12 @@ public class FileControllerActivity extends Activity {
     	} else { //there is no same name file
     		boolean result = file.renameTo(targetFilePath);
     		if(result == true){//copy succeed
-    			Toast.makeText(getApplicationContext(), "move \"" + movedFile +"\"\n to\n\"" + "target" +"\"", Toast.LENGTH_LONG).show();
+    			Toast.makeText(getApplicationContext(), R.string.moveFileSucceed, Toast.LENGTH_LONG).show();
     		} else {//copy failure
-    			Toast.makeText(getApplicationContext(), "Move file failure", Toast.LENGTH_LONG).show();
+    			Toast.makeText(getApplicationContext(), R.string.moveFileFailure, Toast.LENGTH_LONG).show();
     		}
     	}
-		//refresh listView.
-		openTopFile(tv_topDir.getText().toString());
-		openBottomFile(tv_bottomDir.getText().toString());
+		refreshListView();
     }
     
     private void renameFile(final String renamedFilePath){//use to show dialog to get new file name, positive button will call function to rename file.
@@ -268,26 +297,24 @@ public class FileControllerActivity extends Activity {
     	//TODO 反白檔名部份，使改檔名更快
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
         builder.setCancelable(false);   
-        builder.setTitle("Rename File");  
+        builder.setTitle(R.string.alertTitle_renameFile);  
         builder.setView(renameDialogView);  
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {  
+        builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
         			public void onClick(DialogInterface dialog, int whichButton) {  
         				checkFileNameAndRename(renamedFilePath, et_renameInput.getText().toString());
                     }  
                 });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  
+        builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
                     public void onClick(DialogInterface dialog, int whichButton) {
                     	//do nothing
-                    	Toast.makeText(getApplicationContext(), "Rename cancel", Toast.LENGTH_SHORT).show();
+                    	Toast.makeText(getApplicationContext(), R.string.renameFileCancel, Toast.LENGTH_SHORT).show();
                     }  
                 });  
         builder.show();
     }
     
     private void copyFile(final String copieer, final String target){ //copy file to target(directory) as same name.
-    	//find the file name of copied file name
-    	int nameIndex = copieer.lastIndexOf("/");
-    	String copieerFileName = copieer.substring(nameIndex);
+    	String copieerFileName = new File(copieer).getName();//find the file name of copied file name
     	final String completeTargetFilePath = target + "/" + copieerFileName;//[aaa/bbb/ccc.xxx]
     	//Avoid replace the presence data which have the same file name in target directory
     	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
@@ -310,7 +337,7 @@ public class FileControllerActivity extends Activity {
         	s[1] += "\n" + newFileName;//setting new fileName to option.
         	 
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
-        	builder.setTitle("Target directory already have\nthis file name.");
+        	builder.setTitle(R.string.copyFileSameName);
     		builder.setItems(s, new DialogInterface.OnClickListener() {
     			@Override
     			public void onClick(DialogInterface dialog, int which) {
@@ -327,7 +354,6 @@ public class FileControllerActivity extends Activity {
     				default:
     					//Do nothing
     				}
-    				//test line
     			}
     		});
     		builder.show();
@@ -336,16 +362,16 @@ public class FileControllerActivity extends Activity {
     
     private void openDeleteCheckDialog(final String selectedPath){
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    	builder.setTitle("ALERT")
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+    	builder.setTitle(R.string.alertTitle_deletedFile)
+				.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener(){
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						Toast.makeText(getApplicationContext(), "Cancel", Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), R.string.actionCancel, Toast.LENGTH_SHORT).show();
 					}
 				});
     	if(new File(selectedPath).isFile()){//if selected one is file
-    		builder.setMessage("The file will be removed forever.\n" + "This command can't be undo.")
-		    		.setPositiveButton("Delete", new DialogInterface.OnClickListener(){
+    		builder.setMessage(R.string.alertMessage_deleteFile)
+		    		.setPositiveButton(R.string.alertButton_delete, new DialogInterface.OnClickListener(){
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							pureDeleteFile(selectedPath);
@@ -353,8 +379,8 @@ public class FileControllerActivity extends Activity {
 					})
     				.show();
     	} else {//if selected one is directory
-    		builder.setMessage("All file in this directory will also be deleted.\n" + "This command can't be undo.")
-		    		.setPositiveButton("Delete", new DialogInterface.OnClickListener(){
+    		builder.setMessage(R.string.alertMessage_deleteDirectory)
+		    		.setPositiveButton(R.string.alertButton_delete, new DialogInterface.OnClickListener(){
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							pureDeleteDirectory(selectedPath);
@@ -370,7 +396,7 @@ public class FileControllerActivity extends Activity {
     private void checkFileNameAndRename(String renamedFilePath, String newFileName){//check if file name is exist and rename file
     	File newFile = new File(new File(renamedFilePath).getParent() +"/"+ newFileName);
     	if(newFile.exists()){
-    		Toast.makeText(getApplicationContext(), newFileName + " is already exist, choose other name.", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), newFileName + getString(R.string.rename_fileAlreadyExist), Toast.LENGTH_LONG).show();
     	} else {
     		File renamedFile = new File(renamedFilePath);
     		boolean result = renamedFile.renameTo(newFile);
@@ -382,15 +408,13 @@ public class FileControllerActivity extends Activity {
     		}
     		renamedFile = null;
     		
-    		//refresh listView.
-    		openTopFile(tv_topDir.getText().toString());
-    		openBottomFile(tv_bottomDir.getText().toString());
+    		refreshListView();
     	}
     	newFile = null;
     }
     
     private void pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
-    	//TODO if file is very large, maybe need progress bar to show the copy progress.
+    	//TODO 如果檔案太大，是否用progress bar顯示進度？
     	FileInputStream in;
     	FileOutputStream out;
     	byte[] buffer;
@@ -410,9 +434,7 @@ public class FileControllerActivity extends Activity {
 	        //show information to user.
 	        Toast.makeText(getApplicationContext(), "Copy file succeed", Toast.LENGTH_SHORT).show();
 	        
-	        //refresh list.
-	        openTopFile(tv_topDir.getText().toString());
-	        openBottomFile(tv_bottomDir.getText().toString());
+	        refreshListView();
 		} catch (Exception e) {
 			Toast.makeText(getApplicationContext(), "Copy file " + copieerFilePath + " to " + targetFilePath + " error", Toast.LENGTH_SHORT).show();
 			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");	
@@ -462,16 +484,12 @@ public class FileControllerActivity extends Activity {
     		Toast.makeText(getApplicationContext(), "File delete failure", Toast.LENGTH_LONG).show();
     	}
     	f = null;
-    	//refresh listView.
-		openTopFile(tv_topDir.getText().toString());
-		openBottomFile(tv_bottomDir.getText().toString());
+    	refreshListView();
     }
     
     private void pureDeleteDirectory(String beDeletedPath){
     	if(deleteDirectoryNested(beDeletedPath) == true){
-    		//refresh listView.
-    		openTopFile(tv_topDir.getText().toString());
-    		openBottomFile(tv_bottomDir.getText().toString());
+    		refreshListView();
     		Toast.makeText(getApplicationContext(), "Delete directory succeed.", Toast.LENGTH_LONG).show();
     	} else {
     		Toast.makeText(getApplicationContext(), "Delete directory failure.", Toast.LENGTH_LONG).show();
@@ -570,10 +588,12 @@ public class FileControllerActivity extends Activity {
     		Toast.makeText(getApplicationContext(), "Create directory failure", Toast.LENGTH_LONG).show();
     	}
     	newDir = null;
-    	//refresh listView.
-    	openTopFile(tv_topDir.getText().toString());
-    	openBottomFile(tv_bottomDir.getText().toString());
+    	refreshListView();
     }
 	
-
+	//-----general function---//
+	private void refreshListView(){//refresh the file in list view(actually, reload)
+		openTopFile(tv_topDir.getText().toString());
+		openBottomFile(tv_bottomDir.getText().toString());
+	}
 }

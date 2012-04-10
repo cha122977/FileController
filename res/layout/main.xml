@@ -8,7 +8,7 @@
     <TableRow
         android:id="@+id/tableRow1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_weight="0" android:background="#ff00ff">
+        android:layout_height="wrap_content" android:layout_weight="0">
 
         <ImageView
             android:id="@+id/topDirImage"
@@ -31,14 +31,20 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:background="#00ff00" android:paddingLeft="20dp">
+        android:paddingLeft="20dp">
         <!-- Preview: listitem=@android:layout/simple_expandable_list_item_1 -->
     </ListView>
-
+    
+	<View 
+	    android:layout_width  = "fill_parent"
+	    android:layout_height = "2dip"
+	    android:layout_weight = "0" 
+	    android:background="#88EEEEEE"/>
+	
     <TableRow
         android:id="@+id/tableRow2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_weight="0" android:background="#ff0000">
+        android:layout_height="wrap_content" android:layout_weight="0">
 
         <ImageView
             android:id="@+id/bottomDirImage"
