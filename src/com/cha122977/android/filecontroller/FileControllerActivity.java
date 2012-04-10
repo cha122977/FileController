@@ -249,10 +249,9 @@ public class FileControllerActivity extends Activity {
     private void moveFile(String movedFile, String target){
     	final File file = new File(movedFile);//source file
     	final File targetFilePath = new File(target + "/" + (new File(movedFile).getName()));
-    	Log.d("TAG", "Target file path = " + targetFilePath.getPath());
     	if(targetFilePath.exists()){//Already have same name file in target directory.
     		AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
-        	builder.setTitle("Target directory already have\nthis file name.");
+        	builder.setTitle(R.string.move_fileAlreadyExist);
     		builder.setItems(R.array.alert_moveFileSameName, new DialogInterface.OnClickListener() {
     			@Override
     			public void onClick(DialogInterface dialog, int which) {
@@ -260,15 +259,15 @@ public class FileControllerActivity extends Activity {
     				case 0://Replace file: 
     					boolean result = file.renameTo(targetFilePath);
     					if(result == true){
-    						Toast.makeText(getApplicationContext(), R.string.replaceSucceed, Toast.LENGTH_LONG).show();
+    						Toast.makeText(getApplicationContext(), R.string.move_replaceSucceed, Toast.LENGTH_LONG).show();
     					} else {
-    						Toast.makeText(getApplicationContext(), R.string.replaceSucceed, Toast.LENGTH_LONG).show();
+    						Toast.makeText(getApplicationContext(), R.string.move_replaceFailure, Toast.LENGTH_LONG).show();
     					}
     					refreshListView();
     					break;
     				case 1://Cancel 
     					//Do nothing
-    					Toast.makeText(getApplicationContext(), R.string.moveFileCancel, Toast.LENGTH_LONG);
+    					Toast.makeText(getApplicationContext(), R.string.move_moveFileCancel, Toast.LENGTH_LONG);
     					break;
     				default:
     					//Do nothing
@@ -280,9 +279,9 @@ public class FileControllerActivity extends Activity {
     	} else { //there is no same name file
     		boolean result = file.renameTo(targetFilePath);
     		if(result == true){//copy succeed
-    			Toast.makeText(getApplicationContext(), R.string.moveFileSucceed, Toast.LENGTH_LONG).show();
+    			Toast.makeText(getApplicationContext(), R.string.move_moveFileSucceed, Toast.LENGTH_LONG).show();
     		} else {//copy failure
-    			Toast.makeText(getApplicationContext(), R.string.moveFileFailure, Toast.LENGTH_LONG).show();
+    			Toast.makeText(getApplicationContext(), R.string.move_moveFileFailure, Toast.LENGTH_LONG).show();
     		}
     	}
 		refreshListView();
@@ -297,7 +296,7 @@ public class FileControllerActivity extends Activity {
     	//TODO 反白檔名部份，使改檔名更快
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
         builder.setCancelable(false);   
-        builder.setTitle(R.string.alertTitle_renameFile);  
+        builder.setTitle(R.string.rename_renameAlertTitle);  
         builder.setView(renameDialogView);  
         builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
         			public void onClick(DialogInterface dialog, int whichButton) {  
@@ -307,7 +306,7 @@ public class FileControllerActivity extends Activity {
         builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
                     public void onClick(DialogInterface dialog, int whichButton) {
                     	//do nothing
-                    	Toast.makeText(getApplicationContext(), R.string.renameFileCancel, Toast.LENGTH_SHORT).show();
+                    	Toast.makeText(getApplicationContext(), R.string.rename_renameFileCancel, Toast.LENGTH_SHORT).show();
                     }  
                 });  
         builder.show();
@@ -337,7 +336,7 @@ public class FileControllerActivity extends Activity {
         	s[1] += "\n" + newFileName;//setting new fileName to option.
         	 
         	AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
-        	builder.setTitle(R.string.copyFileSameName);
+        	builder.setTitle(R.string.copy_fileSameName);
     		builder.setItems(s, new DialogInterface.OnClickListener() {
     			@Override
     			public void onClick(DialogInterface dialog, int which) {
@@ -362,16 +361,16 @@ public class FileControllerActivity extends Activity {
     
     private void openDeleteCheckDialog(final String selectedPath){
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    	builder.setTitle(R.string.alertTitle_deletedFile)
+    	builder.setTitle(R.string.delete_alertTitle)
 				.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener(){
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						Toast.makeText(getApplicationContext(), R.string.actionCancel, Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), R.string.action_cancel, Toast.LENGTH_SHORT).show();
 					}
 				});
     	if(new File(selectedPath).isFile()){//if selected one is file
-    		builder.setMessage(R.string.alertMessage_deleteFile)
-		    		.setPositiveButton(R.string.alertButton_delete, new DialogInterface.OnClickListener(){
+    		builder.setMessage(R.string.delete_alertDeleteFileMsg)
+		    		.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener(){
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							pureDeleteFile(selectedPath);
@@ -379,8 +378,8 @@ public class FileControllerActivity extends Activity {
 					})
     				.show();
     	} else {//if selected one is directory
-    		builder.setMessage(R.string.alertMessage_deleteDirectory)
-		    		.setPositiveButton(R.string.alertButton_delete, new DialogInterface.OnClickListener(){
+    		builder.setMessage(R.string.delete_alertDeleteDirMsg)
+		    		.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener(){
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							pureDeleteDirectory(selectedPath);
@@ -402,9 +401,9 @@ public class FileControllerActivity extends Activity {
     		boolean result = renamedFile.renameTo(newFile);
     		Log.d("TAG", "rename file result: " + result );
     		if(result==true){
-    			Toast.makeText(getApplicationContext(), "Rename file succeed", Toast.LENGTH_SHORT).show();
+    			Toast.makeText(getApplicationContext(), R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
     		} else{
-    			Toast.makeText(getApplicationContext(), "Rename file failure", Toast.LENGTH_SHORT).show();
+    			Toast.makeText(getApplicationContext(), R.string.rename_renameFileFailure, Toast.LENGTH_SHORT).show();
     		}
     		renamedFile = null;
     		
@@ -426,17 +425,15 @@ public class FileControllerActivity extends Activity {
 	        while((read = in.read(buffer)) != -1){
 	          out.write(buffer, 0, read);
 	        }
-	        Log.d("TAG", "write data over");
 	        in.close();
 	        out.flush();
 	        out.close();
-	        Log.d("TAG", "Copy File Succeed");
 	        //show information to user.
-	        Toast.makeText(getApplicationContext(), "Copy file succeed", Toast.LENGTH_SHORT).show();
+	        Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
 	        
 	        refreshListView();
 		} catch (Exception e) {
-			Toast.makeText(getApplicationContext(), "Copy file " + copieerFilePath + " to " + targetFilePath + " error", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
 			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");	
 		} finally {
 	        in = null;
@@ -479,9 +476,9 @@ public class FileControllerActivity extends Activity {
     	File f = new File(beDeletedFilePath);
     	boolean result = f.delete();
     	if(result == true){
-    		Toast.makeText(getApplicationContext(), beDeletedFilePath + " was deleted succeed", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), beDeletedFilePath + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
     	} else {
-    		Toast.makeText(getApplicationContext(), "File delete failure", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), f.getName() + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
     	}
     	f = null;
     	refreshListView();
@@ -490,9 +487,9 @@ public class FileControllerActivity extends Activity {
     private void pureDeleteDirectory(String beDeletedPath){
     	if(deleteDirectoryNested(beDeletedPath) == true){
     		refreshListView();
-    		Toast.makeText(getApplicationContext(), "Delete directory succeed.", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
     	} else {
-    		Toast.makeText(getApplicationContext(), "Delete directory failure.", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectoryFailure, Toast.LENGTH_LONG).show();
     	}
     }
     private boolean deleteDirectoryNested(String inputPath){
@@ -513,9 +510,9 @@ public class FileControllerActivity extends Activity {
     //---------Create menu.-------//
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, Menu.FIRST  , 1, "Create new directory at TOP directory")
+		menu.add(0, Menu.FIRST  , 1, R.string.menu_createNewDirInTop)
 				.setIcon(R.drawable.folder);
-		menu.add(0, Menu.FIRST+1, 2, "Create new directory at BOTTOM directory")
+		menu.add(0, Menu.FIRST+1, 2, R.string.menu_createNewDirInBottom)
 				.setIcon(R.drawable.folder);
 		menu.add(0, Menu.FIRST+2, 3, "About...")
 				.setIcon(android.R.drawable.ic_dialog_alert);
@@ -548,17 +545,17 @@ public class FileControllerActivity extends Activity {
     	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
         builder.setCancelable(false);   
-        builder.setTitle("New File");  
+        builder.setTitle(R.string.createDir_createNewDirectory);  
         builder.setView(renameDialogView);  
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {  
+        builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
         			public void onClick(DialogInterface dialog, int whichButton) {  
         				pureMakeDir(sourceDirPath, et_renameInput.getText().toString());
                     }  
                 });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  
+        builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
                     public void onClick(DialogInterface dialog, int whichButton) {
                     	//do nothing
-                    	Toast.makeText(getApplicationContext(), "Create directory cancel", Toast.LENGTH_SHORT).show();
+                    	Toast.makeText(getApplicationContext(), R.string.createDir_createDirCancel, Toast.LENGTH_SHORT).show();
                     }  
                 });  
         builder.show();
@@ -568,8 +565,8 @@ public class FileControllerActivity extends Activity {
 		new AlertDialog.Builder(this)
         		.setCancelable(false)
         		.setIcon(android.R.drawable.ic_dialog_alert)
-        		.setTitle("About...")
-        		.setMessage("CopyRight by cha122977\n" + "NTU GICE")
+        		.setTitle(R.string.menu_aboutTitle)
+        		.setMessage(R.string.about_msg)
         		.setPositiveButton("OK", null)
         		.show();
 	}
@@ -583,9 +580,9 @@ public class FileControllerActivity extends Activity {
     		newDir.setReadable(true);
     		newDir.setWritable(true);
     		newDir.setExecutable(true);
-    		Toast.makeText(getApplicationContext(), "Create directory succeed", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), R.string.createDir_createDirSucceed, Toast.LENGTH_LONG).show();
     	} else {
-    		Toast.makeText(getApplicationContext(), "Create directory failure", Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
     	}
     	newDir = null;
     	refreshListView();

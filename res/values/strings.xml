@@ -3,22 +3,47 @@
     <string name="app_name">File Controller</string>
     <string name="isFile">This is File</string>
     <string name="noPermission">No Permission</string>
-    <string name="replaceSucceed">Replace file succeed</string>
-    <string name="replaceFailure">Replace file failure</string>
-    <string name="moveFileSucceed">Move file succeed</string>
-    <string name="moveFileFailure">Move file failure</string>
-    <string name="moveFileCancel">Move File Cancel</string>
-    <string name="alertTitle_renameFile">Rename File</string>
+    
+    <string name="rename_renameAlertTitle">Rename File</string>
+    <string name="rename_renameFileCancel">Rename cancel</string>
+    <string name="rename_fileAlreadyExist"> is already exist, choose other name.</string>
+    <string name="rename_renameFileSucceed">Rename file succeed.</string>
+    <string name="rename_renameFileFailure">Rename file failure.</string>
+    
+    <string name="move_replaceSucceed">Replace file succeed</string>
+    <string name="move_replaceFailure">Replace file failure</string>
+    <string name="move_moveFileSucceed">Move file succeed</string>
+    <string name="move_moveFileFailure">Move file failure</string>
+    <string name="move_moveFileCancel">Move File Cancel</string>
+    <string name="move_fileAlreadyExist">This file is already.</string>
+    
+    <string name="copy_fileSameName">Already have this file.</string>
+	<string name="copy_copyFileSucceed">Copy file succeed.</string>
+    <string name="copy_copyFileFailure">Copy file error.</string>
+    
+    <string name="delete_alertTitle">Delete File</string>
+    <string name="delete_alertDeleteFileMsg">The file will removed forever.</string>
+    <string name="delete_alertDeleteDirMsg">All file in this directory will also be deleted.</string>
+    <string name="delete_deleteButton">Delete</string>
+    <string name="delete_deleteFileSucceed"> was deleted succeed.</string>
+    <string name="delete_deleteFileFailure"> deleted failure.</string>
+    <string name="delete_deleteDirectorySucceed">Delete directory succeed.</string>
+    <string name="delete_deleteDirectoryFailure">Delete directory failure.</string>
+    
     <string name="alertButton_ok">OK</string>
     <string name="alertButton_cancel">Cancel</string>
-    <string name="renameFileCancel">Rename cancel</string>
-    <string name="copyFileSameName">Already have this file.</string>
-    <string name="alertTitle_deletedFile">Delete File</string>
-    <string name="actionCancel">Cancel</string>
-    <string name="alertMessage_deleteFile">The file will removed forever.</string>
-    <string name="alertMessage_deleteDirectory">All file in this directory will also be deleted.</string>
-    <string name="alertButton_delete">Delete</string>
-    <string name="rename_fileAlreadyExist"> is already exist, choose other name.</string>
+    <string name="action_cancel">Cancel</string>
+  
+    <string name="menu_createNewDirInTop">Create new directory in TOP directory.</string>
+    <string name="menu_createNewDirInBottom">Create new directory at BOTTOM directory.</string>
+    <string name="menu_aboutTitle">About....</string>
+    
+    <string name="createDir_createNewDirectory">New directory</string>
+    <string name="createDir_createDirCancel">Create directory cancel</string>
+    <string name="createDir_createDirSucceed">Create directory succeed</string>
+    <string name="createDir_createDirFailure">Create directory failure</string>
+    
+    <string name="about_msg">CopyRight by cha122977\nNTU GICE</string>
     
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
