@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,7 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
-	private final String ROOT = "/sdcard/";
+	private final String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
 
     TextView tv_topDir, tv_bottomDir;
 	ListView lv_topListView, lv_bottomListView;
@@ -136,8 +137,16 @@ public class FileControllerActivity extends Activity {
 		    	tv_topDir.setText(dir);
 		    	lv_topListView.setAdapter(new FileListAdapter(this, topFilePath));
 		    }else{
-		    	Toast.makeText(this, "No Premission", Toast.LENGTH_SHORT).show();
+		    	if(f.exists() == false){//can't read file because file is not exist.
+		    		int indexHelper = dir.lastIndexOf("/");
+		    		if(indexHelper!=0){
+		    			openTopFile(dir.substring(0, indexHelper));
+		    		}
+	    		} else {//can't read file because file cannot be read(no permission)
+	    			Toast.makeText(this, "No Permission", Toast.LENGTH_SHORT).show();
+	    		}
 		    }
+	    	f = null;
     	}
     }
     private void openBottomFile(String dir){
@@ -153,8 +162,16 @@ public class FileControllerActivity extends Activity {
 	        	tv_bottomDir.setText(dir);
 	        	lv_bottomListView.setAdapter(new FileListAdapter(this, bottomFilePath));
 	    	}else{
-	    		Toast.makeText(this, "No Premission", Toast.LENGTH_SHORT).show();
+	    		if(f.exists() == false){//can't read file because file is not exist.
+		    		int indexHelper = dir.lastIndexOf("/");
+		    		if(indexHelper!=0){
+		    			openBottomFile(dir.substring(0, indexHelper));
+		    		}
+	    		} else {//can't read file because file cannot be read(no permission)
+	    			Toast.makeText(this, "No Permission", Toast.LENGTH_SHORT).show();
+	    		}
 	    	}
+	    	f = null;
     	}
     }
     
@@ -203,7 +220,7 @@ public class FileControllerActivity extends Activity {
     //-----------<File Option function--------//
     private void moveFile(String movedFile, String target){
     	final File file = new File(movedFile);//source file
-    	final File targetFilePath = new File(target + new File(movedFile).getName());
+    	final File targetFilePath = new File(target + "/" + (new File(movedFile).getName()));
     	Log.d("TAG", "Target file path = " + targetFilePath.getPath());
     	if(targetFilePath.exists()){//Already have same name file in target directory.
     		//TODO switch function to selected: 1. replace
@@ -246,7 +263,7 @@ public class FileControllerActivity extends Activity {
     	//show a dialog to get new name.
     	LayoutInflater inflater = LayoutInflater.from(this);
     	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
-    	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.renameInput);
+    	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
     	et_renameInput.setText(new File(renamedFilePath).getName());
     	//TODO 反白檔名部份，使改檔名更快
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
@@ -270,8 +287,8 @@ public class FileControllerActivity extends Activity {
     private void copyFile(final String copieer, final String target){ //copy file to target(directory) as same name.
     	//find the file name of copied file name
     	int nameIndex = copieer.lastIndexOf("/");
-    	String copieerFileName = copieer.substring(nameIndex+1);
-    	final String completeTargetFilePath = target + copieerFileName;//[aaa/bbb/ccc.xxx]
+    	String copieerFileName = copieer.substring(nameIndex);
+    	final String completeTargetFilePath = target + "/" + copieerFileName;//[aaa/bbb/ccc.xxx]
     	//Avoid replace the presence data which have the same file name in target directory
     	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
     		pureCopyFile(copieer, completeTargetFilePath);//copy file
@@ -325,8 +342,7 @@ public class FileControllerActivity extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						Toast.makeText(getApplicationContext(), "Cancel", Toast.LENGTH_SHORT).show();
 					}
-				})
-				.show();
+				});
     	if(new File(selectedPath).isFile()){//if selected one is file
     		builder.setMessage("The file will be removed forever.\n" + "This command can't be undo.")
 		    		.setPositiveButton("Delete", new DialogInterface.OnClickListener(){
@@ -472,10 +488,9 @@ public class FileControllerActivity extends Activity {
     				return false;
     			}
     		}
-    		return true;
+    		return f.delete();
     	}
     }
-    
     
     //---------Create menu.-------//
 	@Override
@@ -491,13 +506,72 @@ public class FileControllerActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
-		case Menu.FIRST:
+		case Menu.FIRST://create a folder on top directory
+			makeDirectory(tv_topDir.getText().toString());
 			break;
-		case Menu.FIRST+1://make device discoverable in 60 second.
+		case Menu.FIRST+1://create a folder on bottom directory
+			makeDirectory(tv_bottomDir.getText().toString());
+			break;
+		case Menu.FIRST+2://About...
+			showAboutDialog();
 			break;
 		default:
+			//Do nothing
 			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	//------Menu function----//
+	private void makeDirectory(final String sourceDirPath){
+		//show a dialog to get new name.
+    	LayoutInflater inflater = LayoutInflater.from(this);
+    	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
+    	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
+        builder.setCancelable(false);   
+        builder.setTitle("New File");  
+        builder.setView(renameDialogView);  
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {  
+        			public void onClick(DialogInterface dialog, int whichButton) {  
+        				pureMakeDir(sourceDirPath, et_renameInput.getText().toString());
+                    }  
+                });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {  
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    	//do nothing
+                    	Toast.makeText(getApplicationContext(), "Create directory cancel", Toast.LENGTH_SHORT).show();
+                    }  
+                });  
+        builder.show();
+	}
+	
+	private void showAboutDialog(){
+		new AlertDialog.Builder(this)
+        		.setCancelable(false)
+        		.setIcon(android.R.drawable.ic_dialog_alert)
+        		.setTitle("About...")
+        		.setMessage("CopyRight by cha122977\n" + "NTU GICE")
+        		.setPositiveButton("OK", null)
+        		.show();
+	}
+	
+	
+	//----use in Menu function----//
+	private void pureMakeDir(String sourceDir, String newDirName){
+    	File newDir = new File(sourceDir + "/" + newDirName);
+    	Log.d("TAG", newDir.getAbsolutePath() + "");
+    	if(newDir.mkdir()==true){
+    		newDir.setReadable(true);
+    		newDir.setWritable(true);
+    		newDir.setExecutable(true);
+    		Toast.makeText(getApplicationContext(), "Create directory succeed", Toast.LENGTH_LONG).show();
+    	} else {
+    		Toast.makeText(getApplicationContext(), "Create directory failure", Toast.LENGTH_LONG).show();
+    	}
+    	newDir = null;
+    	//refresh listView.
+    	openTopFile(tv_topDir.getText().toString());
+    	openBottomFile(tv_bottomDir.getText().toString());
+    }
 }
