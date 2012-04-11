@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,8 +68,6 @@ public class FileControllerActivity extends Activity {
 				File f = new File(s);
 				s = f.getParent();
 				openTopFile(s);
-				f = null;
-				s = null;
 			}
 		});
     	tv_bottomDir.setOnClickListener(new OnClickListener() {
@@ -78,8 +77,6 @@ public class FileControllerActivity extends Activity {
 				File f = new File(s);
 				s = f.getParent();
 				openBottomFile(s);
-				f = null;
-				s = null;
 			}
 		});
     	
@@ -146,7 +143,6 @@ public class FileControllerActivity extends Activity {
 	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
 	    		}
 		    }
-	    	f = null;
     	}
     }
     private void openBottomFile(String dir){
@@ -171,7 +167,6 @@ public class FileControllerActivity extends Activity {
 	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
 	    		}
 	    	}
-	    	f = null;
     	}
     }
     
@@ -317,7 +312,7 @@ public class FileControllerActivity extends Activity {
     	final String completeTargetFilePath = target + "/" + copieerFileName;//[aaa/bbb/ccc.xxx]
     	//Avoid replace the presence data which have the same file name in target directory
     	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
-    		pureCopyFile(copieer, completeTargetFilePath);//copy file
+    		doCopyFile(copieer, completeTargetFilePath);//copy file
     	} else {//have same file name in target directory.
         	String[] s = getResources().getStringArray(R.array.alert_sameFileNameOption);
         	s[0] += completeTargetFilePath;//setting pre-replaced file name
@@ -328,7 +323,6 @@ public class FileControllerActivity extends Activity {
         		temp = copieerFileName + "(" + fileNameCounter + ")";
         		if(new File(target + "/" + temp).exists() == false){//new file name is independence
         			newFileName = temp;
-        			temp = null;
         			break;
         		}
         		fileNameCounter++;
@@ -342,10 +336,10 @@ public class FileControllerActivity extends Activity {
     			public void onClick(DialogInterface dialog, int which) {
     				switch(which){
     				case 0://Replace file: 
-    					pureCopyFile(copieer, completeTargetFilePath);
+    					doCopyFile(copieer, completeTargetFilePath);
     					break;
     				case 1://Copied file rename as: 
-    					pureCopyFile(copieer, target +"/"+ newFileName);
+    					doCopyFile(copieer, target +"/"+ newFileName);
     					break;
     				case 2://Cancel copy
     					//Do nothing
@@ -404,42 +398,58 @@ public class FileControllerActivity extends Activity {
     			Toast.makeText(getApplicationContext(), R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
     		} else{
     			Toast.makeText(getApplicationContext(), R.string.rename_renameFileFailure, Toast.LENGTH_SHORT).show();
-    		}
-    		renamedFile = null;
-    		
+    		}    		
     		refreshListView();
     	}
-    	newFile = null;
+    }
+    //TODO re-write to copy directory function.
+    private void doCopyFile(String copieerFilePath, String targetFilePath){
+    	boolean result = pureCopyFile(copieerFilePath, targetFilePath);
+    	if(result == true){
+    		//show information to user.
+            Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
+            refreshListView();
+    	} else {
+    		Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
+    	}
     }
     
-    private void pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
-    	//TODO 如果檔案太大，是否用progress bar顯示進度？
-    	FileInputStream in;
-    	FileOutputStream out;
-    	byte[] buffer;
-    	try {
-			in = new FileInputStream(copieerFilePath);
-			out = new FileOutputStream(targetFilePath);
-			buffer = new byte[1024];
-	        int read;
-	        while((read = in.read(buffer)) != -1){
-	          out.write(buffer, 0, read);
-	        }
-	        in.close();
-	        out.flush();
-	        out.close();
-	        //show information to user.
-	        Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
-	        
-	        refreshListView();
-		} catch (Exception e) {
-			Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
-			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");	
-		} finally {
-	        in = null;
-	        out = null;
-	        buffer = null;
-		}
+    private boolean pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
+    	File copieerFile = new File(copieerFilePath);
+    	if(copieerFile.isFile() == true){
+    		//TODO 如果檔案太大，是否用progress bar顯示進度？
+        	FileInputStream in;
+        	FileOutputStream out;
+        	byte[] buffer;
+        	try {
+    			in = new FileInputStream(copieerFilePath);
+    			out = new FileOutputStream(targetFilePath);
+    			buffer = new byte[1024];
+    	        int read;
+    	        while((read = in.read(buffer)) != -1){
+    	          out.write(buffer, 0, read);
+    	        }
+    	        in.close();
+    	        out.flush();
+    	        out.close();
+    	        return true;
+    		} catch (Exception e) {
+    			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");
+    			return false;
+    		}
+    	} else {
+    		File newDir = new File(targetFilePath);
+    		newDir.mkdir();//create directory.
+    		File[] fList = copieerFile.listFiles();
+    		for(File f: fList){
+    			boolean temp;
+    			temp = pureCopyFile(f.getPath(), targetFilePath + "/" + f.getName());
+    			if(temp == false){
+    				return false;
+    			}
+    		}
+    		return true;
+    	}
     }
     
     private File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 
@@ -468,7 +478,6 @@ public class FileControllerActivity extends Activity {
     			}
     		}
     	}
-    	temp = null;
     	return fList;
     }
     
@@ -480,7 +489,6 @@ public class FileControllerActivity extends Activity {
     	} else {
     		Toast.makeText(getApplicationContext(), f.getName() + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
     	}
-    	f = null;
     	refreshListView();
     }
     
@@ -571,7 +579,6 @@ public class FileControllerActivity extends Activity {
         		.show();
 	}
 	
-	
 	//----use in Menu function----//
 	private void pureMakeDir(String sourceDir, String newDirName){
     	File newDir = new File(sourceDir + "/" + newDirName);
@@ -584,7 +591,6 @@ public class FileControllerActivity extends Activity {
     	} else {
     		Toast.makeText(getApplicationContext(), R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
     	}
-    	newDir = null;
     	refreshListView();
     }
 	
@@ -593,4 +599,13 @@ public class FileControllerActivity extends Activity {
 		openTopFile(tv_topDir.getText().toString());
 		openBottomFile(tv_bottomDir.getText().toString());
 	}
+
+	//----key function---//
+	//TODO back key function
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		
+		return super.onKeyDown(keyCode, event);
+	}
+
 }

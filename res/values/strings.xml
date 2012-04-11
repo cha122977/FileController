@@ -25,7 +25,7 @@
     <string name="delete_alertDeleteFileMsg">The file will removed forever.</string>
     <string name="delete_alertDeleteDirMsg">All file in this directory will also be deleted.</string>
     <string name="delete_deleteButton">Delete</string>
-    <string name="delete_deleteFileSucceed"> was deleted succeed.</string>
+    <string name="delete_deleteFileSucceed"> deleted succeed.</string>
     <string name="delete_deleteFileFailure"> deleted failure.</string>
     <string name="delete_deleteDirectorySucceed">Delete directory succeed.</string>
     <string name="delete_deleteDirectoryFailure">Delete directory failure.</string>
