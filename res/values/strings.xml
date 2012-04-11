@@ -36,6 +36,7 @@
   
     <string name="menu_createNewDirInTop">Create new directory in TOP directory.</string>
     <string name="menu_createNewDirInBottom">Create new directory at BOTTOM directory.</string>
+    <string name="menu_helpTitle">HELP</string>
     <string name="menu_aboutTitle">About....</string>
     
     <string name="createDir_createNewDirectory">New directory</string>
@@ -43,7 +44,12 @@
     <string name="createDir_createDirSucceed">Create directory succeed</string>
     <string name="createDir_createDirFailure">Create directory failure</string>
     
-    <string name="about_msg">CopyRight by cha122977\nNTU GICE</string>
+    <string name="help_title">HELP</string>
+    <string name="help_msg">You can open two directories in the same time.\nOne at TOP and the other one at BOTTOM.\nLong Click directory/file to manage it.\nClick opened directory to upper folder.</string>
+    
+    <string name="about_title">About....</string>
+    <string name="about_msg">CopyRight by cha122977\n
+        					 @NTU GICE</string>
     
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">

@@ -29,11 +29,10 @@ import android.widget.Toast;
 public class FileControllerActivity extends Activity {
 	private final String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
 
-    TextView tv_topDir, tv_bottomDir;
-	ListView lv_topListView, lv_bottomListView;
+    TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
+	ListView lv_topListView, lv_bottomListView;//listView to show all the file in folder where user is.
 	
-	List<String> topFilePath;
-	List<String> bottomFilePath;
+	List<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item 
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,25 +40,25 @@ public class FileControllerActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);//¥h±¼Activity¦WºÙÄæ¦ì
         setContentView(R.layout.main);
         
-        setView();
-        initial();
-        setListener();
+        setView();//connect view object to layout widget(in .xml file).
+        initial();//construct need object.
+        setListener();//set listener to widget
         
         openTopFile(ROOT);//at initial: open the SD-card root
         openBottomFile(ROOT);//at initial: open the SD-card root
         
     }
-    private void setView(){
+    private void setView(){//connect view object to layout widget(in .xml file).
     	tv_topDir = (TextView)findViewById(R.id.topTextView);
     	tv_bottomDir = (TextView)findViewById(R.id.bottomTextView);
     	lv_topListView = (ListView)findViewById(R.id.topListView);
     	lv_bottomListView = (ListView)findViewById(R.id.bottomListView);
     }
-    private void initial(){
+    private void initial(){//construct need object.
     	topFilePath = new ArrayList<String>();
     	bottomFilePath = new ArrayList<String>();
     }
-    private void setListener(){
+    private void setListener(){//set listener to widget
     	tv_topDir.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -120,7 +119,7 @@ public class FileControllerActivity extends Activity {
 		});
     }
     
-    private void openTopFile(String dir){
+    private void openTopFile(String dir){//function to show directory's content.( use in Top Window)
     	if(dir!=null){
 	    	File f = new File(dir);
 	    	if(f.canRead()){
@@ -144,7 +143,7 @@ public class FileControllerActivity extends Activity {
 		    }
     	}
     }
-    private void openBottomFile(String dir){
+    private void openBottomFile(String dir){//function to show directory's content.( use in Bottom Window)
     	if(dir!=null){
 	    	File f = new File(dir);
 	    	if(f.canRead()){
@@ -204,7 +203,7 @@ public class FileControllerActivity extends Activity {
 		builder.show();
     }
     
-    private void openButtomOptionsDialog(int position){//run this function when buttom listView clickItemLongClick(it will show menu to choose action)
+    private void openButtomOptionsDialog(int position){//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = bottomFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
     	s[1] += " " + tv_topDir.getText().toString();//set the string of item
@@ -239,7 +238,7 @@ public class FileControllerActivity extends Activity {
 		builder.show();
     }
     
-    //-----------<File Option function--------//
+    //-----------File Option function--------//
     private void moveFile(String movedFile, String target){
     	final File file = new File(movedFile);//source file
     	final File targetFilePath = new File(target + "/" + (new File(movedFile).getName()));
@@ -352,7 +351,7 @@ public class FileControllerActivity extends Activity {
     	}
     }
     
-    private void openDeleteCheckDialog(final String selectedPath){
+    private void openDeleteCheckDialog(final String selectedPath){//use to delete file and directory.
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle(R.string.delete_alertTitle)
 				.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener(){
@@ -381,7 +380,6 @@ public class FileControllerActivity extends Activity {
 					.show();
     	}
     }
-    //------------File Option function/>-----//
     
     //------------Be call in File Option function-----//
     
@@ -449,35 +447,6 @@ public class FileControllerActivity extends Activity {
     	}
     }
     
-    private File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 
-    	File[] fList = fileList;
-    	File temp = null;
-    	for(int i=fList.length-1; i>0; i--){
-    		for(int j=0; j<i; j++){
-    			if(fList[j].isDirectory() && fList[j+1].isDirectory()){//both of files are director
-    				if(fList[j].getName().compareToIgnoreCase(fList[j+1].getName()) > 0){//switch fList[j] and fList[j+1]
-        				temp = fList[j];
-        				fList[j] = fList[j+1];
-        				fList[j+1] = temp;
-        			}
-    			} else if(fList[j].isDirectory() || fList[j+1].isDirectory()){
-    				if(!fList[j].isDirectory() && fList[j+1].isDirectory()){//former is not directory, latter is directory  
-        				temp = fList[j];
-        				fList[j] = fList[j+1];
-        				fList[j+1] = temp;
-    				}
-    			} else{//traditional 
-    				if(fList[j].getName().compareToIgnoreCase(fList[j+1].getName()) > 0){//switch fList[j] and fList[j+1]
-        				temp = fList[j];
-        				fList[j] = fList[j+1];
-        				fList[j+1] = temp;
-        			}
-    			}
-    		}
-    	}
-    	return fList;
-    }
-    
     private void pureDeleteFile(String beDeletedFilePath){
     	File f = new File(beDeletedFilePath);
     	boolean result = f.delete();
@@ -512,6 +481,35 @@ public class FileControllerActivity extends Activity {
     	}
     }
     
+    private File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 
+    	File[] fList = fileList;
+    	File temp = null;
+    	for(int i=fList.length-1; i>0; i--){
+    		for(int j=0; j<i; j++){
+    			if(fList[j].isDirectory() && fList[j+1].isDirectory()){//both of files are director
+    				if(fList[j].getName().compareToIgnoreCase(fList[j+1].getName()) > 0){//switch fList[j] and fList[j+1]
+        				temp = fList[j];
+        				fList[j] = fList[j+1];
+        				fList[j+1] = temp;
+        			}
+    			} else if(fList[j].isDirectory() || fList[j+1].isDirectory()){
+    				if(!fList[j].isDirectory() && fList[j+1].isDirectory()){//former is not directory, latter is directory  
+        				temp = fList[j];
+        				fList[j] = fList[j+1];
+        				fList[j+1] = temp;
+    				}
+    			} else{//traditional 
+    				if(fList[j].getName().compareToIgnoreCase(fList[j+1].getName()) > 0){//switch fList[j] and fList[j+1]
+        				temp = fList[j];
+        				fList[j] = fList[j+1];
+        				fList[j+1] = temp;
+        			}
+    			}
+    		}
+    	}
+    	return fList;
+    }
+    
     //---------Create menu.-------//
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -519,7 +517,9 @@ public class FileControllerActivity extends Activity {
 				.setIcon(R.drawable.folder);
 		menu.add(0, Menu.FIRST+1, 2, R.string.menu_createNewDirInBottom)
 				.setIcon(R.drawable.folder);
-		menu.add(0, Menu.FIRST+2, 3, "About...")
+		menu.add(0, Menu.FIRST+2, 3, R.string.menu_helpTitle)
+				.setIcon(android.R.drawable.ic_menu_help);
+		menu.add(0, Menu.FIRST+3, 3, R.string.menu_aboutTitle)
 				.setIcon(android.R.drawable.ic_dialog_alert);
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -532,7 +532,11 @@ public class FileControllerActivity extends Activity {
 		case Menu.FIRST+1://create a folder on bottom directory
 			makeDirectory(tv_bottomDir.getText().toString());
 			break;
-		case Menu.FIRST+2://About...
+		case Menu.FIRST+2:
+			//TODO help Dialog
+			showHelpDialog();
+			break;
+		case Menu.FIRST+3://About...
 			showAboutDialog();
 			break;
 		default:
@@ -566,13 +570,23 @@ public class FileControllerActivity extends Activity {
         builder.show();
 	}
 	
+	private void showHelpDialog(){
+		new AlertDialog.Builder(this)
+				.setCancelable(false)
+				.setIcon(android.R.drawable.ic_menu_help)
+				.setTitle(R.string.help_title)
+				.setMessage(R.string.help_msg)
+				.setPositiveButton(R.string.alertButton_ok, null)
+				.show();
+	}
+	
 	private void showAboutDialog(){
 		new AlertDialog.Builder(this)
         		.setCancelable(false)
         		.setIcon(android.R.drawable.ic_dialog_alert)
-        		.setTitle(R.string.menu_aboutTitle)
+        		.setTitle(R.string.about_title)
         		.setMessage(R.string.about_msg)
-        		.setPositiveButton("OK", null)
+        		.setPositiveButton(R.string.alertButton_ok, null)
         		.show();
 	}
 	
