@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -402,8 +401,7 @@ public class FileControllerActivity extends Activity {
     		refreshListView();
     	}
     }
-    //TODO re-write to copy directory function.
-    private void doCopyFile(String copieerFilePath, String targetFilePath){
+    private void doCopyFile(String copieerFilePath, String targetFilePath){//start point of copy file function.
     	boolean result = pureCopyFile(copieerFilePath, targetFilePath);
     	if(result == true){
     		//show information to user.
@@ -413,7 +411,6 @@ public class FileControllerActivity extends Activity {
     		Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
     	}
     }
-    
     private boolean pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
     	File copieerFile = new File(copieerFilePath);
     	if(copieerFile.isFile() == true){
@@ -598,14 +595,6 @@ public class FileControllerActivity extends Activity {
 	private void refreshListView(){//refresh the file in list view(actually, reload)
 		openTopFile(tv_topDir.getText().toString());
 		openBottomFile(tv_bottomDir.getText().toString());
-	}
-
-	//----key function---//
-	//TODO back key function
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		
-		return super.onKeyDown(keyCode, event);
 	}
 
 }
