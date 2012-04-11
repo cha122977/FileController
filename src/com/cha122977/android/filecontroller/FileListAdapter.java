@@ -68,20 +68,20 @@ public class FileListAdapter extends BaseAdapter {
 		}
 		
 		File f = new File(filePath.get(position).toString());
-		switch(getMIMEType(f)){
-		case 2://directory
+		switch(MimeType.getMimeType(f)){
+		case MimeType.TYPE_DIRECTORY://directory
 			holder.icon.setImageBitmap(mIcon2);
 			break;
-		case 3://file
+		case MimeType.TYPE_UNKNOWN://file(unknown)
 			holder.icon.setImageBitmap(mIcon3);
 			break;
-		case 4://music
+		case MimeType.TYPE_AUDIO://audio
 			holder.icon.setImageBitmap(mIcon4);
 			break;
-		case 5://video
+		case MimeType.TYPE_VIDEO://video
 			holder.icon.setImageBitmap(mIcon5);
 			break;
-		case 6://image
+		case MimeType.TYPE_IMAGE://image
 			holder.icon.setImageBitmap(mIcon6);
 			break;
 		default://actually, this will not happen.
@@ -89,51 +89,11 @@ public class FileListAdapter extends BaseAdapter {
 			break;
 		}
 		holder.text.setText(f.getName());
-		
 		return convertView;
 	}
 
 	static class ViewHolder{
 		ImageView icon;
 		TextView text;
-	}
-	
-	/* 判斷檔案MimeType的method */
-	private final int TYPE_DIRECTORY = 2;//directory icon(not open)
-	private final int TYPE_UNKNOWN = 3;//file icon(unknown type)
-	private final int TYPE_AUDIO = 4;
-	private final int TYPE_VIDEO = 5;
-	private final int TYPE_IMAGE = 6;
-	
-	private int getMIMEType(File f){
-		if(f.isDirectory()){
-			return TYPE_DIRECTORY;
-		}
-	    String fName=f.getName();
-	    /* 取得副檔名 */
-	    String end=fName.substring(fName.lastIndexOf(".")+1,
-	                               fName.length()).toLowerCase(); 
-	    
-	    /* 依附檔名的類型決定MimeType */
-	    if(end.equals("m4a")||end.equals("mp3")||end.equals("mid")||
-	       end.equals("xmf")||end.equals("ogg")||end.equals("wav"))
-	    {
-	      return TYPE_AUDIO;
-	    }
-	    else if(end.equals("3gp")||end.equals("mp4"))
-	    {
-	      return TYPE_VIDEO;
-	    }
-	    else if(end.equals("jpg")||end.equals("gif")||end.equals("png")||
-	            end.equals("jpeg")||end.equals("bmp"))
-	    {
-	      return TYPE_IMAGE;
-	    }
-	    else
-	    {
-	      //return ???
-	    }
-	    /* 如果無法直接開啟，就跳出軟體清單給使用者選擇 */
-	    return TYPE_UNKNOWN;
 	}
 }

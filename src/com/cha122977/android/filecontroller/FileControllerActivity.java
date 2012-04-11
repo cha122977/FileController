@@ -9,6 +9,8 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -85,7 +87,8 @@ public class FileControllerActivity extends Activity {
 				if(f.isDirectory()){
 					openTopFile(topFilePath.get(arg2));
 				}else{
-					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
+//					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
+					openFile(f);
 				}
 			}
 		});
@@ -97,7 +100,8 @@ public class FileControllerActivity extends Activity {
 				if(f.isDirectory()){
 					openBottomFile(bottomFilePath.get(arg2));
 				}else{
-					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
+//					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
+					openFile(f);
 				}
 			}
 		});
@@ -606,6 +610,21 @@ public class FileControllerActivity extends Activity {
     }
 	
 	//-----general function---//
+	/* 在手機上開啟檔案的method */
+	private void openFile(File f){
+	    Intent intent = new Intent();
+	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	    intent.setAction(android.content.Intent.ACTION_VIEW);
+	    
+	    /* 取得Type */
+	    String type = MimeType.getMimeType(f.getName());
+	    
+	    /* 設定intent的file與type */
+	    intent.setDataAndType(Uri.fromFile(f), type);
+	    startActivity(intent); 
+	}
+
+	
 	private void refreshListView(){//refresh the file in list view(actually, reload)
 		openTopFile(tv_topDir.getText().toString());
 		openBottomFile(tv_bottomDir.getText().toString());
