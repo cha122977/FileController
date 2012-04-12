@@ -64,28 +64,31 @@ public class FileControllerActivity extends Activity {
     	tv_topDir.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				readyToLeaveApp = false;
 				String s = tv_topDir.getText().toString();
 				File f = new File(s);
 				s = f.getParent();
-				openTopFile(s);
+				openTopFile(true, s);
 			}
 		});
     	tv_bottomDir.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				readyToLeaveApp = false;
 				String s = tv_bottomDir.getText().toString();
 				File f = new File(s);
 				s = f.getParent();
-				openBottomFile(s);
+				openBottomFile(true, s);
 			}
 		});
     	
     	lv_topListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				readyToLeaveApp = false;
 				File f = new File(topFilePath.get(arg2));
 				if(f.isDirectory()){
-					openTopFile(topFilePath.get(arg2));
+					openTopFile(true, topFilePath.get(arg2));
 				}else{
 					openFile(f);
 				}
@@ -95,9 +98,10 @@ public class FileControllerActivity extends Activity {
     	lv_bottomListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				readyToLeaveApp = false;
 				File f = new File(bottomFilePath.get(arg2));
 				if(f.isDirectory()){
-					openBottomFile(bottomFilePath.get(arg2));
+					openBottomFile(true, bottomFilePath.get(arg2));
 				}else{
 //					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
 					openFile(f);
@@ -127,8 +131,8 @@ public class FileControllerActivity extends Activity {
     private String PREF_BOTTOM = "lastestOpenedBottomDir";
     private void restorePrefs(){
     	SharedPreferences settings = getSharedPreferences(PREF, 0);
-    	openTopFile   (settings.getString(PREF_TOP,    ROOT));
-        openBottomFile(settings.getString(PREF_BOTTOM, ROOT));
+    	openTopFile   (false, settings.getString(PREF_TOP,    ROOT));
+        openBottomFile(false, settings.getString(PREF_BOTTOM, ROOT));
     }
     @Override
 	protected void onPause() {
@@ -139,12 +143,14 @@ public class FileControllerActivity extends Activity {
 			.putString(PREF_BOTTOM, tv_bottomDir.getText().toString())
 			.commit();
 	}
-    
 	//Core Function
-    private void openTopFile(String dir){//function to show directory's content.( use in Top Window)
+    private void openTopFile(boolean ifSave, String dir){//function to show directory's content.( use in Top Window)
     	if(dir!=null){
 	    	File f = new File(dir);
 	    	if(f.canRead()){
+	    		if(ifSave){//need save history
+		    		history.add(new HistoryItem(true, tv_topDir.getText().toString()));
+		    	}
 		    	File[] fl = f.listFiles();
 		    	File[] fList = reSort(fl);//reSort FileList
 		    	topFilePath.clear();//clear the list
@@ -157,7 +163,7 @@ public class FileControllerActivity extends Activity {
 		    	if(f.exists() == false){//can't read file because file is not exist.
 		    		int indexHelper = dir.lastIndexOf("/");
 		    		if(indexHelper!=0){
-		    			openTopFile(dir.substring(0, indexHelper));
+		    			openTopFile(ifSave, dir.substring(0, indexHelper));
 		    		}
 	    		} else {//can't read file because file cannot be read(no permission)
 	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
@@ -165,10 +171,13 @@ public class FileControllerActivity extends Activity {
 		    }
     	}
     }
-    private void openBottomFile(String dir){//function to show directory's content.( use in Bottom Window)
+    private void openBottomFile(boolean ifSave, String dir){//function to show directory's content.( use in Bottom Window)
     	if(dir!=null){
 	    	File f = new File(dir);
 	    	if(f.canRead()){
+	    		if(ifSave){//need save history
+	        		history.add(new HistoryItem(false, tv_bottomDir.getText().toString()));
+	        	}
 	    		File[] fList = f.listFiles();
 	    		fList = reSort(fList);//reSort FileList
 	        	bottomFilePath.clear();//clear the list
@@ -181,7 +190,7 @@ public class FileControllerActivity extends Activity {
 	    		if(f.exists() == false){//can't read file because file is not exist.
 		    		int indexHelper = dir.lastIndexOf("/");
 		    		if(indexHelper!=0){
-		    			openBottomFile(dir.substring(0, indexHelper));
+		    			openBottomFile(ifSave, dir.substring(0, indexHelper));
 		    		}
 	    		} else {//can't read file because file cannot be read(no permission)
 	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
@@ -649,8 +658,8 @@ public class FileControllerActivity extends Activity {
 	}
 	
 	private void refreshListView(){//refresh the file in list view(actually, reload)
-		openTopFile(tv_topDir.getText().toString());
-		openBottomFile(tv_bottomDir.getText().toString());
+		openTopFile(false, tv_topDir.getText().toString());
+		openBottomFile(false, tv_bottomDir.getText().toString());
 	}
 	
 	List<HistoryItem> history = new ArrayList<HistoryItem>();
@@ -662,12 +671,30 @@ public class FileControllerActivity extends Activity {
 			openedDir = path;
 		}
 	}
-	
+	boolean readyToLeaveApp = false;//use in double click leave app. mechanism.
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK){
-			
+			if(readyToLeaveApp){
+				return super.onKeyDown(keyCode, event);
+			}
+			int itemNumber = history.size();
+			if(itemNumber != 0){
+				HistoryItem hi = history.get(itemNumber-1);
+				history.remove(itemNumber-1);
+				if(hi.topOrBottom == true){//top
+					openTopFile(false, hi.openedDir);
+				} else {//bottom
+					openBottomFile(false, hi.openedDir);
+				}
+				refreshListView();
+			} else {
+				Toast.makeText(getApplicationContext(), "Click again to finish", Toast.LENGTH_LONG).show();
+				readyToLeaveApp = true;
+			}
+			return false;
 		}
+		readyToLeaveApp = false;
 		return super.onKeyDown(keyCode, event);
 	}
 	
