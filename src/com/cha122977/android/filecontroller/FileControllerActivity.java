@@ -321,8 +321,14 @@ public class FileControllerActivity extends Activity {
         	int fileNameCounter=1;
         	final String newFileName;
         	String temp;//use to find usable fileName.
+        	int pointIndex = copieerFileName.lastIndexOf(".");
+    		Log.d("TAG", "Index of . is: " + pointIndex);
         	while(true){
-        		temp = copieerFileName + "(" + fileNameCounter + ")";
+        		if(pointIndex != -1){//file have attachment 
+        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//連"."一起補上
+        		} else {//file does not have attachment
+        			temp = copieerFileName + "(" + fileNameCounter + ")";
+        		}
         		if(new File(target + "/" + temp).exists() == false){//new file name is independence
         			newFileName = temp;
         			break;
@@ -623,7 +629,6 @@ public class FileControllerActivity extends Activity {
 	    intent.setDataAndType(Uri.fromFile(f), type);
 	    startActivity(intent); 
 	}
-
 	
 	private void refreshListView(){//refresh the file in list view(actually, reload)
 		openTopFile(tv_topDir.getText().toString());
