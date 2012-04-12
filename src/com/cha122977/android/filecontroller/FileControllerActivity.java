@@ -10,10 +10,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +32,7 @@ import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
 	private final String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
-
+	
     TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView;//listView to show all the file in folder where user is.
 	
@@ -42,15 +44,13 @@ public class FileControllerActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);//¥h±¼Activity¦WºÙÄæ¦ì
         setContentView(R.layout.main);
         
-        setView();//connect view object to layout widget(in .xml file).
+        setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
-        setListener();//set listener to widget
-        
-        openTopFile(ROOT);//at initial: open the SD-card root
-        openBottomFile(ROOT);//at initial: open the SD-card root
+        setListeners();//set listener to widget
+        restorePrefs();
         
     }
-    private void setView(){//connect view object to layout widget(in .xml file).
+    private void setViews(){//connect view object to layout widget(in .xml file).
     	tv_topDir = (TextView)findViewById(R.id.topTextView);
     	tv_bottomDir = (TextView)findViewById(R.id.bottomTextView);
     	lv_topListView = (ListView)findViewById(R.id.topListView);
@@ -60,7 +60,7 @@ public class FileControllerActivity extends Activity {
     	topFilePath = new ArrayList<String>();
     	bottomFilePath = new ArrayList<String>();
     }
-    private void setListener(){//set listener to widget
+    private void setListeners(){//set listener to widget
     	tv_topDir.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -87,7 +87,6 @@ public class FileControllerActivity extends Activity {
 				if(f.isDirectory()){
 					openTopFile(topFilePath.get(arg2));
 				}else{
-//					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
 					openFile(f);
 				}
 			}
@@ -122,7 +121,26 @@ public class FileControllerActivity extends Activity {
 			}
 		});
     }
+    //Preferences Code
+    private String PREF		   = "filePreferences";
+    private String PREF_TOP    = "lastestOpenedTopDir";
+    private String PREF_BOTTOM = "lastestOpenedBottomDir";
+    private void restorePrefs(){
+    	SharedPreferences settings = getSharedPreferences(PREF, 0);
+    	openTopFile   (settings.getString(PREF_TOP,    ROOT));
+        openBottomFile(settings.getString(PREF_BOTTOM, ROOT));
+    }
+    @Override
+	protected void onPause() {
+		super.onPause();
+		SharedPreferences settings = getSharedPreferences(PREF, 0);
+		settings.edit()
+			.putString(PREF_TOP, tv_topDir.getText().toString())
+			.putString(PREF_BOTTOM, tv_bottomDir.getText().toString())
+			.commit();
+	}
     
+	//Core Function
     private void openTopFile(String dir){//function to show directory's content.( use in Top Window)
     	if(dir!=null){
 	    	File f = new File(dir);
@@ -634,5 +652,23 @@ public class FileControllerActivity extends Activity {
 		openTopFile(tv_topDir.getText().toString());
 		openBottomFile(tv_bottomDir.getText().toString());
 	}
-
+	
+	List<HistoryItem> history = new ArrayList<HistoryItem>();
+	private class HistoryItem{
+		boolean topOrBottom;
+		String openedDir;
+		public HistoryItem(boolean tb, String path){
+			topOrBottom = tb;
+			openedDir = path;
+		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_BACK){
+			
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
 }
