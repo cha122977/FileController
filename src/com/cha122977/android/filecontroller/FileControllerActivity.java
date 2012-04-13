@@ -14,7 +14,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -349,7 +348,7 @@ public class FileControllerActivity extends Activity {
         	final String newFileName;
         	String temp;//use to find usable fileName.
         	int pointIndex = copieerFileName.lastIndexOf(".");
-    		Log.d("TAG", "Index of . is: " + pointIndex);
+//    		Log.d("TAG", "Index of . is: " + pointIndex);
         	while(true){
         		if(pointIndex != -1){//file have attachment 
         			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//連"."一起補上
@@ -427,7 +426,7 @@ public class FileControllerActivity extends Activity {
     	} else {
     		File renamedFile = new File(renamedFilePath);
     		boolean result = renamedFile.renameTo(newFile);
-    		Log.d("TAG", "rename file result: " + result );
+//    		Log.d("TAG", "rename file result: " + result );
     		if(result==true){
     			Toast.makeText(getApplicationContext(), R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
     		} else{
@@ -466,7 +465,7 @@ public class FileControllerActivity extends Activity {
     	        out.close();
     	        return true;
     		} catch (Exception e) {
-    			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");
+//    			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");
     			return false;
     		}
     	} else {
@@ -630,7 +629,7 @@ public class FileControllerActivity extends Activity {
 	//----use in Menu function----//
 	private void pureMakeDir(String sourceDir, String newDirName){
     	File newDir = new File(sourceDir + "/" + newDirName);
-    	Log.d("TAG", newDir.getAbsolutePath() + "");
+//    	Log.d("TAG", newDir.getAbsolutePath() + "");
     	if(newDir.mkdir()==true){
     		newDir.setReadable(true);
     		newDir.setWritable(true);
@@ -689,7 +688,7 @@ public class FileControllerActivity extends Activity {
 				}
 				refreshListView();
 			} else {
-				Toast.makeText(getApplicationContext(), "Click again to finish", Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), R.string.doubleClickMsg, Toast.LENGTH_LONG).show();
 				readyToLeaveApp = true;
 			}
 			return false;
@@ -697,5 +696,4 @@ public class FileControllerActivity extends Activity {
 		readyToLeaveApp = false;
 		return super.onKeyDown(keyCode, event);
 	}
-	
 }

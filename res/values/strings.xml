@@ -50,6 +50,8 @@
     <string name="about_title">About....</string>
     <string name="about_msg">Write by cha122977\ncha122977@gmail.com</string>
     
+    <string name="doubleClickMsg">Click again to finish</string>
+    
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
         <item>Rename</item>
