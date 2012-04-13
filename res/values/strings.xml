@@ -45,7 +45,7 @@
     <string name="createDir_createDirFailure">Create directory failure</string>
     
     <string name="help_title">HELP</string>
-    <string name="help_msg">You can open two directories in the same time, one at TOP and the other one at BOTTOM.\nLong Click directory/file to manage it.\nClick opened directory to upper folder.</string>
+    <string name="help_msg">Open two directories in the same time, one at TOP screen and the other one at BOTTOM.\nLong Click directory/file to manage it.\nClick opened directory to upper layer.\nClick the directory/file to open it.</string>
     
     <string name="about_title">About....</string>
     <string name="about_msg">Write by cha122977\ncha122977@gmail.com</string>
