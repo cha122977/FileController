@@ -579,8 +579,10 @@ public class FileControllerActivity extends Activity {
 				.setIcon(android.R.drawable.ic_menu_help);
 		menu.add(0, Menu.FIRST+3, 3, R.string.menu_aboutTitle)
 				.setIcon(android.R.drawable.ic_dialog_alert);
+		
 		return super.onCreateOptionsMenu(menu);
 	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
