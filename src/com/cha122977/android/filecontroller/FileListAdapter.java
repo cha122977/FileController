@@ -25,6 +25,7 @@ public class FileListAdapter extends BaseAdapter {
 	private Bitmap mIcon4;//audio
 	private Bitmap mIcon5;//video
 	private Bitmap mIcon6;//picture
+	private Bitmap mIcon7;//text
 	
 	public FileListAdapter(Context context, List<String> filePath) {
 		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
@@ -36,6 +37,7 @@ public class FileListAdapter extends BaseAdapter {
 		mIcon4=BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
 		mIcon5=BitmapFactory.decodeResource(context.getResources(), R.drawable.video);
 		mIcon6=BitmapFactory.decodeResource(context.getResources(), R.drawable.image);
+		mIcon7=BitmapFactory.decodeResource(context.getResources(), R.drawable.text);
 	}
 
 	@Override
@@ -83,6 +85,9 @@ public class FileListAdapter extends BaseAdapter {
 			break;
 		case MimeType.TYPE_IMAGE://image
 			holder.icon.setImageBitmap(mIcon6);
+			break;
+		case MimeType.TYPE_TEXT://text
+			holder.icon.setImageBitmap(mIcon7);
 			break;
 		default://actually, this will not happen.
 			holder.icon.setImageBitmap(mIcon3);

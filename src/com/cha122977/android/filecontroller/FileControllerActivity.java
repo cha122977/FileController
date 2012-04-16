@@ -214,8 +214,8 @@ public class FileControllerActivity extends Activity {
     private void openTopOptionsDialog(int position){//run this function when top listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = topFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
-    	s[1] += " " + tv_bottomDir.getText().toString();//set the string of item
-    	s[2] += " " + tv_bottomDir.getText().toString();
+    	s[2] += " " + tv_bottomDir.getText().toString();//set the string of item
+    	s[3] += " " + tv_bottomDir.getText().toString();
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(topFilePath.get(position));
 		builder.setItems(s, new DialogInterface.OnClickListener() {
@@ -256,8 +256,8 @@ public class FileControllerActivity extends Activity {
     private void openBottomOptionsDialog(int position){//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = bottomFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
-    	s[1] += " " + tv_topDir.getText().toString();//set the string of item
-    	s[2] += " " + tv_topDir.getText().toString();
+    	s[2] += " " + tv_topDir.getText().toString();//set the string of item
+    	s[3] += " " + tv_topDir.getText().toString();
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(bottomFilePath.get(position));
 		builder.setItems(s, new DialogInterface.OnClickListener() {

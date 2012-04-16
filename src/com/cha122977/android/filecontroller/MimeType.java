@@ -9,6 +9,7 @@ public class MimeType {
 	public static final int TYPE_AUDIO = 4;
 	public static final int TYPE_VIDEO = 5;
 	public static final int TYPE_IMAGE = 6;
+	public static final int TYPE_TEXT  = 7;
 	
 	public static int getMimeType(File f){
 		if(f.isDirectory()){
@@ -33,6 +34,10 @@ public class MimeType {
 	            end.equals("jpeg")||end.equals("bmp"))
 	    {
 	      return TYPE_IMAGE;
+	    }
+	    else if(end.equals("text"))
+	    {
+	    	return TYPE_TEXT;
 	    }
 	    else
 	    {
@@ -60,6 +65,11 @@ public class MimeType {
     		            attachment.equals("jpeg")||attachment.equals("bmp"))
     		    {
     		    	type = "image";
+    		    }
+	    	//not sure if android support type "text" 
+    		    else if(attachment.equals("txt"))
+    		    {
+    		    	type = "text";
     		    }
     		    else
     		    {
