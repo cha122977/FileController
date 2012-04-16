@@ -46,7 +46,13 @@ public class FileControllerActivity extends Activity {
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
         setListeners();//set listener to widget
-        restorePrefs();
+        
+        //initial directory.
+        openTopFile(false, ROOT);
+        openBottomFile(false, ROOT);
+        
+        //sharedPreference code was marked.
+//        restorePrefs();
         
     }
     private void setViews(){//connect view object to layout widget(in .xml file).
@@ -124,24 +130,26 @@ public class FileControllerActivity extends Activity {
 			}
 		});
     }
-    //Preferences Code
-    private String PREF		   = "filePreferences";
-    private String PREF_TOP    = "lastestOpenedTopDir";
-    private String PREF_BOTTOM = "lastestOpenedBottomDir";
-    private void restorePrefs(){
-    	SharedPreferences settings = getSharedPreferences(PREF, 0);
-    	openTopFile   (false, settings.getString(PREF_TOP,    ROOT));
-        openBottomFile(false, settings.getString(PREF_BOTTOM, ROOT));
-    }
-    @Override
-	protected void onPause() {
-		super.onPause();
-		SharedPreferences settings = getSharedPreferences(PREF, 0);
-		settings.edit()
-			.putString(PREF_TOP, tv_topDir.getText().toString())
-			.putString(PREF_BOTTOM, tv_bottomDir.getText().toString())
-			.commit();
-	}
+    /** SharedPreference code was marked because we think it was not human-friendly.
+     * */
+//    //Preferences Code
+//    private String PREF		   = "filePreferences";
+//    private String PREF_TOP    = "lastestOpenedTopDir";
+//    private String PREF_BOTTOM = "lastestOpenedBottomDir";
+//    private void restorePrefs(){
+//    	SharedPreferences settings = getSharedPreferences(PREF, 0);
+//    	openTopFile   (false, settings.getString(PREF_TOP,    ROOT));
+//        openBottomFile(false, settings.getString(PREF_BOTTOM, ROOT));
+//    }
+//    @Override
+//	protected void onPause() {
+//		super.onPause();
+//		SharedPreferences settings = getSharedPreferences(PREF, 0);
+//		settings.edit()
+//			.putString(PREF_TOP, tv_topDir.getText().toString())
+//			.putString(PREF_BOTTOM, tv_bottomDir.getText().toString())
+//			.commit();
+//	}
 	//Core Function
     private void openTopFile(boolean ifSave, String dir){//function to show directory's content.( use in Top Window)
     	if(dir!=null){
@@ -209,19 +217,26 @@ public class FileControllerActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				switch(which){
-				case 0://Rename file.
+				case 0://open file.
+					if(new File(selectedFilePath).isDirectory()){
+						openTopFile(true, selectedFilePath);
+					} else {
+						openFile(selectedFilePath);
+					}
+					break;
+				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
-				case 1://Move
+				case 2://Move
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
-				case 2://Copy file to other side.
+				case 3://Copy file to other side.
 					copyFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
-				case 3://Delete
+				case 4://Delete
 					openDeleteCheckDialog(selectedFilePath);
 					break;
-				case 4://Cancel
+				case 5://Cancel
 					//Do nothing
 					break;
 				default:
@@ -244,19 +259,26 @@ public class FileControllerActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				switch(which){
-				case 0://Rename file.
+				case 0://open file.
+					if(new File(selectedFilePath).isDirectory()){
+						openTopFile(true, selectedFilePath);
+					} else {
+						openFile(selectedFilePath);
+					}
+					break;
+				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
-				case 1://Move
+				case 2://Move
 					moveFile(selectedFilePath, tv_topDir.getText().toString());
 					break;
-				case 2://Copy file to other side.
+				case 3://Copy file to other side.
 					copyFile(selectedFilePath, tv_topDir.getText().toString());
 					break;
-				case 3://Delete
+				case 4://Delete
 					openDeleteCheckDialog(selectedFilePath);
 					break;
-				case 4://Cancel
+				case 5://Cancel
 					//Do nothing
 					break;
 				default:
@@ -569,7 +591,6 @@ public class FileControllerActivity extends Activity {
 			makeDirectory(tv_bottomDir.getText().toString());
 			break;
 		case Menu.FIRST+2:
-			//TODO help Dialog
 			showHelpDialog();
 			break;
 		case Menu.FIRST+3://About...
@@ -643,6 +664,9 @@ public class FileControllerActivity extends Activity {
 	
 	//-----general function---//
 	/* 在手機上開啟檔案的method */
+	private void openFile(String s){//Overload
+		openFile(new File(s));
+	}
 	private void openFile(File f){
 	    Intent intent = new Intent();
 	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
