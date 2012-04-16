@@ -577,13 +577,13 @@ public class FileControllerActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, Menu.FIRST  , 1, R.string.menu_createNewDirInTop)
-				.setIcon(R.drawable.folder);
+				.setIcon(R.drawable.add_folder);
 		menu.add(0, Menu.FIRST+1, 2, R.string.menu_createNewDirInBottom)
-				.setIcon(R.drawable.folder);
+				.setIcon(R.drawable.add_folder);
 		menu.add(0, Menu.FIRST+2, 3, R.string.menu_helpTitle)
-				.setIcon(android.R.drawable.ic_menu_help);
+				.setIcon(R.drawable.help);
 		menu.add(0, Menu.FIRST+3, 3, R.string.menu_aboutTitle)
-				.setIcon(android.R.drawable.ic_dialog_alert);
+				.setIcon(R.drawable.about);
 		
 		return super.onCreateOptionsMenu(menu);
 	}
