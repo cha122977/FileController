@@ -10,7 +10,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -91,11 +90,10 @@ public class FileControllerActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				readyToLeaveApp = false;
-				File f = new File(topFilePath.get(arg2));
-				if(f.isDirectory()){
+				if(new File(topFilePath.get(arg2)).isDirectory()){
 					openTopFile(true, topFilePath.get(arg2));
 				}else{
-					openFile(f);
+					openTopOptionsDialog(arg2);
 				}
 			}
 		});
@@ -104,12 +102,10 @@ public class FileControllerActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				readyToLeaveApp = false;
-				File f = new File(bottomFilePath.get(arg2));
-				if(f.isDirectory()){
+				if(new File(bottomFilePath.get(arg2)).isDirectory()){
 					openBottomFile(true, bottomFilePath.get(arg2));
 				}else{
-//					Toast.makeText(getApplicationContext(), R.string.isFile, Toast.LENGTH_SHORT).show();
-					openFile(f);
+					openBottomOptionsDialog(arg2);
 				}
 			}
 		});
@@ -117,7 +113,11 @@ public class FileControllerActivity extends Activity {
     	lv_topListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				openTopOptionsDialog(arg2);
+				if(new File(topFilePath.get(arg2)).isDirectory()){//long click item is directory 
+					openTopOptionsDialog(arg2);
+				} else {//long click item is file
+					openFile(topFilePath.get(arg2));
+				}
 				return true;
 			}
 		});
@@ -125,11 +125,16 @@ public class FileControllerActivity extends Activity {
     	lv_bottomListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				openButtomOptionsDialog(arg2);
+				if(new File(bottomFilePath.get(arg2)).isDirectory()){//long click item is directory 
+					openBottomOptionsDialog(arg2);
+				} else {//long click item is file
+					openFile(bottomFilePath.get(arg2));
+				}
 				return true;
 			}
 		});
     }
+    
     /** SharedPreference code was marked because we think it was not human-friendly.
      * */
 //    //Preferences Code
@@ -248,7 +253,7 @@ public class FileControllerActivity extends Activity {
 		builder.show();
     }
     
-    private void openButtomOptionsDialog(int position){//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
+    private void openBottomOptionsDialog(int position){//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = bottomFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
     	s[1] += " " + tv_topDir.getText().toString();//set the string of item
