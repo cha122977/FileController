@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<color name="transparent">#00000000</color>
+	<color name="scrollbar_outline">#64E6FF</color>
+	<color name="scrollbar_inside">#00324B</color>
+
+</resources>
