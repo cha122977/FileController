@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">File Controller</string>
+    <string name="app_name">Cobi</string>
     <string name="isFile">This is File</string>
     <string name="noPermission">No Permission</string>
     

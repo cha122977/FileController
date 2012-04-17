@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cobi</string>
+    <string name="isFile">這是檔案</string>
+    <string name="noPermission">沒有讀取權限</string>
+    
+    <string name="rename_renameAlertTitle">重新命名檔案</string>
+    <string name="rename_renameFileCancel">取消命名</string>
+    <string name="rename_fileAlreadyExist"> 已經存在，使用其它名稱。</string>
+    <string name="rename_renameFileSucceed">重命名成功</string>
+    <string name="rename_renameFileFailure">重命名失敗</string>
+    
+    <string name="move_replaceSucceed">取代成功</string>
+    <string name="move_replaceFailure">取代失敗</string>
+    <string name="move_moveFileSucceed">移動檔案成功</string>
+    <string name="move_moveFileFailure">移動檔案失敗</string>
+    <string name="move_moveFileCancel">取消移動檔案</string>
+    <string name="move_fileAlreadyExist">該檔案名稱已存在</string>
+    
+    <string name="copy_fileSameName">該檔案名稱已存在</string>
+	<string name="copy_copyFileSucceed">複製檔案成功</string>
+    <string name="copy_copyFileFailure">取消複製檔案</string>
+    
+    <string name="delete_alertTitle">刪除檔案</string>
+    <string name="delete_alertDeleteFileMsg">檔案將永久刪除</string>
+    <string name="delete_alertDeleteDirMsg">資料夾內的資料將永久刪除，此動作將無法還原。</string>
+    <string name="delete_deleteButton">刪除</string>
+    <string name="delete_deleteFileSucceed"> 已刪除成功</string>
+    <string name="delete_deleteFileFailure"> 刪除失敗</string>
+    <string name="delete_deleteDirectorySucceed">刪除資料夾成功</string>
+    <string name="delete_deleteDirectoryFailure">刪除資料夾失敗</string>
+    
+    <string name="alertButton_ok">完成</string>
+    <string name="alertButton_cancel">取消</string>
+    <string name="action_cancel">取消</string>
+  
+    <string name="menu_createNewDirInTop">在上方資料夾新增資料夾</string>
+    <string name="menu_createNewDirInBottom">在下方資料夾新增資料夾</string>
+    <string name="menu_helpTitle">說明</string>
+    <string name="menu_aboutTitle">關於Cobi</string>
+    
+    <string name="createDir_createNewDirectory">新資料夾New directory</string>
+    <string name="createDir_createDirCancel">取消新增資料夾Create directory cancel</string>
+    <string name="createDir_createDirSucceed">新建新資料夾成功Create directory succeed</string>
+    <string name="createDir_createDirFailure">新建新資料夾失敗Create directory failure</string>
+    
+    <string name="help_title">說明</string>
+    <string name="help_msg">Open two directories in the same time, one at TOP screen and the other one at BOTTOM.\nLong Click directory/file to manage it.\nClick opened directory to upper layer.\nClick the directory/file to open it.</string>
+    
+    <string name="about_title">關於Cobi</string>
+    <string name="about_msg">Write by cha122977\ncha122977@gmail.com</string>
+    
+    <string name="doubleClickMsg">再按一次返回鍵來結束程式</string>
+    
+	<!-- use in Long Click List View Item function -->
+    <string-array name="alert_fileSelectedOption">
+        <item>打開 </item>
+        <item>重新命名 </item>
+        <item>移動到: </item>
+        <item>複製到: </item>
+        <item>刪除</item>
+        <item>取消</item>
+    </string-array>
+    
+    <!-- use when copy file and target directory have same name file -->
+    <string-array name="alert_sameFileNameOption">
+        <item>取代 </item>
+        <item>複製並重命名為：</item>
+        <item>取消複製</item>
+    </string-array>
+    
+	<!-- use when move file and target directory have same name file -->
+    <string-array name="alert_moveFileSameName">
+        <item>取代</item>
+        <item>取消</item>
+    </string-array>
+</resources>
