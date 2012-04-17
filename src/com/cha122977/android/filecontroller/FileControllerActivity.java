@@ -13,6 +13,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -635,23 +638,62 @@ public class FileControllerActivity extends Activity {
 	}
 	
 	private void showHelpDialog(){
-		new AlertDialog.Builder(this)
-				.setCancelable(false)
-				.setIcon(android.R.drawable.ic_menu_help)
-				.setTitle(R.string.help_title)
-				.setMessage(R.string.help_msg)
-				.setPositiveButton(R.string.alertButton_ok, null)
-				.show();
+//		new AlertDialog.Builder(this)
+//				.setIcon(R.drawable.help)
+//				.setTitle(R.string.help_title)
+//				.setMessage(R.string.help_msg)
+//				.setPositiveButton(R.string.alertButton_ok, null)
+//				.show();
+		
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View view = inflater.inflate(R.layout.alertdialog_help, null);
+		
+		AlertDialog d = new AlertDialog.Builder(this)
+			.setView(view)
+			.setPositiveButton(R.string.alertButton_ok, null)
+			.create();
+		d.show();
 	}
 	
 	private void showAboutDialog(){
-		new AlertDialog.Builder(this)
-        		.setCancelable(false)
-        		.setIcon(android.R.drawable.ic_dialog_alert)
-        		.setTitle(R.string.about_title)
-        		.setMessage(R.string.about_msg)
-        		.setPositiveButton(R.string.alertButton_ok, null)
-        		.show();
+		// Linkify the message
+	    SpannableString s = new SpannableString(getResources().getString(R.string.about_msg));
+	    Linkify.addLinks(s, Linkify.WEB_URLS);
+		
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View view = inflater.inflate(R.layout.alertdialog_about, null);
+		TextView msgView = (TextView)view.findViewById(R.id.msg);
+		msgView.setText(s);
+		
+		AlertDialog d = new AlertDialog.Builder(this)
+			.setView(view)
+			.setPositiveButton(R.string.alertButton_ok, null)
+			.create();
+		d.show();
+		
+		msgView.setMovementMethod(LinkMovementMethod.getInstance());
+		
+//		// Linkify the message
+//	    SpannableString s = new SpannableString(getResources().getString(R.string.about_msg));
+//	    Linkify.addLinks(s, Linkify.WEB_URLS);
+//		
+//	    final TextView myView = new TextView(this);
+//	    myView.setText(s);
+//	    myView.setTextSize(15);
+//	    myView.setTextScaleX((float)1.1);
+//	    myView.setLineSpacing(6, 1);
+//	    myView.setPadding(30, 10, 10, 10);
+//	    
+//		AlertDialog d = new AlertDialog.Builder(this)
+//        		.setIcon(R.drawable.about)
+//        		.setTitle(R.string.about_title)
+//        		.setView(myView)
+//        		.setPositiveButton(R.string.alertButton_ok, null)
+//        		.create();
+//		d.show();
+//		// Make the textview clickable. Must be called after show()
+////	    ((TextView)d.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+////		myView.setMovementMethod(LinkMovementMethod.getInstance());
 	}
 	
 	//----use in Menu function----//

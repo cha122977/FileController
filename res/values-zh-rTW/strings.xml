@@ -24,19 +24,19 @@
     <string name="delete_alertTitle">刪除檔案</string>
     <string name="delete_alertDeleteFileMsg">檔案將永久刪除</string>
     <string name="delete_alertDeleteDirMsg">資料夾內的資料將永久刪除，此動作將無法還原。</string>
-    <string name="delete_deleteButton">刪除</string>
+    <string name="delete_deleteButton">刪   除</string>
     <string name="delete_deleteFileSucceed"> 已刪除成功</string>
     <string name="delete_deleteFileFailure"> 刪除失敗</string>
     <string name="delete_deleteDirectorySucceed">刪除資料夾成功</string>
     <string name="delete_deleteDirectoryFailure">刪除資料夾失敗</string>
     
-    <string name="alertButton_ok">完成</string>
-    <string name="alertButton_cancel">取消</string>
-    <string name="action_cancel">取消</string>
+    <string name="alertButton_ok">完   成</string>
+    <string name="alertButton_cancel">取   消</string>
+    <string name="action_cancel">取   消</string>
   
     <string name="menu_createNewDirInTop">在上方資料夾新增資料夾</string>
     <string name="menu_createNewDirInBottom">在下方資料夾新增資料夾</string>
-    <string name="menu_helpTitle">說明</string>
+    <string name="menu_helpTitle">說 明</string>
     <string name="menu_aboutTitle">關於Cobi</string>
     
     <string name="createDir_createNewDirectory">新資料夾New directory</string>
@@ -44,34 +44,34 @@
     <string name="createDir_createDirSucceed">新建新資料夾成功Create directory succeed</string>
     <string name="createDir_createDirFailure">新建新資料夾失敗Create directory failure</string>
     
-    <string name="help_title">說明</string>
-    <string name="help_msg">在螢幕上方及下方同時開啟兩個資料夾，並且可以將檔案移動/複製到另一邊。\n此外還提供檔案總管常用的功能，便於管理您的檔案。\n輕點一下檔案或資料夾來打開它，點選資料夾路徑可回到資料夾上一層。\n長按資料夾以打開資料夾選單管理，長按檔案則可以直接以預設程式打開該檔案。</string>
+    <string name="help_title">說   明</string>
+    <string name="help_msg">　　畫面上下方同時開啟兩個資料夾視窗，可以將檔案移動、複製到另一側的資料夾中。\n　　輕點一下檔案來移動、複製檔案，長按檔案則可以直接打開該檔案。\n　　點選資料夾來進入下一層，點選資料夾路徑則可以回到上一層；長按資料夾來打開資料夾管理選單。</string>
     
-    <string name="about_title">關於Cobi</string>
-    <string name="about_msg">Write by cha122977\ncha122977@gmail.com</string>
+    <string name="about_title">關 於 Cobi</string>
+    <string name="about_msg"><b>cha122977</b> &amp; <b>Yu</b>\ncha122977@gmail.com\nyustudiotw@gmail.com\nhttp://yustudio.tw/</string>
     
     <string name="doubleClickMsg">再按一次返回鍵來結束程式</string>
     
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
-        <item>打開 </item>
-        <item>重新命名 </item>
-        <item>移動到: </item>
-        <item>複製到: </item>
+        <item>開啟</item>
+        <item>重新命名</item>
+        <item>移動到：</item>
+        <item>複製到：</item>
         <item>刪除</item>
         <item>取消</item>
     </string-array>
     
     <!-- use when copy file and target directory have same name file -->
     <string-array name="alert_sameFileNameOption">
-        <item>取代 </item>
+        <item>取代該檔案</item>
         <item>複製並重命名為：</item>
         <item>取消複製</item>
     </string-array>
     
 	<!-- use when move file and target directory have same name file -->
     <string-array name="alert_moveFileSameName">
-        <item>取代</item>
+        <item>取代該檔案</item>
         <item>取消</item>
     </string-array>
 </resources>
