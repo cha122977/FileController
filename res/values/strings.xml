@@ -34,8 +34,8 @@
     <string name="alertButton_cancel">Cancel</string>
     <string name="action_cancel">Cancel</string>
   
-    <string name="menu_createNewDirInTop">Create new directory in TOP directory.</string>
-    <string name="menu_createNewDirInBottom">Create new directory at BOTTOM directory.</string>
+    <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
+    <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
     <string name="menu_helpTitle">HELP</string>
     <string name="menu_aboutTitle">About....</string>
     

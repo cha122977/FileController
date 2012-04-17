@@ -34,8 +34,8 @@
     <string name="alertButton_cancel">取   消</string>
     <string name="action_cancel">取   消</string>
   
-    <string name="menu_createNewDirInTop">在上方資料夾新增資料夾</string>
-    <string name="menu_createNewDirInBottom">在下方資料夾新增資料夾</string>
+    <string name="menu_createNewDirInTop">在上方新增資料夾</string>
+    <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     <string name="menu_helpTitle">說 明</string>
     <string name="menu_aboutTitle">關於Cobi</string>
     
