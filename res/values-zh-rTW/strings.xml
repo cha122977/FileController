@@ -45,7 +45,7 @@
     <string name="createDir_createDirFailure">新建新資料夾失敗Create directory failure</string>
     
     <string name="help_title">說明</string>
-    <string name="help_msg">Open two directories in the same time, one at TOP screen and the other one at BOTTOM.\nLong Click directory/file to manage it.\nClick opened directory to upper layer.\nClick the directory/file to open it.</string>
+    <string name="help_msg">在螢幕上方及下方同時開啟兩個資料夾，並且可以將檔案移動/複製到另一邊。\n此外還提供檔案總管常用的功能，便於管理您的檔案。\n輕點一下檔案或資料夾來打開它，點選資料夾路徑可回到資料夾上一層。\n長按資料夾以打開資料夾選單管理，長按檔案則可以直接以預設程式打開該檔案。</string>
     
     <string name="about_title">關於Cobi</string>
     <string name="about_msg">Write by cha122977\ncha122977@gmail.com</string>
