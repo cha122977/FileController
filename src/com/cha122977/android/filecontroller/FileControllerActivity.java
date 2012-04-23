@@ -16,7 +16,6 @@ import android.os.Environment;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,12 +32,37 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
+	
+//	Handler mHandler = new Handler(){	
+//		@Override
+//		public void handleMessage(Message msg) {	
+//			switch(msg.what){
+//			case 1:
+//				Log.d("TAG", "Pre show progressDialog");
+//				myDialog.show();
+//				Log.d("TAG", "Show progressDialog done");
+//				break;
+//			case 2:
+//				Log.d("TAG", "Pre dismiss progressDialog");
+//				myDialog.dismiss();
+//				Log.d("TAG", "dismiss progressDialog done");
+//				break;
+//			default:
+//				//do nothing
+//			}   		
+//			super.handleMessage(msg);
+//		}
+//	};
+	
 	private final static String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
 	
     TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView;//listView to show all the file in folder where user is.
 	
-	List<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item 
+//	ProgressDialog myDialog;
+	
+	List<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,7 +70,7 @@ public class FileControllerActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);//¥h±¼Activity¦WºÙÄæ¦ì
         setContentView(R.layout.main);
         
-        Log.d("TAG", ROOT);
+//        Log.d("TAG", ROOT);
         
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
@@ -55,6 +79,12 @@ public class FileControllerActivity extends Activity {
         //initial directory.
         openTopFile(false, ROOT);
         openBottomFile(false, ROOT);
+        
+//        myDialog = new ProgressDialog(this);
+//        myDialog.setTitle("Copy File");
+//        myDialog.setMessage("Copying file, please wait...");
+//        myDialog.setProgress(ProgressDialog.STYLE_SPINNER);
+//        myDialog.setCancelable(false);
         
         //sharedPreference code was marked.
 //        restorePrefs();
@@ -169,8 +199,11 @@ public class FileControllerActivity extends Activity {
 	    		if(ifSave){//need save history
 		    		history.add(new HistoryItem(true, tv_topDir.getText().toString()));
 		    	}
-		    	File[] fl = f.listFiles();
-		    	File[] fList = reSort(fl);//reSort FileList
+		    	File[] fList = f.listFiles();
+		    	
+		    	fList = filterCannotWriteFile(fList);//filter the file which can't read and write
+		    	
+		    	fList = reSort(fList);//reSort FileList
 		    	topFilePath.clear();//clear the list
 		    	for(File i: fList){
 		    		topFilePath.add(i.getPath());
@@ -197,6 +230,9 @@ public class FileControllerActivity extends Activity {
 	        		history.add(new HistoryItem(false, tv_bottomDir.getText().toString()));
 	        	}
 	    		File[] fList = f.listFiles();
+	    		
+	    		fList = filterCannotWriteFile(fList);//filter the file which can't read and write
+	    		
 	    		fList = reSort(fList);//reSort FileList
 	        	bottomFilePath.clear();//clear the list
 	        	for(File i: fList){
@@ -469,7 +505,9 @@ public class FileControllerActivity extends Activity {
     	}
     }
     private void doCopyFile(String copieerFilePath, String targetFilePath){//start point of copy file function.
+//    	mHandler.sendEmptyMessage(1);//show ProgressDialog
     	boolean result = pureCopyFile(copieerFilePath, targetFilePath);
+//    	mHandler.sendEmptyMessage(2);//dismiss ProgressDialog
     	if(result == true){
     		//show information to user.
             Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
@@ -548,6 +586,18 @@ public class FileControllerActivity extends Activity {
     		}
     		return f.delete();
     	}
+    }
+    
+    private File[] filterCannotWriteFile(File[] beFilteredFile){
+		List<File> l = new ArrayList<File>();
+    	for(File f: beFilteredFile){
+    		if(f.canWrite()){
+    			l.add(f);
+    		}
+		}
+    	File[] result = new File[l.size()];
+    	l.toArray(result);
+    	return result;
     }
     
     private File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 

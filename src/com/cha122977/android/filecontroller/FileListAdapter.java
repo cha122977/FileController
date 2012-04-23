@@ -21,7 +21,13 @@ public class FileListAdapter extends BaseAdapter {
 	Handler mHandler = new Handler(){
 		@Override
 		public void handleMessage(Message msg) {
-			notifyDataSetChanged();
+			switch(msg.what){
+			case 0:
+				notifyDataSetChanged();
+				break;
+			default:
+				//do nothing
+			}
 			super.handleMessage(msg);
 		}
 	};
@@ -137,7 +143,7 @@ public class FileListAdapter extends BaseAdapter {
 						// Bitmap ÁY©ñ
 						Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
 						fileIcon.set(i, vB2);//add icon to fileIcon.
-						mHandler.sendMessage(new Message());//notify data set change
+						mHandler.sendEmptyMessage(0);//notify data set change
 					}
 				}
 			}
