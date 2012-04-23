@@ -1,11 +1,14 @@
 package com.cha122977.android.filecontroller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +18,18 @@ import android.widget.TextView;
 
 public class FileListAdapter extends BaseAdapter {
 	
+	Handler mHandler = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+			notifyDataSetChanged();
+			super.handleMessage(msg);
+		}
+	};
+	
 	private LayoutInflater mLayoutInflater;
 	
 	private List<String> filePath;
+	private List<Bitmap> fileIcon;
 	
 	private Bitmap mIcon1;//opened folder
 	private Bitmap mIcon2;//folder
@@ -30,7 +42,10 @@ public class FileListAdapter extends BaseAdapter {
 	public FileListAdapter(Context context, List<String> filePath) {
 		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
 		this.filePath=filePath;
-
+		fileIcon = new ArrayList<Bitmap>();
+		for(int i=0; i<filePath.size(); i++){
+			fileIcon.add(i, null);
+		}
 		mIcon1=BitmapFactory.decodeResource(context.getResources(), R.drawable.document_open_folder);
 		mIcon2=BitmapFactory.decodeResource(context.getResources(), R.drawable.folder);
 		mIcon3=BitmapFactory.decodeResource(context.getResources(), R.drawable.file);
@@ -38,8 +53,12 @@ public class FileListAdapter extends BaseAdapter {
 		mIcon5=BitmapFactory.decodeResource(context.getResources(), R.drawable.video);
 		mIcon6=BitmapFactory.decodeResource(context.getResources(), R.drawable.image);
 		mIcon7=BitmapFactory.decodeResource(context.getResources(), R.drawable.text);
+		
+		processScaledImage();//run the thread to create scaledImage
 	}
 
+	
+	
 	@Override
 	public int getCount() {
 		return filePath.size();
@@ -84,7 +103,11 @@ public class FileListAdapter extends BaseAdapter {
 			holder.icon.setImageBitmap(mIcon5);
 			break;
 		case MimeType.TYPE_IMAGE://image
-			holder.icon.setImageBitmap(mIcon6);
+			if(fileIcon.get(position) == null){
+				holder.icon.setImageBitmap(mIcon6);
+			} else {
+				holder.icon.setImageBitmap(fileIcon.get(position));
+			}
 			break;
 		case MimeType.TYPE_TEXT://text
 			holder.icon.setImageBitmap(mIcon7);
@@ -96,9 +119,28 @@ public class FileListAdapter extends BaseAdapter {
 		holder.text.setText(f.getName());
 		return convertView;
 	}
-
 	static class ViewHolder{
 		ImageView icon;
 		TextView text;
+	}
+	
+	private void processScaledImage(){//just for set scaled image. if we set all icon here, performance will bad. 
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for(int i=0; i<filePath.size(); i++){
+					String fp = filePath.get(i);
+					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
+						Bitmap vBitmap = BitmapFactory.decodeFile(fp);
+						if(vBitmap == null)//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
+							break;
+						// Bitmap 縮放
+						Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
+						fileIcon.set(i, vB2);//add icon to fileIcon.
+						mHandler.sendMessage(new Message());//notify data set change
+					}
+				}
+			}
+		}).start();
 	}
 }

@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,7 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
-	private final String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
+	private final static String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
 	
     TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView;//listView to show all the file in folder where user is.
@@ -44,6 +45,8 @@ public class FileControllerActivity extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);//¥h±¼Activity¦WºÙÄæ¦ì
         setContentView(R.layout.main);
+        
+        Log.d("TAG", ROOT);
         
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
