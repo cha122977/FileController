@@ -39,7 +39,7 @@
     <string name="menu_helpTitle">說 明</string>
     <string name="menu_aboutTitle">關於Cobi</string>
     
-    <string name="createDir_createNewDirectory">新資料夾New directory</string>
+    <string name="createDir_createNewDirectory">新資料夾</string>
     <string name="createDir_createDirCancel">取消新增資料夾</string>
     <string name="createDir_createDirSucceed">新建新資料夾成功</string>
     <string name="createDir_createDirFailure">新建新資料夾失敗</string>
