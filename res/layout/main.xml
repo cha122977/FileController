@@ -25,7 +25,7 @@
                 android:id="@+id/topDirImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/document_open_folder" 
+                android:src="@drawable/open_v2" 
                 android:background="@color/transparent"/>
 
             <TextView
@@ -51,8 +51,7 @@
             android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
             android:scrollbars="vertical" 
             android:cacheColorHint="@color/transparent" 
-            android:divider="#00000000" 
-            android:dividerHeight="12dp">
+            android:divider="#00000000" android:dividerHeight="1dp">
         </ListView>
 
     </LinearLayout>
@@ -82,7 +81,7 @@
                 android:id="@+id/bottomDirImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/document_open_folder" 
+                android:src="@drawable/open_v2" 
                 android:background="@color/transparent"/>
 
             <TextView
@@ -106,7 +105,7 @@
             android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
             android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
             android:scrollbars="vertical" 
-            android:cacheColorHint="@color/transparent" android:divider="#00000000" android:dividerHeight="12dp">
+            android:cacheColorHint="@color/transparent" android:divider="#00000000" android:dividerHeight="1dp">
         </ListView>
 
     </LinearLayout>

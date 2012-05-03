@@ -8,7 +8,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -18,7 +17,6 @@ import android.os.Environment;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,13 +24,13 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -61,15 +59,13 @@ public class FileControllerActivity extends Activity {
 //		}
 //	};
 	
-	private LinearLayout ll_screen;
+	private LinearLayout ll_screen;//use to change orientation
 	
 	private final static String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
-	
+	ImageView iv_topDirImg, iv_bottomDirImg;
     TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView;//listView to show all the file in folder where user is.
-	
-//	ProgressDialog myDialog;
-	
+		
 	List<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item
 	
 	/** Called when the activity is first created. */
@@ -85,7 +81,6 @@ public class FileControllerActivity extends Activity {
         if( rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270){//if ¿Ã¹õ¥´¾î
         	ll_screen.setOrientation(LinearLayout.HORIZONTAL);
         }
-//        Log.d("TAG", ROOT);
 	        
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
@@ -107,6 +102,8 @@ public class FileControllerActivity extends Activity {
 	}
     
     private void setViews(){//connect view object to layout widget(in .xml file).
+    	iv_topDirImg = (ImageView)findViewById(R.id.topDirImage);
+    	iv_bottomDirImg = (ImageView)findViewById(R.id.bottomDirImage);
     	tv_topDir = (TextView)findViewById(R.id.topTextView);
     	tv_bottomDir = (TextView)findViewById(R.id.bottomTextView);
     	lv_topListView = (ListView)findViewById(R.id.topListView);
@@ -117,6 +114,26 @@ public class FileControllerActivity extends Activity {
     	bottomFilePath = new ArrayList<String>();
     }
     private void setListeners(){//set listener to widget
+    	iv_topDirImg.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				readyToLeaveApp = false;
+				String s = tv_topDir.getText().toString();
+				File f = new File(s);
+				s = f.getParent();
+				openTopFile(true, s);
+			}
+    	});
+    	iv_bottomDirImg.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				readyToLeaveApp = false;
+				String s = tv_bottomDir.getText().toString();
+				File f = new File(s);
+				s = f.getParent();
+				openBottomFile(true, s);
+			}
+    	});
     	tv_topDir.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

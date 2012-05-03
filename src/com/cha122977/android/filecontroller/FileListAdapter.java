@@ -45,6 +45,8 @@ public class FileListAdapter extends BaseAdapter {
 	private Bitmap mIcon6;//picture
 	private Bitmap mIcon7;//text
 	
+	private Bitmap mIcon_m1;//-1, unknown image
+	
 	public FileListAdapter(Context context, List<String> filePath) {
 		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
 		this.filePath=filePath;
@@ -52,7 +54,7 @@ public class FileListAdapter extends BaseAdapter {
 		for(int i=0; i<filePath.size(); i++){
 			fileIcon.add(i, null);
 		}
-		mIcon1=BitmapFactory.decodeResource(context.getResources(), R.drawable.document_open_folder);
+		mIcon1=BitmapFactory.decodeResource(context.getResources(), R.drawable.open_v2);
 		mIcon2=BitmapFactory.decodeResource(context.getResources(), R.drawable.folder);
 		mIcon3=BitmapFactory.decodeResource(context.getResources(), R.drawable.file);
 		mIcon4=BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
@@ -60,6 +62,7 @@ public class FileListAdapter extends BaseAdapter {
 		mIcon6=BitmapFactory.decodeResource(context.getResources(), R.drawable.image);
 		mIcon7=BitmapFactory.decodeResource(context.getResources(), R.drawable.text);
 		
+		mIcon_m1=BitmapFactory.decodeResource(context.getResources(), R.drawable.unknown_image);
 		processScaledImage();//run the thread to create scaledImage
 	}
 
@@ -138,8 +141,10 @@ public class FileListAdapter extends BaseAdapter {
 					String fp = filePath.get(i);
 					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
 						Bitmap vBitmap = BitmapFactory.decodeFile(fp);
-						if(vBitmap == null)//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
+						if(vBitmap == null){//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
+							fileIcon.set(i, mIcon_m1);//放上unknown_image
 							break;
+						}
 						// Bitmap 縮放
 						Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
 						fileIcon.set(i, vB2);//add icon to fileIcon.
