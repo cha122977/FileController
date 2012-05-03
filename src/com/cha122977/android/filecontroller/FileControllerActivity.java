@@ -8,25 +8,32 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +61,8 @@ public class FileControllerActivity extends Activity {
 //		}
 //	};
 	
+	private LinearLayout ll_screen;
+	
 	private final static String ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
 	
     TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
@@ -67,29 +76,36 @@ public class FileControllerActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);//去掉Activity名稱欄位
+        requestWindowFeature(Window.FEATURE_NO_TITLE);//去掉Activity名稱欄位        
         setContentView(R.layout.main);
         
-//        Log.d("TAG", ROOT);
+        ll_screen = (LinearLayout)findViewById(R.id.screanLayout);        
         
+        int rotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        if( rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270){//if 螢幕打橫
+        	ll_screen.setOrientation(LinearLayout.HORIZONTAL);
+        }
+//        Log.d("TAG", ROOT);
+	        
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
         setListeners();//set listener to widget
         
         //initial directory.
         openTopFile(false, ROOT);
-        openBottomFile(false, ROOT);
-        
-//        myDialog = new ProgressDialog(this);
-//        myDialog.setTitle("Copy File");
-//        myDialog.setMessage("Copying file, please wait...");
-//        myDialog.setProgress(ProgressDialog.STYLE_SPINNER);
-//        myDialog.setCancelable(false);
-        
-        //sharedPreference code was marked.
-//        restorePrefs();
-        
+        openBottomFile(false, ROOT);        
     }
+	
+    @Override
+	public void onConfigurationChanged(Configuration newConfig) {//use to change the orientation of view.
+    	super.onConfigurationChanged(newConfig);    	
+    	if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+    		ll_screen.setOrientation(LinearLayout.HORIZONTAL);
+    	} else {
+    		ll_screen.setOrientation(LinearLayout.VERTICAL);
+    	}
+	}
+    
     private void setViews(){//connect view object to layout widget(in .xml file).
     	tv_topDir = (TextView)findViewById(R.id.topTextView);
     	tv_bottomDir = (TextView)findViewById(R.id.bottomTextView);
