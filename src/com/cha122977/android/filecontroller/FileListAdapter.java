@@ -140,15 +140,20 @@ public class FileListAdapter extends BaseAdapter {
 				for(int i=0; i<filePath.size(); i++){
 					String fp = filePath.get(i);
 					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
-						Bitmap vBitmap = BitmapFactory.decodeFile(fp);
-						if(vBitmap == null){//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
-							fileIcon.set(i, mIcon_m1);//放上unknown_image
-							break;
+						try{
+							Bitmap vBitmap = BitmapFactory.decodeFile(fp);
+							if(vBitmap == null){//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
+								fileIcon.set(i, mIcon_m1);//放上unknown_image
+								continue;
+							}
+							// Bitmap 縮放
+							Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
+							fileIcon.set(i, vB2);//add icon to fileIcon.
+							mHandler.sendEmptyMessage(0);//notify data set change
+						} catch(Exception e){
+							fileIcon.set(i, mIcon_m1);
+							continue;
 						}
-						// Bitmap 縮放
-						Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
-						fileIcon.set(i, vB2);//add icon to fileIcon.
-						mHandler.sendEmptyMessage(0);//notify data set change
 					}
 				}
 			}

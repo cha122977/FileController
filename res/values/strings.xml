@@ -52,10 +52,19 @@
     <string name="about_copyRight">CopyRight</string>
     <string name="doubleClickMsg">Click again to finish</string>
     
+    <string name="fileInfo_containingFileNumber">Containing File Number: </string>
+    <string name="fileInfo_size">Size: </string>
+    <string name="fileInfo_lastModify">Last Modified: </string>
+    <string name="fileInfo_unit_byte"> Bytes</string>
+    <string name="fileInfo_unit_kByte"> KBytes</string>
+    <string name="fileInfo_unit_mByte"> MBytes</string>
+    <string name="fileInfo_unit_gByte"> GBytes</string>
+    
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
         <item>Open </item>
         <item>Rename</item>
+        <item>Show information</item>
         <item>Move to: </item>
         <item>Copy to: </item>
         <item>Delete</item>

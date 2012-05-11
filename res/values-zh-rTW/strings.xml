@@ -49,13 +49,21 @@
     
     <string name="about_title">關 於 Cobi</string>
     <string name="about_msg"><b>cha122977</b> &amp; <b>Yu</b>\ncha122977@gmail.com\nyustudiotw@gmail.com\nhttp://yustudio.tw/</string>
-    
     <string name="doubleClickMsg">再按一次返回鍵來結束程式</string>
+    
+    <string name="fileInfo_containingFileNumber">檔案數： </string>
+    <string name="fileInfo_size">檔案大小： </string>
+    <string name="fileInfo_lastModify">最後修改時間： </string>
+    <string name="fileInfo_unit_byte"> 位元組</string>
+    <string name="fileInfo_unit_kByte"> KB</string>
+    <string name="fileInfo_unit_mByte"> MB</string>
+    <string name="fileInfo_unit_gByte"> GB</string>
     
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
         <item>開啟</item>
         <item>重新命名</item>
+        <item>詳細資訊</item>
         <item>移動到：</item>
         <item>複製到：</item>
         <item>刪除</item>

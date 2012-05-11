@@ -3,7 +3,9 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -17,6 +19,7 @@ import android.os.Environment;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -289,8 +292,8 @@ public class FileControllerActivity extends Activity {
     private void openTopOptionsDialog(int position){//run this function when top listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = topFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
-    	s[2] += " " + tv_bottomDir.getText().toString();//set the string of item
-    	s[3] += " " + tv_bottomDir.getText().toString();
+    	s[3] += " " + tv_bottomDir.getText().toString();//set the string of item
+    	s[4] += " " + tv_bottomDir.getText().toString();
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(topFilePath.get(position));
 		builder.setItems(s, new DialogInterface.OnClickListener() {
@@ -307,16 +310,19 @@ public class FileControllerActivity extends Activity {
 				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
-				case 2://Move
+				case 2://Show file info
+					showFileInformation(selectedFilePath);
+					break;
+				case 3://Move
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
-				case 3://Copy file to other side.
+				case 4://Copy file to other side.
 					copyFile(selectedFilePath, tv_bottomDir.getText().toString());
 					break;
-				case 4://Delete
+				case 5://Delete
 					openDeleteCheckDialog(selectedFilePath);
 					break;
-				case 5://Cancel
+				case 6://Cancel
 					//Do nothing
 					break;
 				default:
@@ -331,8 +337,8 @@ public class FileControllerActivity extends Activity {
     private void openBottomOptionsDialog(int position){//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
     	final String selectedFilePath = bottomFilePath.get(position);
     	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
-    	s[2] += " " + tv_topDir.getText().toString();//set the string of item
-    	s[3] += " " + tv_topDir.getText().toString();
+    	s[3] += " " + tv_topDir.getText().toString();//set the string of item
+    	s[4] += " " + tv_topDir.getText().toString();
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(bottomFilePath.get(position));
 		builder.setItems(s, new DialogInterface.OnClickListener() {
@@ -349,16 +355,19 @@ public class FileControllerActivity extends Activity {
 				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
-				case 2://Move
+				case 2://show file information
+					showFileInformation(selectedFilePath);
+					break;
+				case 3://Move
 					moveFile(selectedFilePath, tv_topDir.getText().toString());
 					break;
-				case 3://Copy file to other side.
+				case 4://Copy file to other side.
 					copyFile(selectedFilePath, tv_topDir.getText().toString());
 					break;
-				case 4://Delete
+				case 5://Delete
 					openDeleteCheckDialog(selectedFilePath);
 					break;
-				case 5://Cancel
+				case 6://Cancel
 					//Do nothing
 					break;
 				default:
@@ -371,6 +380,51 @@ public class FileControllerActivity extends Activity {
     }
     
     //-----------File Option function--------//
+    private void showFileInformation(String selectedFilePath){
+    	//TODO show file information
+    	File f = new File(selectedFilePath);
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
+    	builder.setTitle(f.getAbsoluteFile()+"");
+    	
+    	StringBuilder info = new StringBuilder("");
+    	if(f.isDirectory()){
+    		builder.setIcon(R.drawable.open);
+    		//TODO calculate the file number in direction
+    		int numberOfFile = calculateFileNumberInDirectory(f);
+    		info.append(getResources().getString(R.string.fileInfo_containingFileNumber)
+    						+ numberOfFile +"\n");
+    	} else {
+    		builder.setIcon(R.drawable.file);
+    		long size = f.length();
+    		if(size<1000){//0~1KB
+    			info.append(getResources().getString(R.string.fileInfo_size) 
+    							+ f.length()
+    							+ getResources().getString(R.string.fileInfo_unit_byte) + "\n");
+    		} else if(size<1000000) {//1KB~1MB
+    			info.append(getResources().getString(R.string.fileInfo_size) 
+    							+ f.length()/1000
+    							+ getResources().getString(R.string.fileInfo_unit_kByte) + "\n");
+    		} else if(size<1000000000) {//1MB~1GB
+    			info.append(getResources().getString(R.string.fileInfo_size)
+    							+ f.length()/1000000
+    							+ getResources().getString(R.string.fileInfo_unit_mByte) + "\n");
+    		} else {//1GB+
+    			info.append(getResources().getString(R.string.fileInfo_size)
+    							+ f.length()/1000000000 
+    							+ getResources().getString(R.string.fileInfo_unit_gByte) + "\n");
+    		}	
+    	}
+    	
+    	Date d = new Date(f.lastModified());
+    	info.append(getResources().getString(R.string.fileInfo_lastModify)
+    					+ (1900 + d.getYear()) +"/"+ d.getMonth() +"/"+ d.getDay() + " "
+    					+ d.getHours() +":"+ d.getMinutes() +"\n");
+        builder.setCancelable(true);
+        builder.setMessage(info);
+        builder.setPositiveButton(R.string.alertButton_ok, null);
+        builder.show();
+    }
+    
     private void moveFile(String movedFile, String target){
     	final File file = new File(movedFile);//source file
     	final File targetFilePath = new File(target + "/" + (new File(movedFile).getName()));
@@ -699,6 +753,18 @@ public class FileControllerActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	private int calculateFileNumberInDirectory(File calculatedFile) {
+		File[] fList = calculatedFile.listFiles();
+		int counter=0;
+		for(File f: fList){
+			counter++;//file and directory both be calculated
+			if(f.isDirectory()){//deep calculate the file number in sub-director
+				counter += calculateFileNumberInDirectory(f);
+			}
+		}
+		return counter;
+	}
+	
 	//------Menu function----//
 	private void makeDirectory(final String sourceDirPath){
 		//show a dialog to get new name.
@@ -832,6 +898,9 @@ public class FileControllerActivity extends Activity {
 	boolean readyToLeaveApp = false;//use in double click leave app. mechanism.
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_SEARCH){
+			//TODO Search method
+		}
 		if(keyCode == KeyEvent.KEYCODE_BACK){
 			if(readyToLeaveApp){
 				return super.onKeyDown(keyCode, event);
