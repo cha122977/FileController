@@ -237,9 +237,9 @@ public class FileControllerActivity extends Activity {
 		    	}
 		    	File[] fList = f.listFiles();
 		    	
-		    	fList = filterCannotWriteFile(fList);//filter the file which can't read and write
+		    	fList = ListFileProcessor.filterCannotWriteFile(fList);//filter the file which can't read and write
 		    	
-		    	fList = reSort(fList);//reSort FileList
+		    	fList = ListFileProcessor.reSort(fList);//reSort FileList
 		    	topFilePath.clear();//clear the list
 		    	for(File i: fList){
 		    		topFilePath.add(i.getPath());
@@ -267,9 +267,9 @@ public class FileControllerActivity extends Activity {
 	        	}
 	    		File[] fList = f.listFiles();
 	    		
-	    		fList = filterCannotWriteFile(fList);//filter the file which can't read and write
+	    		fList = ListFileProcessor.filterCannotWriteFile(fList);//filter the file which can't read and write
 	    		
-	    		fList = reSort(fList);//reSort FileList
+	    		fList = ListFileProcessor.reSort(fList);//reSort FileList
 	        	bottomFilePath.clear();//clear the list
 	        	for(File i: fList){
 	        		bottomFilePath.add(i.getPath());
@@ -675,47 +675,6 @@ public class FileControllerActivity extends Activity {
     	}
     }
     
-    private File[] filterCannotWriteFile(File[] beFilteredFile){
-		List<File> l = new ArrayList<File>();
-    	for(File f: beFilteredFile){
-    		if(f.canWrite()){
-    			l.add(f);
-    		}
-		}
-    	File[] result = new File[l.size()];
-    	l.toArray(result);
-    	return result;
-    }
-    
-    private File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 
-    	File[] fList = fileList;
-    	File temp = null;
-    	for(int i=fList.length-1; i>0; i--){
-    		for(int j=0; j<i; j++){
-    			if(fList[j].isDirectory() && fList[j+1].isDirectory()){//both of files are director
-    				if(fList[j].getName().compareToIgnoreCase(fList[j+1].getName()) > 0){//switch fList[j] and fList[j+1]
-        				temp = fList[j];
-        				fList[j] = fList[j+1];
-        				fList[j+1] = temp;
-        			}
-    			} else if(fList[j].isDirectory() || fList[j+1].isDirectory()){
-    				if(!fList[j].isDirectory() && fList[j+1].isDirectory()){//former is not directory, latter is directory  
-        				temp = fList[j];
-        				fList[j] = fList[j+1];
-        				fList[j+1] = temp;
-    				}
-    			} else{//traditional 
-    				if(fList[j].getName().compareToIgnoreCase(fList[j+1].getName()) > 0){//switch fList[j] and fList[j+1]
-        				temp = fList[j];
-        				fList[j] = fList[j+1];
-        				fList[j+1] = temp;
-        			}
-    			}
-    		}
-    	}
-    	return fList;
-    }
-    
     //---------Create menu.-------//
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -723,13 +682,17 @@ public class FileControllerActivity extends Activity {
 				.setIcon(R.drawable.add_folder);
 		menu.add(0, Menu.FIRST+1, 2, R.string.menu_createNewDirInBottom)
 				.setIcon(R.drawable.add_folder);
-		menu.add(0, Menu.FIRST+2, 3, R.string.menu_helpTitle)
+		menu.add(0, Menu.FIRST+2, 3, "Search File")
+				.setIcon(android.R.drawable.ic_menu_search);
+		menu.add(0, Menu.FIRST+3, 3, R.string.menu_helpTitle)
 				.setIcon(R.drawable.help);
-		menu.add(0, Menu.FIRST+3, 3, R.string.menu_aboutTitle)
+		menu.add(0, Menu.FIRST+4, 3, R.string.menu_aboutTitle)
 				.setIcon(R.drawable.about);
 		
 		return super.onCreateOptionsMenu(menu);
 	}
+	
+	private final int REQUEST_CODE_SEARCH = 2;//use to start searchActivity.
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -741,9 +704,13 @@ public class FileControllerActivity extends Activity {
 			makeDirectory(tv_bottomDir.getText().toString());
 			break;
 		case Menu.FIRST+2:
+			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
+			startActivityForResult(intent, REQUEST_CODE_SEARCH);
+			break;
+		case Menu.FIRST+3://Help
 			showHelpDialog();
 			break;
-		case Menu.FIRST+3://About...
+		case Menu.FIRST+4://About...
 			showAboutDialog();
 			break;
 		default:
