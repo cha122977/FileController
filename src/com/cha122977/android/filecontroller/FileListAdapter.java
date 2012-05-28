@@ -141,7 +141,28 @@ public class FileListAdapter extends BaseAdapter {
 					String fp = filePath.get(i);
 					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
 						try{
-							Bitmap vBitmap = BitmapFactory.decodeFile(fp);
+							BitmapFactory.Options options = new BitmapFactory.Options();
+							options.inJustDecodeBounds = true; //limit the image to bounds
+							BitmapFactory.decodeFile(fp, options);//get the height & width of image(save in options)
+							
+							final int newHeight = mIcon6.getHeight();
+							final int newWidth  = mIcon6.getWidth();
+							
+							int width=options.outWidth;
+					        int height=options.outHeight;
+							
+					        int scaledPower = 1;
+					        
+					        while(height/2 >= newHeight || width/2 >= newWidth){
+					        	scaledPower++;
+					        	height /= 2;
+					        	width  /= 2;
+					        }
+					        
+					        options = new BitmapFactory.Options();//new options
+					        options.inSampleSize=scaledPower;
+					        Bitmap vBitmap = BitmapFactory.decodeFile(fp, options);
+					        
 							if(vBitmap == null){//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
 								fileIcon.set(i, mIcon_m1);//放上unknown_image
 								continue;
