@@ -311,7 +311,7 @@ public class FileControllerActivity extends Activity {
 					renameFile(selectedFilePath);
 					break;
 				case 2://Show file info
-					ListFileProcessor.showFileInformation(selectedFilePath, getApplicationContext());
+					ListFileProcessor.showFileInformation(selectedFilePath, FileControllerActivity.this);
 					break;
 				case 3://Move
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
@@ -356,7 +356,7 @@ public class FileControllerActivity extends Activity {
 					renameFile(selectedFilePath);
 					break;
 				case 2://show file information
-					ListFileProcessor.showFileInformation(selectedFilePath, getApplicationContext());
+					ListFileProcessor.showFileInformation(selectedFilePath, FileControllerActivity.this);
 					break;
 				case 3://Move
 					moveFile(selectedFilePath, tv_topDir.getText().toString());

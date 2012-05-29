@@ -102,7 +102,7 @@ public class SearchActivity extends ListActivity{
 					finish();
 					break;
 				case 2://Show file info
-					ListFileProcessor.showFileInformation(filePath, getApplicationContext());
+					ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
 					break;
 				case 3://Cancel
 					//do nothing
@@ -140,7 +140,7 @@ public class SearchActivity extends ListActivity{
 					finish();
 					break;
 				case 3://more information
-					ListFileProcessor.showFileInformation(filePath, getApplicationContext());
+					ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
 					break;
 				case 4://Cancel
 					//Do nothing

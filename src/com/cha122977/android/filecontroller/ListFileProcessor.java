@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 public class ListFileProcessor {
 	public static File[] filterCannotWriteFile(File[] beFilteredFile){//use to filter the file which cannot be write
@@ -79,13 +80,13 @@ public class ListFileProcessor {
     	
     	StringBuilder info = new StringBuilder("");
     	if(f.isDirectory()){
-    		builder.setIcon(context.getResources().getInteger(R.drawable.open));
+    		builder.setIcon(R.drawable.open);
     		//TODO calculate the file number in direction
     		int numberOfFile = calculateFileNumberInDirectory(f);
     		info.append(context.getResources().getString(R.string.fileInfo_containingFileNumber)
     						+ numberOfFile +"\n");
     	} else {
-    		builder.setIcon(context.getResources().getInteger(R.drawable.file));
+    		builder.setIcon(R.drawable.file);
     		long size = f.length();
     		if(size<1000){//0~1KB
     			info.append(context.getResources().getString(R.string.fileInfo_size) 
