@@ -3,24 +3,31 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.List;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
+import android.view.View.OnKeyListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class SearchActivity extends ListActivity{
 
-	EditText et_searchName;
-	Button bt_searchButton;
+	private EditText et_searchName;
+	private Button bt_searchButton;
+	
+	private ArrayList<String> searchResultPathList;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,45 +48,154 @@ public class SearchActivity extends ListActivity{
 		bt_searchButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				startSearch();
+				String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+				String keyWord = et_searchName.getText().toString();
+				startSearch(externalRoot, keyWord);
+			}
+		});
+		
+		et_searchName.setOnKeyListener(new OnKeyListener(){
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN){
+					String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+					String keyWord = et_searchName.getText().toString();
+					startSearch(externalRoot, keyWord);
+					return true;
+				}
+				return false;
+			}
+		});
+		
+		getListView().setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				//TODO search activity dialog
+				String filePath = searchResultPathList.get(arg2);
+				if(new File(filePath).isDirectory()){
+					openDirectory(filePath);
+				}else{
+					openFile(filePath);
+				}
 			}
 		});
 	}
 	
-	private void startSearch(){
-		String fileNameToSearch = et_searchName.getText().toString();
-		if(fileNameToSearch.equals("") || fileNameToSearch==null){//check if user enter the file name
-			Toast.makeText(getApplicationContext(), "Please enter file name", Toast.LENGTH_SHORT);
-		} else {
-			File externalRoot = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-			
-			File[] searchResult = externalRoot.listFiles(new FileNameFilter(fileNameToSearch));
-			List<String> searchResultFileName = new ArrayList<String>();
-			List<String> searchResultFilePath = new ArrayList<String>();
-			for(File f : searchResult){
-				searchResultFileName.add(f.getName());
-				searchResultFilePath.add(f.getAbsolutePath());
+	private void openDirectory(final String filePath){
+		String[] s = getResources().getStringArray(R.array.alert_searchListDirectoryOption);
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setTitle(filePath);
+		builder.setItems(s, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch(which){
+				case 0://open in Top window
+					Intent intent0 = new Intent();
+					intent0.putExtra("path", filePath);
+					setResult(FileControllerActivity.RESULT_CODE_OPEN_TOP, intent0);
+					finish();
+					break;
+				case 1://open in Bottom window
+					Intent intent1 = new Intent();
+					intent1.putExtra("path", filePath);
+					setResult(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, intent1);
+					finish();
+					break;
+				case 2://Show file info
+					ListFileProcessor.showFileInformation(filePath, getApplicationContext());
+					break;
+				case 3://Cancel
+					//do nothing
+					break;
+				default:
+					//do nothing
+					break;
+				}
 			}
-			
-			setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchResultFileName));
+		});
+		builder.show();
+	}
+	
+	private void openFile(final String filePath){
+		String[] s = getResources().getStringArray(R.array.alert_searchListFileOption);
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	builder.setTitle(filePath);
+    	builder.setItems(s, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch(which){
+				case 0://open file.
+					ListFileProcessor.openFile(filePath, getApplicationContext());
+					break;
+				case 1://Show in Top window
+					Intent intent1 = new Intent();
+					intent1.putExtra("path", new File(filePath).getParent());
+					setResult(FileControllerActivity.RESULT_CODE_OPEN_TOP, intent1);
+					finish();
+					break;
+				case 2://Show in Bottom window
+					Intent intent2 = new Intent();
+					intent2.putExtra("path", new File(filePath).getParent());
+					setResult(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, intent2);
+					finish();
+					break;
+				case 3://more information
+					ListFileProcessor.showFileInformation(filePath, getApplicationContext());
+					break;
+				case 4://Cancel
+					//Do nothing
+					break;
+				default:
+					//do nothing
+					break;
+				}
+			}
+		});
+		builder.show();
+	}
+	
+	private void startSearch(String targetDirectory, String keyWord){
+		if(keyWord.equals("") || keyWord==null){//check if user enter the file name
+			Toast.makeText(getApplicationContext(), "Please enter file name", Toast.LENGTH_SHORT).show();
+		} else {
+			File file = new File(targetDirectory);
+			if(file != null){//make sure
+				searchResultPathList = deepSearch(file, keyWord);
+				setListAdapter(new SearchListAdapter(this, searchResultPathList));
+			}
 		}
 	}
 	
-	class FileNameFilter implements FileFilter{
-
-		private String acceptableName;
+	private ArrayList<String> deepSearch(File targetDirectory, String keyWord){
+		ArrayList<String> result = new ArrayList<String>();
 		
-		private  FileNameFilter(){}//private default constructor
-		public FileNameFilter(String passName){
-			this.acceptableName = passName;
+		//shadow search
+		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
+		listfile = ListFileProcessor.filterCannotWriteFile(listfile);
+		for(File f: listfile){
+			result.add(f.getAbsolutePath());
 		}
 		
+		//deep search(use recursive method)
+		listfile = targetDirectory.listFiles();
+		listfile = ListFileProcessor.filterCannotWriteFile(listfile);
+		for(File f: listfile){
+			if(f.isDirectory()){
+				result.addAll(deepSearch(f, keyWord));
+			}
+		}
+		return result;
+	}	
+	
+	private class FileNameFilter implements FileFilter{
+		private String acceptableName;
+		public FileNameFilter(String passName){
+			this.acceptableName = passName.toLowerCase();
+		}
 		@Override
 		public boolean accept(File inputFile) {
-			//TODO use recursive method to find all file in input file name.
-			//     use resort function???
-			String inputFileName = inputFile.getName();
-			if(inputFileName.contains(acceptableName)){//have subName in this file
+			String inputFileNameLowCase = inputFile.getName().toLowerCase();
+			if(inputFileNameLowCase.contains(acceptableName)){//have subName in this file
 				return true;
 			} else {
 				return false;

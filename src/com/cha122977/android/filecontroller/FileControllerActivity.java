@@ -3,9 +3,7 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -13,7 +11,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.SpannableString;
@@ -40,6 +37,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
+	public static final int REQUEST_CODE_SEARCH = 11;//use to start searchActivity.
+	public static final int RESULT_CODE_OPEN_TOP = 11;
+	public static final int RESULT_CODE_OPEN_BOTTOM = 12;
 	
 //	Handler mHandler = new Handler(){	
 //		@Override
@@ -188,7 +188,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(topFilePath.get(arg2)).isDirectory()){//long click item is directory 
 					openTopOptionsDialog(arg2);
 				} else {//long click item is file
-					openFile(topFilePath.get(arg2));
+					ListFileProcessor.openFile(topFilePath.get(arg2), getApplicationContext());
 				}
 				return true;
 			}
@@ -200,7 +200,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(bottomFilePath.get(arg2)).isDirectory()){//long click item is directory 
 					openBottomOptionsDialog(arg2);
 				} else {//long click item is file
-					openFile(bottomFilePath.get(arg2));
+					ListFileProcessor.openFile(bottomFilePath.get(arg2), getApplicationContext());
 				}
 				return true;
 			}
@@ -304,14 +304,14 @@ public class FileControllerActivity extends Activity {
 					if(new File(selectedFilePath).isDirectory()){
 						openTopFile(true, selectedFilePath);
 					} else {
-						openFile(selectedFilePath);
+						ListFileProcessor.openFile(selectedFilePath, getApplicationContext());
 					}
 					break;
 				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
 				case 2://Show file info
-					showFileInformation(selectedFilePath);
+					ListFileProcessor.showFileInformation(selectedFilePath, getApplicationContext());
 					break;
 				case 3://Move
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
@@ -349,14 +349,14 @@ public class FileControllerActivity extends Activity {
 					if(new File(selectedFilePath).isDirectory()){
 						openTopFile(true, selectedFilePath);
 					} else {
-						openFile(selectedFilePath);
+						ListFileProcessor.openFile(selectedFilePath, getApplicationContext());
 					}
 					break;
 				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
 				case 2://show file information
-					showFileInformation(selectedFilePath);
+					ListFileProcessor.showFileInformation(selectedFilePath, getApplicationContext());
 					break;
 				case 3://Move
 					moveFile(selectedFilePath, tv_topDir.getText().toString());
@@ -379,51 +379,7 @@ public class FileControllerActivity extends Activity {
 		builder.show();
     }
     
-    //-----------File Option function--------//
-    private void showFileInformation(String selectedFilePath){
-    	//TODO show file information
-    	File f = new File(selectedFilePath);
-    	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
-    	builder.setTitle(f.getAbsoluteFile()+"");
-    	
-    	StringBuilder info = new StringBuilder("");
-    	if(f.isDirectory()){
-    		builder.setIcon(R.drawable.open);
-    		//TODO calculate the file number in direction
-    		int numberOfFile = calculateFileNumberInDirectory(f);
-    		info.append(getResources().getString(R.string.fileInfo_containingFileNumber)
-    						+ numberOfFile +"\n");
-    	} else {
-    		builder.setIcon(R.drawable.file);
-    		long size = f.length();
-    		if(size<1000){//0~1KB
-    			info.append(getResources().getString(R.string.fileInfo_size) 
-    							+ f.length()
-    							+ getResources().getString(R.string.fileInfo_unit_byte) + "\n");
-    		} else if(size<1000000) {//1KB~1MB
-    			info.append(getResources().getString(R.string.fileInfo_size) 
-    							+ f.length()/1000
-    							+ getResources().getString(R.string.fileInfo_unit_kByte) + "\n");
-    		} else if(size<1000000000) {//1MB~1GB
-    			info.append(getResources().getString(R.string.fileInfo_size)
-    							+ f.length()/1000000
-    							+ getResources().getString(R.string.fileInfo_unit_mByte) + "\n");
-    		} else {//1GB+
-    			info.append(getResources().getString(R.string.fileInfo_size)
-    							+ f.length()/1000000000 
-    							+ getResources().getString(R.string.fileInfo_unit_gByte) + "\n");
-    		}	
-    	}
-    	
-    	Date d = new Date(f.lastModified());
-    	info.append(getResources().getString(R.string.fileInfo_lastModify)
-    					+ (1900 + d.getYear()) +"/"+ d.getMonth() +"/"+ d.getDay() + " "
-    					+ d.getHours() +":"+ d.getMinutes() +"\n");
-        builder.setCancelable(true);
-        builder.setMessage(info);
-        builder.setPositiveButton(R.string.alertButton_ok, null);
-        builder.show();
-    }
+    
     
     private void moveFile(String movedFile, String target){
     	final File file = new File(movedFile);//source file
@@ -692,8 +648,6 @@ public class FileControllerActivity extends Activity {
 		return super.onCreateOptionsMenu(menu);
 	}
 	
-	private final int REQUEST_CODE_SEARCH = 2;//use to start searchActivity.
-	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()){
@@ -705,6 +659,7 @@ public class FileControllerActivity extends Activity {
 			break;
 		case Menu.FIRST+2:
 			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivityForResult(intent, REQUEST_CODE_SEARCH);
 			break;
 		case Menu.FIRST+3://Help
@@ -718,18 +673,6 @@ public class FileControllerActivity extends Activity {
 			break;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-	
-	private int calculateFileNumberInDirectory(File calculatedFile) {
-		File[] fList = calculatedFile.listFiles();
-		int counter=0;
-		for(File f: fList){
-			counter++;//file and directory both be calculated
-			if(f.isDirectory()){//deep calculate the file number in sub-director
-				counter += calculateFileNumberInDirectory(f);
-			}
-		}
-		return counter;
 	}
 	
 	//------Menu function----//
@@ -831,23 +774,6 @@ public class FileControllerActivity extends Activity {
     }
 	
 	//-----general function---//
-	/* 在手機上開啟檔案的method */
-	private void openFile(String s){//Overload
-		openFile(new File(s));
-	}
-	private void openFile(File f){
-	    Intent intent = new Intent();
-	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	    intent.setAction(android.content.Intent.ACTION_VIEW);
-	    
-	    /* 取得Type */
-	    String type = MimeType.getMimeType(f.getName());
-	    
-	    /* 設定intent的file與type */
-	    intent.setDataAndType(Uri.fromFile(f), type);
-	    startActivity(intent); 
-	}
-	
 	private void refreshListView(){//refresh the file in list view(actually, reload)
 		openTopFile(false, tv_topDir.getText().toString());
 		openBottomFile(false, tv_bottomDir.getText().toString());
@@ -887,8 +813,37 @@ public class FileControllerActivity extends Activity {
 				readyToLeaveApp = true;
 			}
 			return false;
+		} else if (keyCode == KeyEvent.KEYCODE_SEARCH){
+			readyToLeaveApp = false;
+			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivityForResult(intent, REQUEST_CODE_SEARCH);
+			return false;//Override the original search button
 		}
 		readyToLeaveApp = false;
 		return super.onKeyDown(keyCode, event);
 	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode == REQUEST_CODE_SEARCH){
+			openResult(resultCode, data);
+		}
+	}
+	private void openResult(int resultCode, Intent data){
+		Log.d("TAG", resultCode +"");
+		switch(resultCode){
+			case RESULT_CODE_OPEN_TOP:
+				openTopFile(true, data.getStringExtra("path"));
+				break;
+			case RESULT_CODE_OPEN_BOTTOM:
+				openBottomFile(true, data.getStringExtra("path"));
+				break;
+			default:
+				break;
+		}
+	}
+	
+	
 }

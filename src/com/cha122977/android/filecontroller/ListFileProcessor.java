@@ -2,7 +2,13 @@ package com.cha122977.android.filecontroller;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 
 public class ListFileProcessor {
 	public static File[] filterCannotWriteFile(File[] beFilteredFile){//use to filter the file which cannot be write
@@ -45,4 +51,80 @@ public class ListFileProcessor {
     	}
     	return fList;
     }
+    
+    /* function used to open file */
+	public static void openFile(String s, Context context){//Overload
+		openFile(new File(s), context);
+	}
+	public static void openFile(File f, Context context){
+	    Intent intent = new Intent();
+	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	    intent.setAction(android.content.Intent.ACTION_VIEW);
+	    
+	    /* 取得Type */
+	    String type = MimeType.getMimeType(f.getName());
+	    
+	    /* 設定intent的file與type */
+	    intent.setDataAndType(Uri.fromFile(f), type);
+	    context.startActivity(intent); 
+	}
+    
+    
+	/* function used to show file information*/
+    public static void showFileInformation(String selectedFilePath, Context context){
+    	//TODO show file information
+    	File f = new File(selectedFilePath);
+    	AlertDialog.Builder builder = new AlertDialog.Builder(context);  
+    	builder.setTitle(f.getAbsoluteFile()+"");
+    	
+    	StringBuilder info = new StringBuilder("");
+    	if(f.isDirectory()){
+    		builder.setIcon(context.getResources().getInteger(R.drawable.open));
+    		//TODO calculate the file number in direction
+    		int numberOfFile = calculateFileNumberInDirectory(f);
+    		info.append(context.getResources().getString(R.string.fileInfo_containingFileNumber)
+    						+ numberOfFile +"\n");
+    	} else {
+    		builder.setIcon(context.getResources().getInteger(R.drawable.file));
+    		long size = f.length();
+    		if(size<1000){//0~1KB
+    			info.append(context.getResources().getString(R.string.fileInfo_size) 
+    							+ f.length()
+    							+ context.getResources().getString(R.string.fileInfo_unit_byte) + "\n");
+    		} else if(size<1000000) {//1KB~1MB
+    			info.append(context.getResources().getString(R.string.fileInfo_size) 
+    							+ f.length()/1000
+    							+ context.getResources().getString(R.string.fileInfo_unit_kByte) + "\n");
+    		} else if(size<1000000000) {//1MB~1GB
+    			info.append(context.getResources().getString(R.string.fileInfo_size)
+    							+ f.length()/1000000
+    							+ context.getResources().getString(R.string.fileInfo_unit_mByte) + "\n");
+    		} else {//1GB+
+    			info.append(context.getResources().getString(R.string.fileInfo_size)
+    							+ f.length()/1000000000 
+    							+ context.getResources().getString(R.string.fileInfo_unit_gByte) + "\n");
+    		}	
+    	}
+    	
+    	Date d = new Date(f.lastModified());
+    	info.append(context.getResources().getString(R.string.fileInfo_lastModify)
+    					+ (1900 + d.getYear()) +"/"+ d.getMonth() +"/"+ d.getDay() + " "
+    					+ d.getHours() +":"+ d.getMinutes() +"\n");
+        builder.setCancelable(true);
+        builder.setMessage(info);
+        builder.setPositiveButton(R.string.alertButton_ok, null);
+        builder.show();
+    }
+    
+    private static int calculateFileNumberInDirectory(File calculatedFile) {
+		File[] fList = calculatedFile.listFiles();
+		int counter=0;
+		for(File f: fList){
+			counter++;//file and directory both be calculated
+			if(f.isDirectory()){//deep calculate the file number in sub-director
+				counter += calculateFileNumberInDirectory(f);
+			}
+		}
+		return counter;
+	}
 }

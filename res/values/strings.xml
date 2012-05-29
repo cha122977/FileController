@@ -83,4 +83,21 @@
         <item>Replace it</item>
         <item>Cancel</item>
     </string-array>
+    
+    <!--  use in SearchActivity to maintain user option when clicked one is directory -->
+    <string-array name="alert_searchListDirectoryOption">
+        <item>Show in Top Window</item>
+        <item>Show in Bottom Window</item>
+        <item>Detail...</item>
+        <item>Cancel</item>
+    </string-array>
+    
+    <!--  use in SearchActivity to maintain user option when clicked one is file-->
+    <string-array name="alert_searchListFileOption">
+        <item>Open</item>
+        <item>Show in Top Window</item>
+        <item>Show in Bottom Window</item>
+        <item>Detail...</item>
+        <item>Cancel</item>
+    </string-array>
 </resources>

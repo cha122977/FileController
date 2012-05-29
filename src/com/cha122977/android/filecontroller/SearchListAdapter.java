@@ -16,7 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class FileListAdapter extends BaseAdapter {
+public class SearchListAdapter extends BaseAdapter {
 	
 	Handler mHandler = new Handler(){
 		@Override
@@ -47,7 +47,7 @@ public class FileListAdapter extends BaseAdapter {
 	
 	private Bitmap mIcon_m1;//-1, unknown image
 	
-	public FileListAdapter(Context context, List<String> filePath) {
+	public SearchListAdapter(Context context, List<String> filePath) {
 		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
 		this.filePath=filePath;
 		fileIcon = new ArrayList<Bitmap>();
@@ -65,8 +65,6 @@ public class FileListAdapter extends BaseAdapter {
 		mIcon_m1=BitmapFactory.decodeResource(context.getResources(), R.drawable.unknown_image);
 		processScaledImage();//run the thread to create scaledImage
 	}
-
-	
 	
 	@Override
 	public int getCount() {
@@ -87,10 +85,11 @@ public class FileListAdapter extends BaseAdapter {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
 		if(convertView==null){
-			convertView = mLayoutInflater.inflate(R.layout.file_list_row, null);
+			convertView = mLayoutInflater.inflate(R.layout.search_list_row, null);
 			holder = new ViewHolder();
-			holder.icon = (ImageView)convertView.findViewById(R.id.icon);
-			holder.text = (TextView)convertView.findViewById(R.id.fileName);
+			holder.icon = (ImageView)convertView.findViewById(R.id.fileIcon);
+			holder.fileName = (TextView)convertView.findViewById(R.id.fileName);
+			holder.filePath = (TextView)convertView.findViewById(R.id.filePath);
 			convertView.setTag(holder);
 
 		}else{
@@ -125,12 +124,14 @@ public class FileListAdapter extends BaseAdapter {
 			holder.icon.setImageBitmap(mIcon3);
 			break;
 		}
-		holder.text.setText(f.getName());
+		holder.fileName.setText(f.getName());
+		holder.filePath.setText(f.getAbsolutePath());
 		return convertView;
 	}
 	static class ViewHolder{
 		ImageView icon;
-		TextView text;
+		TextView fileName;
+		TextView filePath;
 	}
 	
 	private void processScaledImage(){//just for set scaled image. if we set all icon here, performance will bad. 
