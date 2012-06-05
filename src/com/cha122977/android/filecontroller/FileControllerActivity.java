@@ -638,8 +638,8 @@ public class FileControllerActivity extends Activity {
 				.setIcon(R.drawable.add_folder);
 		menu.add(0, Menu.FIRST+1, 2, R.string.menu_createNewDirInBottom)
 				.setIcon(R.drawable.add_folder);
-		menu.add(0, Menu.FIRST+2, 3, "Search File")
-				.setIcon(android.R.drawable.ic_menu_search);
+		menu.add(0, Menu.FIRST+2, 3, R.string.menu_search)
+				.setIcon(R.drawable.search);
 		menu.add(0, Menu.FIRST+3, 3, R.string.menu_helpTitle)
 				.setIcon(R.drawable.help);
 		menu.add(0, Menu.FIRST+4, 3, R.string.menu_aboutTitle)
@@ -816,8 +816,9 @@ public class FileControllerActivity extends Activity {
 		} else if (keyCode == KeyEvent.KEYCODE_SEARCH){
 			readyToLeaveApp = false;
 			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivityForResult(intent, REQUEST_CODE_SEARCH);
+			Log.d("TAG", "Just click the Search Button");
 			return false;//Override the original search button
 		}
 		readyToLeaveApp = false;
@@ -828,22 +829,28 @@ public class FileControllerActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == REQUEST_CODE_SEARCH){
-			openResult(resultCode, data);
-		}
-	}
-	private void openResult(int resultCode, Intent data){
-		Log.d("TAG", resultCode +"");
-		switch(resultCode){
+			switch(resultCode){
 			case RESULT_CODE_OPEN_TOP:
-				openTopFile(true, data.getStringExtra("path"));
+				String path1 = data.getStringExtra("path");
+				if(new File(path1).isDirectory()){
+					openTopFile(true, path1);
+				} else {
+					openTopFile(true, new File(path1).getParent());
+				}
 				break;
 			case RESULT_CODE_OPEN_BOTTOM:
-				openBottomFile(true, data.getStringExtra("path"));
+				String path2 = data.getStringExtra("path");
+				if (new File(path2).isDirectory()) {
+					openTopFile(true, path2);
+				} else {
+					openTopFile(true, new File(path2).getParent());
+				}
 				break;
 			default:
+				//Do nothing
 				break;
+			}
 		}
 	}
-	
 	
 }

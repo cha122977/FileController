@@ -36,6 +36,7 @@
   
     <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
     <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
+    <string name="menu_search">Search File</string>
     <string name="menu_helpTitle">HELP</string>
     <string name="menu_aboutTitle">About....</string>
     
@@ -43,6 +44,10 @@
     <string name="createDir_createDirCancel">Create directory cancel</string>
     <string name="createDir_createDirSucceed">Create directory succeed</string>
     <string name="createDir_createDirFailure">Create directory failure</string>
+    
+    <string name="search_activity_title">Search File</string>
+    <string name="search_no_text">Please enter file name</string>
+    <string name="search_input_hint">Enter Keyword Here</string>
     
     <string name="help_title">HELP</string>
     <string name="help_msg">    Open two directories in the same time, one at TOP screen and the other one at BOTTOM.\n    Click directory/file to open it.\n    Click opened directory to upper layer.\n    Long click the directory to manage it. Long click file can open it directly.</string>
@@ -88,7 +93,7 @@
     <string-array name="alert_searchListDirectoryOption">
         <item>Show in Top Window</item>
         <item>Show in Bottom Window</item>
-        <item>Detail...</item>
+        <item>Show information</item>
         <item>Cancel</item>
     </string-array>
     
@@ -97,7 +102,7 @@
         <item>Open</item>
         <item>Show in Top Window</item>
         <item>Show in Bottom Window</item>
-        <item>Detail...</item>
+        <item>Show information</item>
         <item>Cancel</item>
     </string-array>
 </resources>

@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,6 +33,7 @@ public class SearchActivity extends ListActivity{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.searchlayout);
+		setTitle(R.string.search_activity_title);
 		
 		setViews();
 		setListeners();
@@ -81,38 +81,11 @@ public class SearchActivity extends ListActivity{
 		});
 	}
 	
-	private void openDirectory(final String filePath){
+	private void openDirectory(String filePath){
 		String[] s = getResources().getStringArray(R.array.alert_searchListDirectoryOption);
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle(filePath);
-		builder.setItems(s, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				switch(which){
-				case 0://open in Top window
-					Intent intent0 = new Intent();
-					intent0.putExtra("path", filePath);
-					setResult(FileControllerActivity.RESULT_CODE_OPEN_TOP, intent0);
-					finish();
-					break;
-				case 1://open in Bottom window
-					Intent intent1 = new Intent();
-					intent1.putExtra("path", filePath);
-					setResult(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, intent1);
-					finish();
-					break;
-				case 2://Show file info
-					ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
-					break;
-				case 3://Cancel
-					//do nothing
-					break;
-				default:
-					//do nothing
-					break;
-				}
-			}
-		});
+		builder.setItems(s, new DirectoryDialog(filePath));
 		builder.show();
 	}
 	
@@ -120,43 +93,13 @@ public class SearchActivity extends ListActivity{
 		String[] s = getResources().getStringArray(R.array.alert_searchListFileOption);
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle(filePath);
-    	builder.setItems(s, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				switch(which){
-				case 0://open file.
-					ListFileProcessor.openFile(filePath, getApplicationContext());
-					break;
-				case 1://Show in Top window
-					Intent intent1 = new Intent();
-					intent1.putExtra("path", new File(filePath).getParent());
-					setResult(FileControllerActivity.RESULT_CODE_OPEN_TOP, intent1);
-					finish();
-					break;
-				case 2://Show in Bottom window
-					Intent intent2 = new Intent();
-					intent2.putExtra("path", new File(filePath).getParent());
-					setResult(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, intent2);
-					finish();
-					break;
-				case 3://more information
-					ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
-					break;
-				case 4://Cancel
-					//Do nothing
-					break;
-				default:
-					//do nothing
-					break;
-				}
-			}
-		});
+    	builder.setItems(s, new FileDialog(filePath));
 		builder.show();
 	}
 	
 	private void startSearch(String targetDirectory, String keyWord){
 		if(keyWord.equals("") || keyWord==null){//check if user enter the file name
-			Toast.makeText(getApplicationContext(), "Please enter file name", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), R.string.search_no_text, Toast.LENGTH_SHORT).show();
 		} else {
 			File file = new File(targetDirectory);
 			if(file != null){//make sure
@@ -212,4 +155,69 @@ public class SearchActivity extends ListActivity{
     		//Do nothing
     	}
 	}
+	
+	private class DirectoryDialog implements DialogInterface.OnClickListener{
+		private String filePath;
+		public DirectoryDialog(String filePath){
+			this.filePath = filePath;
+		}
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			switch(which){
+			case 0://open in Top window
+				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_TOP, filePath);
+				break;
+			case 1://open in Bottom window
+				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, filePath);
+				break;
+			case 2://Show file info
+				ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
+				break;
+			case 3://Cancel
+				//do nothing
+				break;
+			default:
+				//do nothing
+				break;
+			}
+		}
+	}
+	
+	private class FileDialog implements DialogInterface.OnClickListener{
+		private String filePath;
+		public FileDialog(String filePath){
+			this.filePath = filePath;
+		}
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			switch(which){
+			case 0://open file.
+				ListFileProcessor.openFile(filePath, getApplicationContext());
+				break;
+			case 1://Show in Top window
+				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_TOP, filePath);
+				break;
+			case 2://Show in Bottom window
+				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, filePath);
+				break;
+			case 3://more information
+				ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
+				break;
+			case 4://Cancel
+				//Do nothing
+				break;
+			default:
+				//do nothing
+				break;
+			}
+		}
+	}
+	
+	private void setResultAndFinish(int resultCode, String path){
+		Intent intent = new Intent();
+		intent.putExtra("path", new File(path).getParent());
+		setResult(resultCode, intent);
+		finish();
+	}
+		
 }
