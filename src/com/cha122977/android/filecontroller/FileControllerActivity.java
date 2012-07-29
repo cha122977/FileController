@@ -69,19 +69,19 @@ public class FileControllerActivity extends Activity {
     TextView tv_topDir, tv_bottomDir;//textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView;//listView to show all the file in folder where user is.
 		
-	List<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item
+	ArrayList<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item
 	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);//¥h±¼Activity¦WºÙÄæ¦ì        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);//ï¿½hï¿½ï¿½Activityï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½        
         setContentView(R.layout.main);
         
         ll_screen = (LinearLayout)findViewById(R.id.screanLayout);        
         
         int rotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-        if( rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270){//if ¿Ã¹õ¥´¾î
+        if( rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270){//if ï¿½Ã¹ï¿½ï¿½ï¿½ï¿½ï¿½
         	ll_screen.setOrientation(LinearLayout.HORIZONTAL);
         }
 	        
@@ -428,7 +428,7 @@ public class FileControllerActivity extends Activity {
     	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
     	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
     	et_renameInput.setText(new File(renamedFilePath).getName());
-    	//TODO ¤Ï¥ÕÀÉ¦W³¡¥÷¡A¨Ï§ïÀÉ¦W§ó§Ö
+    	//TODO ï¿½Ï¥ï¿½ï¿½É¦Wï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½Ï§ï¿½ï¿½É¦Wï¿½ï¿½ï¿½
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
         builder.setCancelable(false);   
         builder.setTitle(R.string.rename_renameAlertTitle);  
@@ -463,7 +463,7 @@ public class FileControllerActivity extends Activity {
 //    		Log.d("TAG", "Index of . is: " + pointIndex);
         	while(true){
         		if(pointIndex != -1){//file have attachment 
-        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//³s"."¤@°_¸É¤W
+        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//ï¿½s"."ï¿½@ï¿½_ï¿½É¤W
         		} else {//file does not have attachment
         			temp = copieerFileName + "(" + fileNameCounter + ")";
         		}
@@ -562,7 +562,7 @@ public class FileControllerActivity extends Activity {
     private boolean pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
     	File copieerFile = new File(copieerFilePath);
     	if(copieerFile.isFile() == true){
-    		//TODO ¦pªGÀÉ®×¤Ó¤j¡A¬O§_¥Îprogress barÅã¥Ü¶i«×¡H
+    		//TODO ï¿½pï¿½Gï¿½É®×¤Ó¤jï¿½Aï¿½Oï¿½_ï¿½ï¿½progress barï¿½ï¿½Ü¶iï¿½×¡H
         	FileInputStream in;
         	FileOutputStream out;
         	byte[] buffer;

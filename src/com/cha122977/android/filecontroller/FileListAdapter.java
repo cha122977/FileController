@@ -34,7 +34,7 @@ public class FileListAdapter extends BaseAdapter {
 	
 	private LayoutInflater mLayoutInflater;
 	
-	private List<String> filePath;
+	private ArrayList<String> filePath;
 	private List<Bitmap> fileIcon;
 	
 	private Bitmap mIcon1;//opened folder
@@ -47,9 +47,9 @@ public class FileListAdapter extends BaseAdapter {
 	
 	private Bitmap mIcon_m1;//-1, unknown image
 	
-	public FileListAdapter(Context context, List<String> filePath) {
-		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
-		this.filePath=filePath;
+	public FileListAdapter(Context context, ArrayList<String> filePath) {
+		mLayoutInflater = LayoutInflater.from(context);
+		this.filePath = (ArrayList<String>)filePath.clone();
 		fileIcon = new ArrayList<Bitmap>();
 		for(int i=0; i<filePath.size(); i++){
 			fileIcon.add(i, null);
@@ -163,11 +163,11 @@ public class FileListAdapter extends BaseAdapter {
 					        options.inSampleSize=scaledPower;
 					        Bitmap vBitmap = BitmapFactory.decodeFile(fp, options);
 					        
-							if(vBitmap == null){//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
-								fileIcon.set(i, mIcon_m1);//放上unknown_image
+							if(vBitmap == null){//avoid crash.
+								fileIcon.set(i, mIcon_m1);//set to unknown_image
 								continue;
 							}
-							// Bitmap 縮放
+							// scaled image
 							Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
 							fileIcon.set(i, vB2);//add icon to fileIcon.
 							mHandler.sendEmptyMessage(0);//notify data set change

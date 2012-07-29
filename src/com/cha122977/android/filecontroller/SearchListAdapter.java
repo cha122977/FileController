@@ -23,7 +23,7 @@ public class SearchListAdapter extends BaseAdapter {
 		public void handleMessage(Message msg) {
 			switch(msg.what){
 			case 0:
-				notifyDataSetChanged(); 
+				notifyDataSetChanged();
 				break;
 			default:
 				//do nothing
