@@ -93,6 +93,7 @@
         <item>顯示在上方視窗</item>
         <item>顯示在下方視窗</item>
         <item>顯示檔案資訊</item>
+        <item>刪除</item>
         <item>取消</item>
     </string-array>
     
@@ -102,6 +103,7 @@
         <item>顯示在上方視窗</item>
         <item>顯示在下方視窗</item>
         <item>顯示檔案資訊</item>
+        <item>刪除</item>
         <item>取消</item>
     </string-array>
 </resources>

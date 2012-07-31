@@ -30,7 +30,6 @@ public class SearchActivity extends ListActivity{
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.searchlayout);
 		setTitle(R.string.search_activity_title);
@@ -69,9 +68,9 @@ public class SearchActivity extends ListActivity{
 		
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+			public void onItemClick(AdapterView<?> adapter, View view, int which, long id) {
 				//TODO search activity dialog
-				String filePath = searchResultPathList.get(arg2);
+				String filePath = searchResultPathList.get(which);
 				if(new File(filePath).isDirectory()){
 					openDirectory(filePath);
 				}else{
@@ -173,7 +172,19 @@ public class SearchActivity extends ListActivity{
 			case 2://Show file info
 				ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
 				break;
-			case 3://Cancel
+			case 3://Delete
+				AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);
+				builder.setMessage(R.string.delete_alertDeleteFileMsg);
+	    		builder.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener(){
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						pureDeleteDirectory(filePath);
+					}
+				});
+	    		builder.setNegativeButton(R.string.alertButton_cancel, null);
+				builder.show();
+				break;
+			case 4://Cancel
 				//do nothing
 				break;
 			default:
@@ -203,8 +214,20 @@ public class SearchActivity extends ListActivity{
 			case 3://more information
 				ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
 				break;
-			case 4://Cancel
-				//Do nothing
+			case 4://Delete
+				AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);
+				builder.setMessage(R.string.delete_alertDeleteDirMsg);
+	    		builder.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener(){
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						pureDeleteFile(filePath);
+					}
+				});
+	    		builder.setNegativeButton(R.string.alertButton_cancel, null);
+				builder.show();
+				break;
+			case 5://Cancel
+				// do nothing
 				break;
 			default:
 				//do nothing
@@ -219,5 +242,43 @@ public class SearchActivity extends ListActivity{
 		setResult(resultCode, intent);
 		finish();
 	}
-		
+	
+	// Delete function
+	private void pureDeleteFile(String beDeletedFilePath){
+    	File f = new File(beDeletedFilePath);
+    	boolean result = f.delete();
+    	if(result == true){
+    		Toast.makeText(getApplicationContext(), beDeletedFilePath + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
+    	} else {
+    		Toast.makeText(getApplicationContext(), f.getName() + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
+    	}
+    	String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+		String keyWord = et_searchName.getText().toString();
+		startSearch(externalRoot, keyWord);
+    }
+    
+    private void pureDeleteDirectory(String beDeletedPath){
+    	if(deleteDirectoryNested(beDeletedPath) == true){
+    		String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+			String keyWord = et_searchName.getText().toString();
+			startSearch(externalRoot, keyWord);
+    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
+    	} else {
+    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectoryFailure, Toast.LENGTH_LONG).show();
+    	}
+    }
+    private boolean deleteDirectoryNested(String inputPath){
+    	File f = new File(inputPath);
+    	if(f.isFile()){//path is file
+    		return f.delete();
+    	} else {//path is directory
+    		File[] fl = f.listFiles();
+    		for(File i: fl){
+    			if(deleteDirectoryNested(i.getAbsolutePath()) == false){
+    				return false;
+    			}
+    		}
+    		return f.delete();
+    	}
+    }
 }
