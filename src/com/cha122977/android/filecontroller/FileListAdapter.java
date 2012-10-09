@@ -133,11 +133,20 @@ public class FileListAdapter extends BaseAdapter {
 		TextView text;
 	}
 	
+	private boolean isListDropped = false;
+	
+	public void setListDropped() {
+		isListDropped = true;
+	}
+	
 	private void processScaledImage(){//just for set scaled image. if we set all icon here, performance will bad. 
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				for(int i=0; i<filePath.size(); i++){
+					if (isListDropped) {
+						break;
+					}
 					String fp = filePath.get(i);
 					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
 						try{

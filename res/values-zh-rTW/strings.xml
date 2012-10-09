@@ -30,6 +30,7 @@
     <string name="delete_deleteDirectorySucceed">刪除資料夾成功</string>
     <string name="delete_deleteDirectoryFailure">刪除資料夾失敗</string>
     
+    <string name="alert_waitingDialogTitle">請稍後...</string>
     <string name="alertButton_ok">完   成</string>
     <string name="alertButton_cancel">取   消</string>
     <string name="action_cancel">取   消</string>

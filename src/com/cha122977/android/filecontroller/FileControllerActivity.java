@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Stack;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -33,34 +35,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
+
 	public static final int REQUEST_CODE_SEARCH = 11;//use to start searchActivity.
 	public static final int RESULT_CODE_OPEN_TOP = 11;
 	public static final int RESULT_CODE_OPEN_BOTTOM = 12;
-	
-//	Handler mHandler = new Handler(){	
-//		@Override
-//		public void handleMessage(Message msg) {	
-//			switch(msg.what){
-//			case 1:
-//				Log.d("TAG", "Pre show progressDialog");
-//				myDialog.show();
-//				Log.d("TAG", "Show progressDialog done");
-//				break;
-//			case 2:
-//				Log.d("TAG", "Pre dismiss progressDialog");
-//				myDialog.dismiss();
-//				Log.d("TAG", "dismiss progressDialog done");
-//				break;
-//			default:
-//				//do nothing
-//			}   		
-//			super.handleMessage(msg);
-//		}
-//	};
 	
 	private LinearLayout ll_screen;//use to change orientation
 	
@@ -71,11 +54,55 @@ public class FileControllerActivity extends Activity {
 		
 	ArrayList<String> topFilePath, bottomFilePath;//save file's path of top folder, which will use in OnLongClickEvent in ListView item
 	
+	AlertDialog waitingAlertDialog;
+	
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+				case 0:
+					waitingAlertDialog.show();
+					break;
+				case 1: // copy succeed
+					Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
+					waitingAlertDialog.dismiss();
+					refreshListView();
+					break;
+				case 2: // copy failure
+					Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
+					waitingAlertDialog.dismiss();
+					break;
+				case 3:
+					Bundle b3 = msg.getData();
+					String beDeletedFilePath3 = b3.getString("beDeletedFilePath");
+					Toast.makeText(getApplicationContext(), beDeletedFilePath3 + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
+					refreshListView();
+					break;
+				case 4:
+					Bundle b4 = msg.getData();
+					String beDeletedFilePath4 = b4.getString("beDeletedFilePath");
+					Toast.makeText(getApplicationContext(), beDeletedFilePath4 + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
+					break;
+				case 5: // delete directory succeed.
+					Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
+					waitingAlertDialog.dismiss();
+					refreshListView();
+					break;
+				case 6:
+					Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectoryFailure, Toast.LENGTH_LONG).show();
+					waitingAlertDialog.dismiss();
+					break;
+				default: // do nothing.
+					break;
+			}
+		}
+	};
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);//�h��Activity�W�����        
+        requestWindowFeature(Window.FEATURE_NO_TITLE); // clear title bar
         setContentView(R.layout.main);
         
         ll_screen = (LinearLayout)findViewById(R.id.screanLayout);        
@@ -92,6 +119,8 @@ public class FileControllerActivity extends Activity {
         //initial directory.
         openTopFile(false, ROOT);
         openBottomFile(false, ROOT);        
+        
+        setWaitingAlertDialog();
     }
 	
     @Override
@@ -102,6 +131,12 @@ public class FileControllerActivity extends Activity {
     	} else {
     		ll_screen.setOrientation(LinearLayout.VERTICAL);
     	}
+	}
+    
+    @Override
+	protected void onResume() {
+		super.onResume();
+		refreshListView();
 	}
     
     private void setViews(){//connect view object to layout widget(in .xml file).
@@ -207,33 +242,23 @@ public class FileControllerActivity extends Activity {
 		});
     }
     
-    /** SharedPreference code was marked because we think it was not human-friendly.
-     * */
-//    //Preferences Code
-//    private String PREF		   = "filePreferences";
-//    private String PREF_TOP    = "lastestOpenedTopDir";
-//    private String PREF_BOTTOM = "lastestOpenedBottomDir";
-//    private void restorePrefs(){
-//    	SharedPreferences settings = getSharedPreferences(PREF, 0);
-//    	openTopFile   (false, settings.getString(PREF_TOP,    ROOT));
-//        openBottomFile(false, settings.getString(PREF_BOTTOM, ROOT));
-//    }
-//    @Override
-//	protected void onPause() {
-//		super.onPause();
-//		SharedPreferences settings = getSharedPreferences(PREF, 0);
-//		settings.edit()
-//			.putString(PREF_TOP, tv_topDir.getText().toString())
-//			.putString(PREF_BOTTOM, tv_bottomDir.getText().toString())
-//			.commit();
-//	}
+    private void setWaitingAlertDialog() {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.alert_waitingDialogTitle);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.waiting_dialog, null);
+        builder.setView(view);
+    	builder.setCancelable(false); // can't not be cancel
+    	waitingAlertDialog = builder.create();
+    }
+    
 	//Core Function
     private void openTopFile(boolean ifSave, String dir){//function to show directory's content.( use in Top Window)
     	if(dir!=null){
 	    	File f = new File(dir);
 	    	if(f.canRead()){
 	    		if(ifSave){//need save history
-		    		history.add(new HistoryItem(true, tv_topDir.getText().toString()));
+		    		history.push(new HistoryItem(true, tv_topDir.getText().toString()));
 		    	}
 		    	File[] fList = f.listFiles();
 		    	
@@ -245,7 +270,12 @@ public class FileControllerActivity extends Activity {
 		    		topFilePath.add(i.getPath());
 		    	}
 		    	tv_topDir.setText(dir);
+		    	
+	        	FileListAdapter fa = (FileListAdapter)(lv_topListView.getAdapter());
+	        	if (fa!=null) fa.setListDropped(); // stop process image thread of dropped adapter 
+	        	
 		    	lv_topListView.setAdapter(new FileListAdapter(this, topFilePath));
+		    	
 		    }else{
 		    	if(f.exists() == false){//can't read file because file is not exist.
 		    		int indexHelper = dir.lastIndexOf("/");
@@ -263,7 +293,7 @@ public class FileControllerActivity extends Activity {
 	    	File f = new File(dir);
 	    	if(f.canRead()){
 	    		if(ifSave){//need save history
-	        		history.add(new HistoryItem(false, tv_bottomDir.getText().toString()));
+	        		history.push(new HistoryItem(false, tv_bottomDir.getText().toString()));
 	        	}
 	    		File[] fList = f.listFiles();
 	    		
@@ -275,6 +305,10 @@ public class FileControllerActivity extends Activity {
 	        		bottomFilePath.add(i.getPath());
 	        	}
 	        	tv_bottomDir.setText(dir);
+	        	
+	        	FileListAdapter fa = (FileListAdapter)(lv_bottomListView.getAdapter());
+	        	if (fa!=null) fa.setListDropped(); // stop process image thread of dropped adapter
+	        	
 	        	lv_bottomListView.setAdapter(new FileListAdapter(this, bottomFilePath));
 	    	}else{
 	    		if(f.exists() == false){//can't read file because file is not exist.
@@ -448,55 +482,66 @@ public class FileControllerActivity extends Activity {
     }
     
     private void copyFile(final String copieer, final String target){ //copy file to target(directory) as same name.
-    	String copieerFileName = new File(copieer).getName();//find the file name of copied file name
-    	final String completeTargetFilePath = target + "/" + copieerFileName;//[aaa/bbb/ccc.xxx]
-    	//Avoid replace the presence data which have the same file name in target directory
-    	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
-    		doCopyFile(copieer, completeTargetFilePath);//copy file
-    	} else {//have same file name in target directory.
-        	String[] s = getResources().getStringArray(R.array.alert_sameFileNameOption);
-        	s[0] += completeTargetFilePath;//setting pre-replaced file name
-        	int fileNameCounter=1;
-        	final String newFileName;
-        	String temp;//use to find usable fileName.
-        	int pointIndex = copieerFileName.lastIndexOf(".");
-//    		Log.d("TAG", "Index of . is: " + pointIndex);
-        	while(true){
-        		if(pointIndex != -1){//file have attachment 
-        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//�s"."�@�_�ɤW
-        		} else {//file does not have attachment
-        			temp = copieerFileName + "(" + fileNameCounter + ")";
-        		}
-        		if(new File(target + "/" + temp).exists() == false){//new file name is independence
-        			newFileName = temp;
-        			break;
-        		}
-        		fileNameCounter++;
-        	}
-        	s[1] += "\n" + newFileName;//setting new fileName to option.
-        	 
-        	AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
-        	builder.setTitle(R.string.copy_fileSameName);
-    		builder.setItems(s, new DialogInterface.OnClickListener() {
-    			@Override
-    			public void onClick(DialogInterface dialog, int which) {
-    				switch(which){
-    				case 0://Replace file: 
-    					doCopyFile(copieer, completeTargetFilePath);
-    					break;
-    				case 1://Copied file rename as: 
-    					doCopyFile(copieer, target +"/"+ newFileName);
-    					break;
-    				case 2://Cancel copy
-    					//Do nothing
-    					break;
-    				default:
-    					//Do nothing
-    				}
-    			}
-    		});
-    		builder.show();
-    	}
+    	// TODO show alert and run
+    	
+    	new Thread(new Runnable() {
+			@Override
+			public void run() {
+				
+				mHandler.sendEmptyMessage(0);
+		    	
+		    	String copieerFileName = new File(copieer).getName();//find the file name of copied file name
+		    	final String completeTargetFilePath = target + "/" + copieerFileName;//[aaa/bbb/ccc.xxx]
+		    	//Avoid replace the presence data which have the same file name in target directory
+		    	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
+		    		doCopyFile(copieer, completeTargetFilePath);//copy file
+		    	} else {//have same file name in target directory.
+		        	String[] s = getResources().getStringArray(R.array.alert_sameFileNameOption);
+		        	s[0] += completeTargetFilePath;//setting pre-replaced file name
+		        	int fileNameCounter=1;
+		        	final String newFileName;
+		        	String temp;//use to find usable fileName.
+		        	int pointIndex = copieerFileName.lastIndexOf(".");
+//		    		Log.d("TAG", "Index of . is: " + pointIndex);
+		        	while(true){
+		        		if(pointIndex != -1){//file have attachment 
+		        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//�s"."�@�_�ɤW
+		        		} else {//file does not have attachment
+		        			temp = copieerFileName + "(" + fileNameCounter + ")";
+		        		}
+		        		if(new File(target + "/" + temp).exists() == false){//new file name is independence
+		        			newFileName = temp;
+		        			break;
+		        		}
+		        		fileNameCounter++;
+		        	}
+		        	s[1] += "\n" + newFileName;//setting new fileName to option.
+		        	 
+		        	AlertDialog.Builder builder = new AlertDialog.Builder(FileControllerActivity.this);//use to select option
+		        	builder.setTitle(R.string.copy_fileSameName);
+		    		builder.setItems(s, new DialogInterface.OnClickListener() {
+		    			@Override
+		    			public void onClick(DialogInterface dialog, int which) {
+		    				switch(which){
+		    				case 0://Replace file: 
+		    					doCopyFile(copieer, completeTargetFilePath);
+		    					break;
+		    				case 1://Copied file rename as: 
+		    					doCopyFile(copieer, target +"/"+ newFileName);
+		    					break;
+		    				case 2://Cancel copy
+		    					//Do nothing
+		    					break;
+		    				default:
+		    					//Do nothing
+		    				}
+		    			}
+		    		});
+		    		builder.show();
+		    	}
+			}
+		}).start();
+    	
     }
     
     private void openDeleteCheckDialog(final String selectedPath){//use to delete file and directory.
@@ -548,21 +593,18 @@ public class FileControllerActivity extends Activity {
     	}
     }
     private void doCopyFile(String copieerFilePath, String targetFilePath){//start point of copy file function.
-//    	mHandler.sendEmptyMessage(1);//show ProgressDialog
     	boolean result = pureCopyFile(copieerFilePath, targetFilePath);
-//    	mHandler.sendEmptyMessage(2);//dismiss ProgressDialog
     	if(result == true){
     		//show information to user.
-            Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
-            refreshListView();
+    		mHandler.sendEmptyMessage(1);
+//            refreshListView();
     	} else {
-    		Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
+    		mHandler.sendEmptyMessage(2);
     	}
     }
     private boolean pureCopyFile(String copieerFilePath, String targetFilePath){//copy "copieerFilePath"(file) to "targetFilePath"(file).
     	File copieerFile = new File(copieerFilePath);
     	if(copieerFile.isFile() == true){
-    		//TODO �p�G�ɮפӤj�A�O�_��progress bar��ܶi�סH
         	FileInputStream in;
         	FileOutputStream out;
         	byte[] buffer;
@@ -597,24 +639,45 @@ public class FileControllerActivity extends Activity {
     	}
     }
     
-    private void pureDeleteFile(String beDeletedFilePath){
-    	File f = new File(beDeletedFilePath);
-    	boolean result = f.delete();
-    	if(result == true){
-    		Toast.makeText(getApplicationContext(), beDeletedFilePath + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
-    	} else {
-    		Toast.makeText(getApplicationContext(), f.getName() + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
-    	}
-    	refreshListView();
+    private void pureDeleteFile(final String beDeletedFilePath){
+    	new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mHandler.sendEmptyMessage(0);
+				File f = new File(beDeletedFilePath);
+		    	boolean result = f.delete();
+		    	if(result == true){
+		    		Message msg = new Message();
+		    		Bundle bundle = new Bundle();
+		    		bundle.putString("beDeletedFilePath", beDeletedFilePath);
+		    		msg.setData(bundle);
+		    		msg.what = 3;
+		    		mHandler.sendMessage(msg);
+		    	} else {
+		    		Message msg = new Message();
+		    		Bundle bundle = new Bundle();
+		    		bundle.putString("beDeletedFilePath", beDeletedFilePath);
+		    		msg.setData(bundle);
+		    		msg.what = 4;
+		    		mHandler.sendMessage(msg);
+		    	}
+			}
+		}).start();
     }
     
-    private void pureDeleteDirectory(String beDeletedPath){
-    	if(deleteDirectoryNested(beDeletedPath) == true){
-    		refreshListView();
-    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
-    	} else {
-    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectoryFailure, Toast.LENGTH_LONG).show();
-    	}
+    private void pureDeleteDirectory(final String beDeletedPath){
+    	new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mHandler.sendEmptyMessage(0);
+				if(deleteDirectoryNested(beDeletedPath) == true){
+//		    		refreshListView();
+		    		mHandler.sendEmptyMessage(5);
+		    	} else {
+		    		mHandler.sendEmptyMessage(6);
+		    	}
+			}
+		}).start();
     }
     private boolean deleteDirectoryNested(String inputPath){
     	File f = new File(inputPath);
@@ -779,7 +842,7 @@ public class FileControllerActivity extends Activity {
 		openBottomFile(false, tv_bottomDir.getText().toString());
 	}
 	
-	List<HistoryItem> history = new ArrayList<HistoryItem>();
+	Stack<HistoryItem> history = new Stack<HistoryItem>();
 	private class HistoryItem{
 		boolean topOrBottom;
 		String openedDir;
@@ -791,17 +854,12 @@ public class FileControllerActivity extends Activity {
 	boolean readyToLeaveApp = false;//use in double click leave app. mechanism.
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if(keyCode == KeyEvent.KEYCODE_SEARCH){
-			//TODO Search method
-		}
 		if(keyCode == KeyEvent.KEYCODE_BACK){
 			if(readyToLeaveApp){
 				return super.onKeyDown(keyCode, event);
 			}
-			int itemNumber = history.size();
-			if(itemNumber != 0){
-				HistoryItem hi = history.get(itemNumber-1);
-				history.remove(itemNumber-1);
+			if(!history.isEmpty()){ // if hostory is not empty
+				HistoryItem hi = history.pop();
 				if(hi.topOrBottom == true){//top
 					openTopFile(false, hi.openedDir);
 				} else {//bottom

@@ -30,6 +30,7 @@
     <string name="delete_deleteDirectorySucceed">Delete directory succeed.</string>
     <string name="delete_deleteDirectoryFailure">Delete directory failure.</string>
     
+    <string name="alert_waitingDialogTitle">Please wait...</string>
     <string name="alertButton_ok">OK</string>
     <string name="alertButton_cancel">Cancel</string>
     <string name="action_cancel">Cancel</string>
