@@ -3,6 +3,7 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -15,27 +16,38 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 public class SearchActivity extends ListActivity{
-
+	
 	private EditText et_searchName;
 	private Button bt_searchButton;
+	
+	private Stack<String> visitedHistory; // history of visited directories 
 	
 	private ArrayList<String> searchResultPathList;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.searchlayout);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+	    setContentView(R.layout.searchlayout);
+		
 		setTitle(R.string.search_activity_title);
 		
+		initial();
 		setViews();
 		setListeners();
+	}
+	
+	private void initial() {
+		visitedHistory = new Stack<String>();
 	}
 	
 	private void setViews(){
@@ -69,15 +81,36 @@ public class SearchActivity extends ListActivity{
 		getListView().setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View view, int which, long id) {
-				//TODO search activity dialog
 				String filePath = searchResultPathList.get(which);
 				if(new File(filePath).isDirectory()){
-					openDirectory(filePath);
-				}else{
-					openFile(filePath);
+					visitedHistory.push(filePath);
+					openTopOrDown(filePath);
+				} else {
+					ListFileProcessor.openFile(filePath, getApplicationContext());
 				}
 			}
 		});
+		
+		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> adapter, View view, int which, long id) {
+				String filePath = searchResultPathList.get(which);
+				if (new File(filePath).isDirectory()) {
+					openDirectory(filePath);
+				} else {
+					openFile(filePath);
+				}
+				return true;
+			}
+		});
+	}
+	
+	private void openTopOrDown(String filePath) {
+		searchResultPathList = new ArrayList<String>();
+		for(File f: new File(filePath).listFiles()) {
+			searchResultPathList.add(f.getPath());
+		}
+		setListAdapter(new SearchListAdapter(this, searchResultPathList));
 	}
 	
 	private void openDirectory(String filePath){
@@ -96,21 +129,37 @@ public class SearchActivity extends ListActivity{
 		builder.show();
 	}
 	
-	private void startSearch(String targetDirectory, String keyWord){
+	private void startSearch(String targetDirectory, final String keyWord){
 		if(keyWord.equals("") || keyWord==null){//check if user enter the file name
 			Toast.makeText(getApplicationContext(), R.string.search_no_text, Toast.LENGTH_SHORT).show();
 		} else {
-			File file = new File(targetDirectory);
+			final File file = new File(targetDirectory);
 			if(file != null){//make sure
-				searchResultPathList = deepSearch(file, keyWord);
-				setListAdapter(new SearchListAdapter(this, searchResultPathList));
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						SearchActivity.this.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								setProgressBarIndeterminateVisibility(true);
+							}
+						});
+						searchResultPathList = deepSearch(file, keyWord);
+						SearchActivity.this.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								setListAdapter(new SearchListAdapter(SearchActivity.this, searchResultPathList));
+								setProgressBarIndeterminateVisibility(false);
+							}
+						});
+					}
+				}).start();
 			}
 		}
 	}
 	
 	private ArrayList<String> deepSearch(File targetDirectory, String keyWord){
 		ArrayList<String> result = new ArrayList<String>();
-		
 		//shadow search
 		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
 		listfile = ListFileProcessor.filterCannotWriteFile(listfile);
@@ -281,4 +330,40 @@ public class SearchActivity extends ListActivity{
     		return f.delete();
     	}
     }
+    
+    @Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(keyCode == KeyEvent.KEYCODE_BACK){
+			if (visitedHistory.isEmpty()) { // back to previous Activity
+				return super.onKeyDown(keyCode, event);
+			}
+			visitedHistory.pop(); // delete current directory(unused)
+			if (visitedHistory.isEmpty()) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						SearchActivity.this.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								setProgressBarIndeterminateVisibility(true);
+							}
+						});
+						searchResultPathList = deepSearch(new File(Environment.getExternalStorageDirectory().getAbsolutePath()),
+								  						  et_searchName.getText().toString());
+						SearchActivity.this.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								setListAdapter(new SearchListAdapter(SearchActivity.this, searchResultPathList));
+								setProgressBarIndeterminateVisibility(false);
+							}
+						});
+					}
+				}).start();
+			} else {
+				openTopOrDown(visitedHistory.peek());
+			}
+			return false;
+		} 
+		return super.onKeyDown(keyCode, event);
+	}
 }

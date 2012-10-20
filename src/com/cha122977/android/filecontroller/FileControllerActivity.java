@@ -200,7 +200,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(topFilePath.get(arg2)).isDirectory()){
 					openTopFile(true, topFilePath.get(arg2));
 				}else{
-					openTopOptionsDialog(arg2);
+					ListFileProcessor.openFile(topFilePath.get(arg2), getApplicationContext());
 				}
 			}
 		});
@@ -212,7 +212,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(bottomFilePath.get(arg2)).isDirectory()){
 					openBottomFile(true, bottomFilePath.get(arg2));
 				}else{
-					openBottomOptionsDialog(arg2);
+					ListFileProcessor.openFile(bottomFilePath.get(arg2), getApplicationContext());
 				}
 			}
 		});
@@ -223,7 +223,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(topFilePath.get(arg2)).isDirectory()){//long click item is directory 
 					openTopOptionsDialog(arg2);
 				} else {//long click item is file
-					ListFileProcessor.openFile(topFilePath.get(arg2), getApplicationContext());
+					openTopOptionsDialog(arg2);
 				}
 				return true;
 			}
@@ -235,7 +235,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(bottomFilePath.get(arg2)).isDirectory()){//long click item is directory 
 					openBottomOptionsDialog(arg2);
 				} else {//long click item is file
-					ListFileProcessor.openFile(bottomFilePath.get(arg2), getApplicationContext());
+					openBottomOptionsDialog(arg2);
 				}
 				return true;
 			}
