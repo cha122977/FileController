@@ -1,6 +1,7 @@
 package com.cha122977.android.filecontroller;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,10 +63,10 @@ public class ListFileProcessor {
 	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	    intent.setAction(android.content.Intent.ACTION_VIEW);
 	    
-	    /* ¨ú±oType */
+	    /* ï¿½ï¿½oType */
 	    String type = MimeType.getMimeType(f.getName());
 	    
-	    /* ³]©wintentªºfile»Ptype */
+	    /* ï¿½]ï¿½wintentï¿½ï¿½fileï¿½Ptype */
 	    intent.setDataAndType(Uri.fromFile(f), type);
 	    context.startActivity(intent); 
 	}
@@ -73,7 +74,9 @@ public class ListFileProcessor {
     
 	/* function used to show file information*/
     public static void showFileInformation(String selectedFilePath, Context context){
-    	//TODO show file information
+    	DecimalFormat df = new DecimalFormat("0.00");
+    	
+    	
     	File f = new File(selectedFilePath);
     	AlertDialog.Builder builder = new AlertDialog.Builder(context);  
     	builder.setTitle(f.getAbsoluteFile()+"");
@@ -93,16 +96,19 @@ public class ListFileProcessor {
     							+ f.length()
     							+ context.getResources().getString(R.string.fileInfo_unit_byte) + "\n");
     		} else if(size<1000000) {//1KB~1MB
+    			
+    			
+    			
     			info.append(context.getResources().getString(R.string.fileInfo_size) 
-    							+ f.length()/1000
+    							+ df.format(f.length()/1000.0)
     							+ context.getResources().getString(R.string.fileInfo_unit_kByte) + "\n");
     		} else if(size<1000000000) {//1MB~1GB
     			info.append(context.getResources().getString(R.string.fileInfo_size)
-    							+ f.length()/1000000
+    							+ df.format(f.length()/1000000.0)
     							+ context.getResources().getString(R.string.fileInfo_unit_mByte) + "\n");
     		} else {//1GB+
     			info.append(context.getResources().getString(R.string.fileInfo_size)
-    							+ f.length()/1000000000 
+    							+ df.format(f.length()/1000000000.0) 
     							+ context.getResources().getString(R.string.fileInfo_unit_gByte) + "\n");
     		}	
     	}

@@ -76,12 +76,14 @@ public class FileControllerActivity extends Activity {
 					Bundle b3 = msg.getData();
 					String beDeletedFilePath3 = b3.getString("beDeletedFilePath");
 					Toast.makeText(getApplicationContext(), beDeletedFilePath3 + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
+					waitingAlertDialog.dismiss();
 					refreshListView();
 					break;
 				case 4:
 					Bundle b4 = msg.getData();
 					String beDeletedFilePath4 = b4.getString("beDeletedFilePath");
 					Toast.makeText(getApplicationContext(), beDeletedFilePath4 + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
+					waitingAlertDialog.dismiss();
 					break;
 				case 5: // delete directory succeed.
 					Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
