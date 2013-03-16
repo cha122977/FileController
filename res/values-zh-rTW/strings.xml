@@ -51,10 +51,11 @@
     <string name="search_input_hint">在此輸入關鍵字</string>
     
     <string name="help_title">說   明</string>
-    <string name="help_msg">　　畫面上下方同時開啟兩個資料夾視窗，可以將檔案移動、複製到另一側的資料夾中。\n　　輕點一下檔案來移動、複製檔案，長按檔案則可以直接打開該檔案。\n　　點選資料夾來進入下一層，點選資料夾路徑則可以回到上一層；長按資料夾來打開資料夾管理選單。</string>
+    <string name="help_msg">　　畫面上下方同時開啟兩個資料夾視窗，可以將檔案移動、複製到另一側的資料夾中。\n　　輕點一下檔案來移動、複製檔案，長按檔案則可以直接打開該檔案。\n　　點選資料夾來進入下一層，點選資料夾路徑則可以回到上一層；長按資料夾來打開資料夾管理選單。\n　　若要搜尋檔案，在選單中選擇或按下搜尋紐。</string>
     
     <string name="about_title">關 於 Cobi</string>
     <string name="about_msg"><b>cha122977</b> &amp; <b>Yu</b>\ncha122977@gmail.com\nyustudiotw@gmail.com\nhttp://yustudio.tw/</string>
+    <string name="about_copyRight">版權所有</string>
     <string name="doubleClickMsg">再按一次返回鍵來結束程式</string>
     
     <string name="fileInfo_containingFileNumber">檔案數： </string>
