@@ -17,11 +17,13 @@ import android.widget.TextView;
 
 public class FileListAdapter extends BaseAdapter {
 	
-	Handler mHandler = new Handler(){
+	private static final int NOTIFY_CHANGED = 0;
+	
+	Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what){
-			case 0:
+			case NOTIFY_CHANGED:
 				notifyDataSetChanged();
 				break;
 			default:
@@ -51,7 +53,7 @@ public class FileListAdapter extends BaseAdapter {
 		mLayoutInflater = LayoutInflater.from(context);
 		this.filePath = (ArrayList<String>)filePath.clone();
 		fileIcon = new ArrayList<Bitmap>();
-		for(int i=0; i<filePath.size(); i++){
+		for (int i=0; i<filePath.size(); i++) {
 			fileIcon.add(i, null);
 		}
 		
@@ -97,19 +99,19 @@ public class FileListAdapter extends BaseAdapter {
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
-		if(convertView==null){
+		if (convertView==null) {
 			convertView = mLayoutInflater.inflate(R.layout.file_list_row, null);
 			holder = new ViewHolder();
 			holder.icon = (ImageView)convertView.findViewById(R.id.icon);
 			holder.text = (TextView)convertView.findViewById(R.id.fileName);
 			convertView.setTag(holder);
 
-		}else{
+		} else {
 			holder = (ViewHolder)convertView.getTag();
 		}
 		
 		File f = new File(filePath.get(position).toString());
-		switch(MimeType.getMimeType(f)){
+		switch (MimeType.getMimeType(f)) {
 		case MimeType.TYPE_DIRECTORY://directory
 			holder.icon.setImageBitmap(mIcon2);
 			break;
@@ -123,7 +125,7 @@ public class FileListAdapter extends BaseAdapter {
 			holder.icon.setImageBitmap(mIcon5);
 			break;
 		case MimeType.TYPE_IMAGE://image
-			if(fileIcon.get(position) == null){
+			if (fileIcon.get(position) == null) {
 				holder.icon.setImageBitmap(mIcon6);
 			} else {
 				holder.icon.setImageBitmap(fileIcon.get(position));
@@ -139,7 +141,7 @@ public class FileListAdapter extends BaseAdapter {
 		holder.text.setText(f.getName());
 		return convertView;
 	}
-	static class ViewHolder{
+	static class ViewHolder {
 		ImageView icon;
 		TextView text;
 	}
@@ -150,16 +152,16 @@ public class FileListAdapter extends BaseAdapter {
 		isListDropped = true;
 	}
 	
-	private void processScaledImage(){//just for set scaled image. if we set all icon here, performance will bad. 
+	private void processScaledImage() {//just for set scaled image. if we set all icon here, performance will bad. 
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				for(int i=0; i<filePath.size(); i++){
+				for (int i=0; i<filePath.size(); i++) {
 					if (isListDropped) {
 						break;
 					}
 					String fp = filePath.get(i);
-					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
+					if (MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE) {
 //						try{
 //							BitmapFactory.Options options = new BitmapFactory.Options();
 //							options.inJustDecodeBounds = true; //limit the image to bounds
@@ -208,6 +210,7 @@ public class FileListAdapter extends BaseAdapter {
 						} else {
 							fileIcon.set(i, mIcon_m1);
 						}
+						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
 					}
 				}
 			}
