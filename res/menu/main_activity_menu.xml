@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fileManager="http://schemas.android.com/apk/res-auto" >
+    
+	<item android:id="@+id/action_createNewTopDir"
+		android:title="@string/menu_createNewDirInTop"
+		android:icon="@drawable/add_folder"
+		fileManager:showAsAction="" />
+	<item android:id="@+id/action_createNewBottomDir"
+		android:title="@string/menu_createNewDirInBottom"
+		android:icon="@drawable/add_folder"
+		fileManager:showAsAction="never" />
+	<item android:id="@+id/action_search"
+		android:title="@string/menu_search"
+		android:icon="@drawable/search"
+		fileManager:showAsAction="always" />
+	<item android:id="@+id/action_help"
+		android:title="@string/menu_helpTitle"
+		android:icon="@drawable/help"
+		fileManager:showAsAction="never" />
+	<item android:id="@+id/action_aboutApp"
+		android:title="@string/menu_aboutTitle"
+		android:icon="@drawable/about"
+		fileManager:showAsAction="never" />
+	
+</menu>
