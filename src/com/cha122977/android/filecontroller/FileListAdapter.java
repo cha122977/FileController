@@ -48,15 +48,30 @@ public class FileListAdapter extends BaseAdapter {
 	
 	private Bitmap mIcon_m1;//-1, unknown image
 	
+	public FileListAdapter(Context context, File[] fileList) {
+		filePath = new ArrayList<String>(fileList.length);
+		for (int i = 0; i<fileList.length; i++) {
+			filePath.add(i, fileList[i].getPath());
+		}
+		fileIcon = new ArrayList<Bitmap>(fileList.length);
+		for (int i=0; i<filePath.size(); i++) {
+			fileIcon.add(i, null);
+		}
+		initial(context);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public FileListAdapter(Context context, ArrayList<String> filePath) {
-		mLayoutInflater = LayoutInflater.from(context);
-		this.filePath = (ArrayList<String>)filePath.clone();
+		this.filePath = (ArrayList<String>) filePath.clone();
 		fileIcon = new ArrayList<Bitmap>();
 		for (int i=0; i<filePath.size(); i++) {
 			fileIcon.add(i, null);
 		}
-		
+		initial(context);
+	}
+
+	private void initial(Context context) {
+		mLayoutInflater = LayoutInflater.from(context);
 		mIcon1=Utility.decodeSampledBitmapFromResource(context.getResources(), R.drawable.open_v2, 48 ,48);
 		mIcon2=Utility.decodeSampledBitmapFromResource(context.getResources(), R.drawable.folder, 48, 48);
 		mIcon3=Utility.decodeSampledBitmapFromResource(context.getResources(), R.drawable.file, 48, 48);
@@ -67,19 +82,8 @@ public class FileListAdapter extends BaseAdapter {
 		
 		mIcon_m1=Utility.decodeSampledBitmapFromResource(context.getResources(), R.drawable.unknown_image, 48, 48);
 		
-//		mIcon1=BitmapFactory.decodeResource(context.getResources(), R.drawable.open_v2);
-//		mIcon2=BitmapFactory.decodeResource(context.getResources(), R.drawable.folder);
-//		mIcon3=BitmapFactory.decodeResource(context.getResources(), R.drawable.file);
-//		mIcon4=BitmapFactory.decodeResource(context.getResources(), R.drawable.music);
-//		mIcon5=BitmapFactory.decodeResource(context.getResources(), R.drawable.video);
-//		mIcon6=BitmapFactory.decodeResource(context.getResources(), R.drawable.image);
-//		mIcon7=BitmapFactory.decodeResource(context.getResources(), R.drawable.text);
-		
-//		mIcon_m1=BitmapFactory.decodeResource(context.getResources(), R.drawable.unknown_image);
 		processScaledImage();//run the thread to create scaledImage
 	}
-
-	
 	
 	@Override
 	public int getCount() {
@@ -146,70 +150,25 @@ public class FileListAdapter extends BaseAdapter {
 		TextView text;
 	}
 	
-	private boolean isListDropped = false;
+	private boolean isAdapterDropped = false;
 	
-	public void setListDropped() {
-		isListDropped = true;
+	public void drop() {
+		isAdapterDropped = true;
 	}
 	
-	private void processScaledImage() {//just for set scaled image. if we set all icon here, performance will bad. 
+	private void processScaledImage() { //just for set scaled image. if we set all icon here, performance will bad. 
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				for (int i=0; i<filePath.size(); i++) {
-					if (isListDropped) {
-						break;
+					if (isAdapterDropped) {
+						return;
 					}
 					String fp = filePath.get(i);
 					if (MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE) {
-//						try{
-//							BitmapFactory.Options options = new BitmapFactory.Options();
-//							options.inJustDecodeBounds = true; //limit the image to bounds
-//							BitmapFactory.decodeFile(fp, options);//get the height & width of image(save in options)
-//							
-//							final int newHeight = mIcon6.getHeight();
-//							final int newWidth  = mIcon6.getWidth();
-//							
-//							int width=options.outWidth;
-//					        int height=options.outHeight;
-//							
-//					        int scaledPower = 1;
-//					        
-//					        while(height/2 >= newHeight || width/2 >= newWidth){
-//					        	scaledPower++;
-//					        	height /= 2;
-//					        	width  /= 2;
-//					        }
-//					        
-//					        options = new BitmapFactory.Options();//new options
-//					        options.inSampleSize=scaledPower;
-//					        Bitmap vBitmap = BitmapFactory.decodeFile(fp, options);
-//					        
-//							if(vBitmap == null){//avoid crash.
-//								fileIcon.set(i, mIcon_m1);//set to unknown_image
-//								continue;
-//							}
-//							// scaled image
-//							Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
-//							fileIcon.set(i, vB2);//add icon to fileIcon.
-//							mHandler.sendEmptyMessage(0);//notify data set change
-//						} catch(Exception e){
-//							fileIcon.set(i, mIcon_m1);
-//							continue;
-//						}
-						
-//						if(vBitmap == null){//avoid crash.
-////							fileIcon.set(i, mIcon_m1);//set to unknown_image
-////							continue;
-////						}
-						
 						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
+						fileIcon.set(i, bm != null? bm: mIcon_m1);
 						
-						if (bm != null) {
-							fileIcon.set(i, bm);
-						} else {
-							fileIcon.set(i, mIcon_m1);
-						}
 						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
 					}
 				}

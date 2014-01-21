@@ -1,7 +1,12 @@
 package com.cha122977.android.filecontroller;
 
+import android.os.Environment;
+
 public class AppConstant {
 
+	public final static String SDCARD_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
+	public final static String ROOT = "/";
+	
 	public static final String PREFS_NAME = "UserPrefs";
 	public static final String OPEN_FIRST = "OpenAppFirst";
 

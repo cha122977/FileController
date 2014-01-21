@@ -310,7 +310,7 @@ public class FileControllerActivity extends Activity {
 		    	tv_topDir.setText(dir);
 		    	
 	        	FileListAdapter fa = (FileListAdapter)(lv_topListView.getAdapter());
-	        	if (fa!=null) fa.setListDropped(); // stop process image thread of dropped adapter 
+	        	if (fa!=null) fa.drop(); // stop process image thread of dropped adapter 
 	        	
 		    	lv_topListView.setAdapter(new FileListAdapter(this, topFilePath));
 		    	
@@ -347,7 +347,7 @@ public class FileControllerActivity extends Activity {
 	        	tv_bottomDir.setText(dir);
 	        	
 	        	FileListAdapter fa = (FileListAdapter)(lv_bottomListView.getAdapter());
-	        	if (fa!=null) fa.setListDropped(); // stop process image thread of dropped adapter
+	        	if (fa!=null) fa.drop(); // stop process image thread of dropped adapter
 	        	
 	        	lv_bottomListView.setAdapter(new FileListAdapter(this, bottomFilePath));
 	    	} else {

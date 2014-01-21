@@ -66,6 +66,9 @@
     <string name="fileInfo_unit_mByte"> MBytes</string>
     <string name="fileInfo_unit_gByte"> GBytes</string>
     
+    <string name="fileCannotRead">Cannot read this file.</string>
+    <string name="fileDoesNotExists">File does not exist.</string>
+    
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">
         <item>Open </item>
