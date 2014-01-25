@@ -22,7 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActionBarActivity extends ActionBarActivity {
+public class MainActionBarActivity extends ActionBarActivity implements IFMWindowFragmentOwner {
 	
 	private LinearLayout ll_rootWindow;
 	
@@ -55,6 +55,11 @@ public class MainActionBarActivity extends ActionBarActivity {
 	private void setFragment() {
 	}
 	
+	private void refreshLists() {
+		topWindow.refresh();
+		bottomWindow.refresh();
+	}
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) { //use to change the orientation of view.
     	super.onConfigurationChanged(newConfig);
@@ -76,10 +81,10 @@ public class MainActionBarActivity extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_createNewTopDir:
-			// TODO create new top dir.
+			topWindow.createDirectory(topWindow.getDirectoryPath());
 			return true;
 		case R.id.action_createNewBottomDir:
-			// TODO create new bottom dir.
+			bottomWindow.createDirectory(bottomWindow.getDirectoryPath());
 			return true;
 		case R.id.action_aboutApp:
 			showAboutDialog();
@@ -125,5 +130,10 @@ public class MainActionBarActivity extends ActionBarActivity {
 			.setPositiveButton(R.string.alertButton_ok, null)
 			.create();
 		d.show();
+	}
+
+	@Override
+	public void refreshAllWindow() {
+		refreshLists();
 	}
 }

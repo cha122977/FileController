@@ -238,7 +238,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(topFilePath.get(arg2)).isDirectory()){
 					openTopFile(true, topFilePath.get(arg2));
 				}else{
-					ListFileProcessor.openFile(topFilePath.get(arg2), getApplicationContext());
+					FSController.openFile(topFilePath.get(arg2), getApplicationContext());
 				}
 			}
 		});
@@ -250,7 +250,7 @@ public class FileControllerActivity extends Activity {
 				if (new File(bottomFilePath.get(arg2)).isDirectory()) {
 					openBottomFile(true, bottomFilePath.get(arg2));
 				}else{
-					ListFileProcessor.openFile(bottomFilePath.get(arg2), getApplicationContext());
+					FSController.openFile(bottomFilePath.get(arg2), getApplicationContext());
 				}
 			}
 		});
@@ -300,9 +300,9 @@ public class FileControllerActivity extends Activity {
 		    	}
 		    	File[] fList = f.listFiles();
 		    	
-		    	fList = ListFileProcessor.filterCannotWriteFile(fList);//filter the file which can't read and write
+		    	fList = FSController.filterCannotWriteFile(fList);//filter the file which can't read and write
 		    	
-		    	fList = ListFileProcessor.reSort(fList); //reSort FileList
+		    	fList = FSController.reSort(fList); //reSort FileList
 		    	topFilePath.clear(); //clear the list
 		    	for(File i: fList) {
 		    		topFilePath.add(i.getPath());
@@ -337,9 +337,9 @@ public class FileControllerActivity extends Activity {
 	        	}
 	    		File[] fList = f.listFiles();
 	    		
-	    		fList = ListFileProcessor.filterCannotWriteFile(fList);//filter the file which can't read and write
+	    		fList = FSController.filterCannotWriteFile(fList);//filter the file which can't read and write
 	    		
-	    		fList = ListFileProcessor.reSort(fList);//reSort FileList
+	    		fList = FSController.reSort(fList);//reSort FileList
 	        	bottomFilePath.clear();//clear the list
 	        	for (File i: fList) {
 	        		bottomFilePath.add(i.getPath());
@@ -380,14 +380,14 @@ public class FileControllerActivity extends Activity {
 					if (new File(selectedFilePath).isDirectory()) {
 						openTopFile(true, selectedFilePath);
 					} else {
-						ListFileProcessor.openFile(selectedFilePath, getApplicationContext());
+						FSController.openFile(selectedFilePath, getApplicationContext());
 					}
 					break;
 				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
 				case 2://Show file info
-					ListFileProcessor.showFileInformation(selectedFilePath, FileControllerActivity.this);
+					FSController.showFileInformation(selectedFilePath, FileControllerActivity.this);
 					break;
 				case 3://Move
 					moveFile(selectedFilePath, tv_bottomDir.getText().toString());
@@ -425,14 +425,14 @@ public class FileControllerActivity extends Activity {
 					if(new File(selectedFilePath).isDirectory()){
 						openTopFile(true, selectedFilePath);
 					} else {
-						ListFileProcessor.openFile(selectedFilePath, getApplicationContext());
+						FSController.openFile(selectedFilePath, getApplicationContext());
 					}
 					break;
 				case 1://Rename file.
 					renameFile(selectedFilePath);
 					break;
 				case 2://show file information
-					ListFileProcessor.showFileInformation(selectedFilePath, FileControllerActivity.this);
+					FSController.showFileInformation(selectedFilePath, FileControllerActivity.this);
 					break;
 				case 3://Move
 					moveFile(selectedFilePath, tv_topDir.getText().toString());

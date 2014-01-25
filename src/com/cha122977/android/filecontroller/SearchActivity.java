@@ -86,7 +86,7 @@ public class SearchActivity extends ListActivity{
 					visitedHistory.push(filePath);
 					openTopOrDown(filePath);
 				} else {
-					ListFileProcessor.openFile(filePath, getApplicationContext());
+					FSController.openFile(filePath, getApplicationContext());
 				}
 			}
 		});
@@ -162,14 +162,14 @@ public class SearchActivity extends ListActivity{
 		ArrayList<String> result = new ArrayList<String>();
 		//shadow search
 		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
-		listfile = ListFileProcessor.filterCannotWriteFile(listfile);
+		listfile = FSController.filterCannotWriteFile(listfile);
 		for(File f: listfile){
 			result.add(f.getAbsolutePath());
 		}
 		
 		//deep search(use recursive method)
 		listfile = targetDirectory.listFiles();
-		listfile = ListFileProcessor.filterCannotWriteFile(listfile);
+		listfile = FSController.filterCannotWriteFile(listfile);
 		for(File f: listfile){
 			if(f.isDirectory()){
 				result.addAll(deepSearch(f, keyWord));
@@ -219,7 +219,7 @@ public class SearchActivity extends ListActivity{
 				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, filePath);
 				break;
 			case 2://Show file info
-				ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
+				FSController.showFileInformation(filePath, SearchActivity.this);
 				break;
 			case 3://Delete
 				AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);
@@ -252,7 +252,7 @@ public class SearchActivity extends ListActivity{
 		public void onClick(DialogInterface dialog, int which) {
 			switch(which){
 			case 0://open file.
-				ListFileProcessor.openFile(filePath, getApplicationContext());
+				FSController.openFile(filePath, getApplicationContext());
 				break;
 			case 1://Show in Top window
 				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_TOP, filePath);
@@ -261,7 +261,7 @@ public class SearchActivity extends ListActivity{
 				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, filePath);
 				break;
 			case 3://more information
-				ListFileProcessor.showFileInformation(filePath, SearchActivity.this);
+				FSController.showFileInformation(filePath, SearchActivity.this);
 				break;
 			case 4://Delete
 				AlertDialog.Builder builder = new AlertDialog.Builder(SearchActivity.this);

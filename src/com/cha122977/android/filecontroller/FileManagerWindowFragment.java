@@ -3,21 +3,26 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,12 +30,14 @@ import android.widget.Toast;
 
 public class FileManagerWindowFragment extends Fragment {
 
-	private Context context;
+	private static final String LOG_TAG = "FileManagerWindow";
+	
+	private Activity activity;
 	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		context = activity;
+		this.activity = activity;
 	}
 	
 	public FileManagerWindowFragment() {
@@ -68,12 +75,6 @@ public class FileManagerWindowFragment extends Fragment {
 		openDefaultDirectory();
 	}
 	
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		// TODO check this function.
-	}
-	
 	private void initialVariable() {
 		
 	}
@@ -97,26 +98,13 @@ public class FileManagerWindowFragment extends Fragment {
 		lv_fileList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if (listFilesOfDirFile[position].isDirectory()) { // item is directory.
-					openDirectory(listFilesOfDirFile[position]);
-				} else { // item is file
-					openFile(listFilesOfDirFile[position]);
-				}
 				openData(listFilesOfDirFile[position]);
 			}
 		});
 		
-		lv_fileList.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				if (listFilesOfDirFile[position].isDirectory()) { // long click directory.
-					// TODO open directory's option dialog.
-				} else { // long click file.
-					// TODO open file's option dialog.
-				}
-				return true;
-			}
-		});
+		// register menu of file.(including dir and file)
+		registerForContextMenu(tv_filePath);
+		registerForContextMenu(lv_fileList);
 	}
 	
 	private void openDefaultDirectory() {
@@ -128,8 +116,11 @@ public class FileManagerWindowFragment extends Fragment {
         	// sdcard doesn't exist
         	defaultDirPath = AppConstant.ROOT;
         }
+    	
     	openDirectory(new File(defaultDirPath));
     }
+	
+	// AREA Open File
 	
 	/**
 	 * File or Directory must be opened from this function.
@@ -138,7 +129,7 @@ public class FileManagerWindowFragment extends Fragment {
 	 */
 	private boolean openData(File file) {
 		if (!file.canRead()) {
-			Toast.makeText(context, R.string.fileCannotRead, Toast.LENGTH_SHORT).show();
+			Toast.makeText(activity, R.string.fileCannotRead, Toast.LENGTH_SHORT).show();
 			return false;
 		} else if (!file.exists()) { //file doesn't exist. (This may happened when delete data from other app)
 			// open parent directory insteed.
@@ -148,7 +139,7 @@ public class FileManagerWindowFragment extends Fragment {
     		} else {
     			openDefaultDirectory();
     		}
-    		Toast.makeText(context, R.string.fileDoesNotExists, Toast.LENGTH_SHORT).show();
+    		Toast.makeText(activity, R.string.fileDoesNotExists, Toast.LENGTH_SHORT).show();
     		return false;
 		}
 		
@@ -168,7 +159,7 @@ public class FileManagerWindowFragment extends Fragment {
     	if (dir.canRead()) {
 	    	File[] fList = dir.listFiles();
 	    	
-	    	fList = ListFileProcessor.reSort(fList); //reSort FileList
+	    	fList = FSController.reSort(fList); //reSort FileList
 	    	
 	    	// set variable.
 	    	this.dirFile = dir;
@@ -182,7 +173,7 @@ public class FileManagerWindowFragment extends Fragment {
         		fa.drop(); // stop process image thread of dropped adapter 
         	}
         	
-	    	lv_fileList.setAdapter(new FileListAdapter(context, fList));
+	    	lv_fileList.setAdapter(new FileListAdapter(activity, fList));
 	    	
 	    	return true;
 	    }
@@ -204,39 +195,115 @@ public class FileManagerWindowFragment extends Fragment {
 	    
 	    /* open file accroding its mimetype */
 	    intent.setDataAndType(Uri.fromFile(file), type);
-	    context.startActivity(intent); 
+	    activity.startActivity(intent); 
     	return true;
     }
     
-    private void refreshListView() {
+    // AREA Options
+    
+    private boolean openDataOptions(File file) {
+    	// TODO check if file canRead?
+    	if (file.isDirectory()) {
+    		return openDirectoryOptions(file);
+    	} else {
+    		return openFileOptions(file);
+    	}
+    }
+    
+    private boolean openDirectoryOptions(File file) {
+    	
+    	return false;
+    }
+    
+    private boolean openFileOptions(File file) {
+    	return false;
+    }
+    
+    public void refresh() {
     	openDirectory(dirFile);
     }
     
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = activity.getMenuInflater();
+        Log.i(LOG_TAG, "ceate context menu...");
+        if (v == lv_fileList) {
+        	Log.i(LOG_TAG, "v == lv_fileList");
+        	AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) menuInfo;
+        	if (listFilesOfDirFile[acmi.position].isDirectory()) {
+        		inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
+        	} else {
+        		inflater.inflate(R.menu.file_manager_window_file_options_menu, menu);
+        	}
+        } else if (v == tv_filePath) {
+        	inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
+        }
+    }
     
-//    
-//    //------Menu function----//
-//  	private void makeDirectory(final String sourceDirPath) {
-//  		//show a dialog to get new name.
-//      	LayoutInflater inflater = LayoutInflater.from(this);
-//      	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
-//      	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
-//      	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
-//          builder.setCancelable(false);   
-//          builder.setTitle(R.string.createDir_createNewDirectory);  
-//          builder.setView(renameDialogView);  
-//          builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
-//          			public void onClick(DialogInterface dialog, int whichButton) {  
-//          				pureMakeDir(sourceDirPath, et_renameInput.getText().toString());
-//                      }  
-//                  });
-//          builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
-//                      public void onClick(DialogInterface dialog, int whichButton) {
-//                      	//do nothing
-//                      	Toast.makeText(getApplicationContext(), R.string.createDir_createDirCancel, Toast.LENGTH_SHORT).show();
-//                      }  
-//                  });  
-//          builder.show();
-//  	}
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+    	AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
+    	switch(item.getItemId()) {
+    	// TODO complete these.
+    	// for directory.
+    	case R.id.menu_createDir:
+    		return true;
+    	case R.id.menu_renameDir:
+    		return true;
+    	case R.id.menu_showDirInfo:
+    		return true;
+    	case R.id.menu_moveDir:
+    		return true;
+    	case R.id.menu_copyDirToOtherSide:
+    		return true;
+    	case R.id.menu_deleteDir:
+    		return true;
+    	// for file.
+    	case R.id.menu_renameFile:
+    		return true;
+    	case R.id.menu_showFileInfo:
+    		return true;
+    	case R.id.menu_moveFile:
+    		return true;
+    	case R.id.menu_copyFileToOtherSide:
+    		return true;
+    	case R.id.menu_deleteFile:
+    		return true;
+    	}
+    	
+    	return super.onContextItemSelected(item);
+    }
+
+    public void createDirectory(final String parentDirPath) {
+		//show a dialog to get new name.
+		LayoutInflater inflater = LayoutInflater.from(activity);
+		View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
+		final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);  
+		builder.setCancelable(false);   
+		builder.setTitle(R.string.createDir_createNewDirectory);  
+		builder.setView(renameDialogView);  
+		builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
+			public void onClick(DialogInterface dialog, int whichButton) {  
+				if (FSController.createDirectory(parentDirPath, et_renameInput.getText().toString())) {
+					Toast.makeText(activity.getApplicationContext(), R.string.createDir_createDirSucceed, Toast.LENGTH_LONG).show();
+					// refresh all windows. 
+					// Other window may looking at same directory, so refresh all to avoid unsynchronized.
+					((IFMWindowFragmentOwner) activity).refreshAllWindow();
+				} else {
+					Toast.makeText(activity.getApplicationContext(), R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
+				}
+			}  
+		});
+		builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
+			public void onClick(DialogInterface dialog, int whichButton) {
+				Toast.makeText(activity.getApplicationContext(), R.string.createDir_createDirCancel, Toast.LENGTH_SHORT).show();
+			}  
+		});  
+		builder.show();
+	}
+    
 //    
 //    
 //    private void openBottomOptionsDialog(int position) {//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
@@ -608,4 +675,13 @@ public class FileManagerWindowFragment extends Fragment {
 //		}
 //		return super.onOptionsItemSelected(item);
 //	}
+    
+    // AREA public parameter getter.
+    public File getDirectory() {
+		return this.dirFile;
+	}
+	
+	public String getDirectoryPath() {
+		return this.dirFile.getPath();
+	}
 }
