@@ -86,7 +86,7 @@ public class SearchActivity extends ListActivity{
 					visitedHistory.push(filePath);
 					openTopOrDown(filePath);
 				} else {
-					FSController.openFile(filePath, getApplicationContext());
+					FSController.openFile(new File(filePath), getApplicationContext());
 				}
 			}
 		});
@@ -252,7 +252,7 @@ public class SearchActivity extends ListActivity{
 		public void onClick(DialogInterface dialog, int which) {
 			switch(which){
 			case 0://open file.
-				FSController.openFile(filePath, getApplicationContext());
+				FSController.openFile(new File(filePath), getApplicationContext());
 				break;
 			case 1://Show in Top window
 				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_TOP, filePath);
@@ -297,9 +297,9 @@ public class SearchActivity extends ListActivity{
     	File f = new File(beDeletedFilePath);
     	boolean result = f.delete();
     	if(result == true){
-    		Toast.makeText(getApplicationContext(), beDeletedFilePath + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), beDeletedFilePath + getString(R.string.delete_deleteDataSucceed), Toast.LENGTH_LONG).show();
     	} else {
-    		Toast.makeText(getApplicationContext(), f.getName() + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), f.getName() + getString(R.string.delete_deleteDataFailure), Toast.LENGTH_LONG).show();
     	}
     	String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
 		String keyWord = et_searchName.getText().toString();
@@ -311,9 +311,9 @@ public class SearchActivity extends ListActivity{
     		String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
 			String keyWord = et_searchName.getText().toString();
 			startSearch(externalRoot, keyWord);
-    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDataSucceed, Toast.LENGTH_LONG).show();
     	} else {
-    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectoryFailure, Toast.LENGTH_LONG).show();
+    		Toast.makeText(getApplicationContext(), R.string.delete_deleteDataFailure, Toast.LENGTH_LONG).show();
     	}
     }
     private boolean deleteDirectoryNested(String inputPath){

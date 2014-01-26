@@ -18,17 +18,15 @@
     <string name="move_fileAlreadyExist">該檔案名稱已存在</string>
     
     <string name="copy_fileSameName">該檔案名稱已存在</string>
-	<string name="copy_copyFileSucceed">複製檔案成功</string>
-    <string name="copy_copyFileFailure">取消複製檔案</string>
+	<string name="copy_copyDataSucceed">複製檔案成功</string>
+    <string name="copy_copyDataFailure">取消複製檔案</string>
     
     <string name="delete_alertTitle">刪除檔案</string>
     <string name="delete_alertDeleteFileMsg">檔案將永久刪除</string>
     <string name="delete_alertDeleteDirMsg">資料夾內的資料將永久刪除，此動作將無法還原。</string>
     <string name="delete_deleteButton">刪   除</string>
-    <string name="delete_deleteFileSucceed"> 已刪除成功</string>
-    <string name="delete_deleteFileFailure"> 刪除失敗</string>
-    <string name="delete_deleteDirectorySucceed">刪除資料夾成功</string>
-    <string name="delete_deleteDirectoryFailure">刪除資料夾失敗</string>
+    <string name="delete_deleteDataSucceed"> 已刪除成功</string>
+    <string name="delete_deleteDataFailure"> 刪除失敗</string>
     
     <string name="alert_waitingDialogTitle">請稍後...</string>
     <string name="alertButton_ok">完   成</string>

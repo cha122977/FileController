@@ -1,28 +1,30 @@
 package com.cha122977.android.filecontroller;
 
+import java.io.File;
+
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActionBarActivity extends ActionBarActivity implements IFMWindowFragmentOwner {
+	
+	private static final String LOG_TAG = "MainActionBarActivity";
 	
 	private LinearLayout ll_rootWindow;
 	
@@ -30,6 +32,9 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		// request window feature.
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);  
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_action_bar_activity_layout);
 		
@@ -81,10 +86,10 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_createNewTopDir:
-			topWindow.createDirectory(topWindow.getDirectoryPath());
+			topWindow.createDirectory(topWindow.getDirectory());
 			return true;
 		case R.id.action_createNewBottomDir:
-			bottomWindow.createDirectory(bottomWindow.getDirectoryPath());
+			bottomWindow.createDirectory(bottomWindow.getDirectory());
 			return true;
 		case R.id.action_aboutApp:
 			showAboutDialog();
@@ -135,5 +140,30 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	@Override
 	public void refreshAllWindow() {
 		refreshLists();
+	}
+	
+	@Override
+	public void syncLists(FileManagerWindowFragment requester) {
+		String requestDirPath = requester.getDirectory().getAbsolutePath();
+		String anotherDirPath = getAnotherWindowDir(requester).getAbsolutePath();
+		if (requestDirPath.equals(anotherDirPath)) {
+			getAnotherWindow(requester).refresh();
+		}
+		requester.refresh();
+	}
+	
+	@Override
+	public FileManagerWindowFragment getAnotherWindow(FileManagerWindowFragment requester) {
+		return requester == topWindow? bottomWindow: topWindow;
+	}
+
+	@Override
+	public File getAnotherWindowDir(FileManagerWindowFragment requester) {
+		return getAnotherWindow(requester).getDirectory();
+	}
+
+	@Override
+	public void refreshOtherWindows(FileManagerWindowFragment requester) {
+		getAnotherWindow(requester).refresh();
 	}
 }

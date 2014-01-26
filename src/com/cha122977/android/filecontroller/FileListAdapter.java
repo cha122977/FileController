@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cha122977.android.filecontroller.FSController.MimeType;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -115,27 +117,27 @@ public class FileListAdapter extends BaseAdapter {
 		}
 		
 		File f = new File(filePath.get(position).toString());
-		switch (MimeType.getMimeType(f)) {
-		case MimeType.TYPE_DIRECTORY://directory
+		switch (FSController.getMimeType(f)) {
+		case DIRECTORY://directory
 			holder.icon.setImageBitmap(mIcon2);
 			break;
-		case MimeType.TYPE_UNKNOWN://file(unknown)
+		case UNKNOWN://file(unknown)
 			holder.icon.setImageBitmap(mIcon3);
 			break;
-		case MimeType.TYPE_AUDIO://audio
+		case AUDIO://audio
 			holder.icon.setImageBitmap(mIcon4);
 			break;
-		case MimeType.TYPE_VIDEO://video
+		case VIDEO://video
 			holder.icon.setImageBitmap(mIcon5);
 			break;
-		case MimeType.TYPE_IMAGE://image
+		case IMAGE://image
 			if (fileIcon.get(position) == null) {
 				holder.icon.setImageBitmap(mIcon6);
 			} else {
 				holder.icon.setImageBitmap(fileIcon.get(position));
 			}
 			break;
-		case MimeType.TYPE_TEXT://text
+		case TEXT://text
 			holder.icon.setImageBitmap(mIcon7);
 			break;
 		default://actually, this will not happen.
@@ -165,7 +167,7 @@ public class FileListAdapter extends BaseAdapter {
 						return;
 					}
 					String fp = filePath.get(i);
-					if (MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE) {
+					if (FSController.getMimeType(new File(fp)) == MimeType.IMAGE) {
 						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
 						fileIcon.set(i, bm != null? bm: mIcon_m1);
 						

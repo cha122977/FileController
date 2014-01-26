@@ -68,34 +68,34 @@ public class FileControllerActivity extends Activity {
 					waitingAlertDialog.show();
 					break;
 				case 1: // copy succeed
-					Toast.makeText(getApplicationContext(), R.string.copy_copyFileSucceed, Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), R.string.copy_copyDataSucceed, Toast.LENGTH_SHORT).show();
 					waitingAlertDialog.dismiss();
 					refreshListView();
 					break;
 				case 2: // copy failure
-					Toast.makeText(getApplicationContext(), R.string.copy_copyFileFailure, Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), R.string.copy_copyDataFailure, Toast.LENGTH_SHORT).show();
 					waitingAlertDialog.dismiss();
 					break;
 				case 3:
 					Bundle b3 = msg.getData();
 					String beDeletedFilePath3 = b3.getString("beDeletedFilePath");
-					Toast.makeText(getApplicationContext(), beDeletedFilePath3 + getString(R.string.delete_deleteFileSucceed), Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), beDeletedFilePath3 + getString(R.string.delete_deleteDataSucceed), Toast.LENGTH_LONG).show();
 					waitingAlertDialog.dismiss();
 					refreshListView();
 					break;
 				case 4:
 					Bundle b4 = msg.getData();
 					String beDeletedFilePath4 = b4.getString("beDeletedFilePath");
-					Toast.makeText(getApplicationContext(), beDeletedFilePath4 + getString(R.string.delete_deleteFileFailure), Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), beDeletedFilePath4 + getString(R.string.delete_deleteDataFailure), Toast.LENGTH_LONG).show();
 					waitingAlertDialog.dismiss();
 					break;
 				case 5: // delete directory succeed.
-					Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectorySucceed, Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), R.string.delete_deleteDataSucceed, Toast.LENGTH_LONG).show();
 					waitingAlertDialog.dismiss();
 					refreshListView();
 					break;
 				case 6:
-					Toast.makeText(getApplicationContext(), R.string.delete_deleteDirectoryFailure, Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), R.string.delete_deleteDataFailure, Toast.LENGTH_LONG).show();
 					waitingAlertDialog.dismiss();
 					break;
 				default: // do nothing.
@@ -238,7 +238,7 @@ public class FileControllerActivity extends Activity {
 				if(new File(topFilePath.get(arg2)).isDirectory()){
 					openTopFile(true, topFilePath.get(arg2));
 				}else{
-					FSController.openFile(topFilePath.get(arg2), getApplicationContext());
+					FSController.openFile(new File(topFilePath.get(arg2)), getApplicationContext());
 				}
 			}
 		});
@@ -250,7 +250,7 @@ public class FileControllerActivity extends Activity {
 				if (new File(bottomFilePath.get(arg2)).isDirectory()) {
 					openBottomFile(true, bottomFilePath.get(arg2));
 				}else{
-					FSController.openFile(bottomFilePath.get(arg2), getApplicationContext());
+					FSController.openFile(new File(bottomFilePath.get(arg2)), getApplicationContext());
 				}
 			}
 		});
@@ -380,7 +380,7 @@ public class FileControllerActivity extends Activity {
 					if (new File(selectedFilePath).isDirectory()) {
 						openTopFile(true, selectedFilePath);
 					} else {
-						FSController.openFile(selectedFilePath, getApplicationContext());
+						FSController.openFile(new File(selectedFilePath), getApplicationContext());
 					}
 					break;
 				case 1://Rename file.
@@ -425,7 +425,7 @@ public class FileControllerActivity extends Activity {
 					if(new File(selectedFilePath).isDirectory()){
 						openTopFile(true, selectedFilePath);
 					} else {
-						FSController.openFile(selectedFilePath, getApplicationContext());
+						FSController.openFile(new File(selectedFilePath), getApplicationContext());
 					}
 					break;
 				case 1://Rename file.

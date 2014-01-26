@@ -18,17 +18,15 @@
     <string name="move_fileAlreadyExist">This file is already.</string>
     
     <string name="copy_fileSameName">Already have this file.</string>
-	<string name="copy_copyFileSucceed">Copy file succeed.</string>
-    <string name="copy_copyFileFailure">Copy file error.</string>
+	<string name="copy_copyDataSucceed">Copy file succeed.</string>
+    <string name="copy_copyDataFailure">Copy file error.</string>
     
     <string name="delete_alertTitle">Delete File</string>
     <string name="delete_alertDeleteFileMsg">The file will removed forever.</string>
     <string name="delete_alertDeleteDirMsg">All file in this directory will also be deleted.</string>
     <string name="delete_deleteButton">Delete</string>
-    <string name="delete_deleteFileSucceed"> deleted succeed.</string>
-    <string name="delete_deleteFileFailure"> deleted failure.</string>
-    <string name="delete_deleteDirectorySucceed">Delete directory succeed.</string>
-    <string name="delete_deleteDirectoryFailure">Delete directory failure.</string>
+    <string name="delete_deleteDataSucceed"> deleted succeed.</string>
+    <string name="delete_deleteDataFailure"> deleted failure.</string>
     
     <string name="alert_waitingDialogTitle">Please wait...</string>
     <string name="alertButton_ok">OK</string>

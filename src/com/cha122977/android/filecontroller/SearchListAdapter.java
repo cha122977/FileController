@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cha122977.android.filecontroller.FSController.MimeType;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,10 +20,10 @@ import android.widget.TextView;
 
 public class SearchListAdapter extends BaseAdapter {
 	
-	Handler mHandler = new Handler(){
+	Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch(msg.what){
+			switch (msg.what) {
 			case 0:
 				notifyDataSetChanged();
 				break;
@@ -37,21 +39,21 @@ public class SearchListAdapter extends BaseAdapter {
 	private List<String> filePath;
 	private List<Bitmap> fileIcon;
 	
-	private Bitmap mIcon1;//opened folder
-	private Bitmap mIcon2;//folder
-	private Bitmap mIcon3;//file
-	private Bitmap mIcon4;//audio
-	private Bitmap mIcon5;//video
-	private Bitmap mIcon6;//picture
-	private Bitmap mIcon7;//text
+	private Bitmap mIcon1; // opened folder
+	private Bitmap mIcon2; // folder
+	private Bitmap mIcon3; // file
+	private Bitmap mIcon4; // audio
+	private Bitmap mIcon5; // video
+	private Bitmap mIcon6; // picture
+	private Bitmap mIcon7; // text
 	
-	private Bitmap mIcon_m1;//-1, unknown image
+	private Bitmap mIcon_m1; // -1, unknown image
 	
 	public SearchListAdapter(Context context, List<String> filePath) {
-		mLayoutInflater = LayoutInflater.from(context);//不用就拿不到原生Activity(FindMusicActivity)的Layout
+		mLayoutInflater = LayoutInflater.from(context);
 		this.filePath=filePath;
 		fileIcon = new ArrayList<Bitmap>();
-		for(int i=0; i<filePath.size(); i++){
+		for (int i=0; i<filePath.size(); i++) {
 			fileIcon.add(i, null);
 		}
 		mIcon1=BitmapFactory.decodeResource(context.getResources(), R.drawable.open_v2);
@@ -84,7 +86,7 @@ public class SearchListAdapter extends BaseAdapter {
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
-		if(convertView==null){
+		if (convertView==null) {
 			convertView = mLayoutInflater.inflate(R.layout.search_list_row, null);
 			holder = new ViewHolder();
 			holder.icon = (ImageView)convertView.findViewById(R.id.fileIcon);
@@ -92,32 +94,32 @@ public class SearchListAdapter extends BaseAdapter {
 			holder.filePath = (TextView)convertView.findViewById(R.id.filePath);
 			convertView.setTag(holder);
 
-		}else{
+		} else {
 			holder = (ViewHolder)convertView.getTag();
 		}
 		
 		File f = new File(filePath.get(position).toString());
-		switch(MimeType.getMimeType(f)){
-		case MimeType.TYPE_DIRECTORY://directory
+		switch (FSController.getMimeType(f)) {
+		case DIRECTORY://directory
 			holder.icon.setImageBitmap(mIcon2);
 			break;
-		case MimeType.TYPE_UNKNOWN://file(unknown)
+		case UNKNOWN://file(unknown)
 			holder.icon.setImageBitmap(mIcon3);
 			break;
-		case MimeType.TYPE_AUDIO://audio
+		case AUDIO://audio
 			holder.icon.setImageBitmap(mIcon4);
 			break;
-		case MimeType.TYPE_VIDEO://video
+		case VIDEO://video
 			holder.icon.setImageBitmap(mIcon5);
 			break;
-		case MimeType.TYPE_IMAGE://image
+		case IMAGE://image
 			if(fileIcon.get(position) == null){
 				holder.icon.setImageBitmap(mIcon6);
 			} else {
 				holder.icon.setImageBitmap(fileIcon.get(position));
 			}
 			break;
-		case MimeType.TYPE_TEXT://text
+		case TEXT://text
 			holder.icon.setImageBitmap(mIcon7);
 			break;
 		default://actually, this will not happen.
@@ -128,20 +130,20 @@ public class SearchListAdapter extends BaseAdapter {
 		holder.filePath.setText(f.getAbsolutePath());
 		return convertView;
 	}
-	static class ViewHolder{
+	static class ViewHolder {
 		ImageView icon;
 		TextView fileName;
 		TextView filePath;
 	}
 	
-	private void processScaledImage(){//just for set scaled image. if we set all icon here, performance will bad. 
+	private void processScaledImage() {//just for set scaled image. if we set all icon here, performance will bad. 
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				for(int i=0; i<filePath.size(); i++){
+				for (int i=0; i<filePath.size(); i++) {
 					String fp = filePath.get(i);
-					if(MimeType.getMimeType(new File(fp)) == MimeType.TYPE_IMAGE){
-						try{
+					if (FSController.getMimeType(new File(fp)) == MimeType.IMAGE) {
+						try {
 							BitmapFactory.Options options = new BitmapFactory.Options();
 							options.inJustDecodeBounds = true; //limit the image to bounds
 							BitmapFactory.decodeFile(fp, options);//get the height & width of image(save in options)
@@ -154,7 +156,7 @@ public class SearchListAdapter extends BaseAdapter {
 							
 					        int scaledPower = 1;
 					        
-					        while(height/2 >= newHeight || width/2 >= newWidth){
+					        while (height/2 >= newHeight || width/2 >= newWidth) {
 					        	scaledPower++;
 					        	height /= 2;
 					        	width  /= 2;
@@ -164,15 +166,15 @@ public class SearchListAdapter extends BaseAdapter {
 					        options.inSampleSize=scaledPower;
 					        Bitmap vBitmap = BitmapFactory.decodeFile(fp, options);
 					        
-							if(vBitmap == null){//避免副檔名錯誤產生crash 不寫則vB2那行會crash掉
-								fileIcon.set(i, mIcon_m1);//放上unknown_image
+							if (vBitmap == null) { // no such this bitmap.
+								fileIcon.set(i, mIcon_m1); // set to unknown icon
 								continue;
 							}
-							// Bitmap 縮放
+							// scaled Bitmap 
 							Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
 							fileIcon.set(i, vB2);//add icon to fileIcon.
 							mHandler.sendEmptyMessage(0);//notify data set change
-						} catch(Exception e){
+						} catch (Exception e) {
 							fileIcon.set(i, mIcon_m1);
 							continue;
 						}

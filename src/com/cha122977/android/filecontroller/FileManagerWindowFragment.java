@@ -5,10 +5,10 @@ import java.io.File;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -28,65 +28,134 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cha122977.android.filecontroller.FSController.RenameResult;
+
 public class FileManagerWindowFragment extends Fragment {
 
 	private static final String LOG_TAG = "FileManagerWindow";
-	
+
 	private Activity activity;
-	
+	private IFMWindowFragmentOwner owner;
+
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
+		
 		this.activity = activity;
-	}
-	
-	public FileManagerWindowFragment() {
+		this.owner = (IFMWindowFragmentOwner) activity;
 	}
 
+	public FileManagerWindowFragment() {
+	}
+	
 	// UI widget.
 	private ImageView iv_dirImage;
 	private TextView tv_filePath;
-	
+
 	private ListView lv_fileList;
+
+	private static final int SYNC_ALL_LISTS = -4;
+	private static final int REFRESH_OTHER_WINDWOS = -3;
+	private static final int REFRESH_ALL_LISTS = -2;
+	private static final int REFRESH = -1;
+	private static final int PROCESSING = 0;
+	private static final int COPY_DATA_SUCCEED = 1;
+	private static final int COPY_DATA_FAILED = 2; 
+	private static final int DELETE_DATA_SUCCEED = 3;
+	private static final int DELETE_DATA_FAILED = 4;
+	
+	private static final String NAME_PROCESSED_DATA = "processedData";
+	
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case SYNC_ALL_LISTS:
+				owner.syncLists(FileManagerWindowFragment.this);
+				break;
+			case REFRESH_OTHER_WINDWOS:
+				owner.refreshOtherWindows(FileManagerWindowFragment.this);
+				break;
+			case REFRESH_ALL_LISTS:
+				owner.refreshAllWindow();
+				break;
+			case REFRESH:
+				refresh();
+				break;
+			case PROCESSING:
+				activity.setProgressBarIndeterminateVisibility(true);
+				break;
+			case COPY_DATA_SUCCEED: // copy succeed
+				Toast.makeText(activity, R.string.copy_copyDataSucceed, Toast.LENGTH_SHORT).show();
+				activity.setProgressBarIndeterminateVisibility(false);
+				sendEmptyMessage(REFRESH_OTHER_WINDWOS);
+				break;
+			case COPY_DATA_FAILED: // copy failure
+				Toast.makeText(activity, R.string.copy_copyDataFailure, Toast.LENGTH_SHORT).show();
+				activity.setProgressBarIndeterminateVisibility(false);
+				break;
+			case DELETE_DATA_SUCCEED:
+				String deleteSucceedDataPath = msg.getData().getString(NAME_PROCESSED_DATA);
+				Toast.makeText(activity, deleteSucceedDataPath + getString(R.string.delete_deleteDataSucceed), Toast.LENGTH_LONG).show();
+				activity.setProgressBarIndeterminateVisibility(false);
+				sendEmptyMessage(SYNC_ALL_LISTS);
+				break;
+			case DELETE_DATA_FAILED:
+				String deleteFailedDataPath = msg.getData().getString(NAME_PROCESSED_DATA);
+				Toast.makeText(activity, deleteFailedDataPath + getString(R.string.delete_deleteDataFailure), Toast.LENGTH_LONG).show();
+				activity.setProgressBarIndeterminateVisibility(false);
+				break;
+			default: // do nothing.
+				break;
+			}
+		}
+	};
 	
 	// Class variable.
 	private File dirFile;
 	private File[] listFilesOfDirFile;
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.file_manager_window_fragment_layout, container, false);
-		
+
 		iv_dirImage = (ImageView) rootView.findViewById(R.id.dirImage_FileManagerWindow_ImageView);
 		tv_filePath = (TextView) rootView.findViewById(R.id.dirPath_FileManagerWindow_ImageView);
 		lv_fileList = (ListView) rootView.findViewById(R.id.fileList_FileManagerWindow_ImageView);
-		
+
 		return rootView;
 	}
-	
+
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		// initial variable first to avoid parameters are used in the following functions.
+		// initial variable first to avoid parameters are used in the following
+		// functions.
 		initialVariable();
 		setListeners();
 		
 		// open default directory at last.
 		openDefaultDirectory();
 	}
-	
-	private void initialVariable() {
-		
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		mHandler.sendEmptyMessage(REFRESH);
 	}
 	
+	private void initialVariable() {
+
+	}
+
 	private void setListeners() {
 		iv_dirImage.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				openDirectory(dirFile.getParentFile());
 			}
-    	});
-		
+		});
+
 		tv_filePath.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -94,36 +163,34 @@ public class FileManagerWindowFragment extends Fragment {
 				// TODO open keyboard and modify file path by userself.
 			}
 		});
-		
+
 		lv_fileList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				openData(listFilesOfDirFile[position]);
 			}
 		});
-		
-		// register menu of file.(including dir and file)
-		registerForContextMenu(tv_filePath);
-		registerForContextMenu(lv_fileList);
 	}
-	
+
 	private void openDefaultDirectory() {
 		String defaultDirPath;
-    	if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
-        	// sdcard exist
-    		defaultDirPath = AppConstant.SDCARD_ROOT;
-        } else {
-        	// sdcard doesn't exist
-        	defaultDirPath = AppConstant.ROOT;
-        }
-    	
-    	openDirectory(new File(defaultDirPath));
-    }
-	
+		if (Environment.getExternalStorageState().equals(
+				android.os.Environment.MEDIA_MOUNTED)) {
+			// sdcard exist
+			defaultDirPath = AppConstant.SDCARD_ROOT;
+		} else {
+			// sdcard doesn't exist
+			defaultDirPath = AppConstant.ROOT;
+		}
+
+		openDirectory(new File(defaultDirPath));
+	}
+
 	// AREA Open File
-	
+
 	/**
 	 * File or Directory must be opened from this function.
+	 * 
 	 * @param file
 	 * @return true if open succeed, false else.
 	 */
@@ -131,556 +198,394 @@ public class FileManagerWindowFragment extends Fragment {
 		if (!file.canRead()) {
 			Toast.makeText(activity, R.string.fileCannotRead, Toast.LENGTH_SHORT).show();
 			return false;
-		} else if (!file.exists()) { //file doesn't exist. (This may happened when delete data from other app)
+		} else if (!file.exists()) { // file doesn't exist. (This may happened when delete data from other app)
 			// open parent directory insteed.
 			String parentPath = file.getParent();
 			if (parentPath != null) {
 				openDirectory(new File(parentPath));
-    		} else {
-    			openDefaultDirectory();
-    		}
-    		Toast.makeText(activity, R.string.fileDoesNotExists, Toast.LENGTH_SHORT).show();
-    		return false;
+			} else {
+				openDefaultDirectory();
+			}
+			Toast.makeText(activity, R.string.fileDoesNotExists, Toast.LENGTH_SHORT).show();
+			return false;
 		}
-		
+
 		if (file.isDirectory()) {
 			return openDirectory(file);
 		} else {
 			return openFile(file);
 		}
 	}
-	
+
 	/**
 	 * function to open directory's content.
+	 * 
 	 * @param dir
 	 * @return true if open directory succeed, false else.
 	 */
-    private boolean openDirectory(File dir) {
-    	if (dir.canRead()) {
-	    	File[] fList = dir.listFiles();
-	    	
-	    	fList = FSController.reSort(fList); //reSort FileList
-	    	
-	    	// set variable.
-	    	this.dirFile = dir;
-	    	this.listFilesOfDirFile = fList;
-	    	
-	    	// set UI.
-	    	tv_filePath.setText(dir.getPath());
-	    	
-        	FileListAdapter fa = (FileListAdapter)lv_fileList.getAdapter();
-        	if (fa!=null) {
-        		fa.drop(); // stop process image thread of dropped adapter 
-        	}
-        	
-	    	lv_fileList.setAdapter(new FileListAdapter(activity, fList));
-	    	
-	    	return true;
-	    }
-    	return false;
-    }
-    
-    /**
+	private boolean openDirectory(File dir) {
+		if (dir.canRead()) {
+			File[] fList = dir.listFiles();
+
+			fList = FSController.reSort(fList); // reSort FileList
+
+			// set variable.
+			this.dirFile = dir;
+			this.listFilesOfDirFile = fList;
+
+			// set UI.
+			tv_filePath.setText(dir.getPath());
+
+			FileListAdapter fa = (FileListAdapter) lv_fileList.getAdapter();
+			if (fa != null) {
+				fa.drop(); // stop process image thread of dropped adapter
+			}
+
+			lv_fileList.setAdapter(new FileListAdapter(activity, fList));
+
+			// register new parentDir and list.
+			registerForContextMenu(tv_filePath);
+			registerForContextMenu(lv_fileList);
+			
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * function to open file content.
-	 * @param filePath
+	 * @param file opened file
 	 * @return true if open file succeed, false else.
 	 */
-    private boolean openFile(File file) {
-    	Intent intent = new Intent();
-	    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	    intent.setAction(android.content.Intent.ACTION_VIEW);
-	    
-	    /* get file mimetype */
-	    String type = MimeType.getMimeType(file.getName());
-	    
-	    /* open file accroding its mimetype */
-	    intent.setDataAndType(Uri.fromFile(file), type);
-	    activity.startActivity(intent); 
-    	return true;
-    }
-    
-    // AREA Options
-    
-    private boolean openDataOptions(File file) {
-    	// TODO check if file canRead?
-    	if (file.isDirectory()) {
-    		return openDirectoryOptions(file);
-    	} else {
-    		return openFileOptions(file);
-    	}
-    }
-    
-    private boolean openDirectoryOptions(File file) {
-    	
-    	return false;
-    }
-    
-    private boolean openFileOptions(File file) {
-    	return false;
-    }
-    
-    public void refresh() {
-    	openDirectory(dirFile);
-    }
-    
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = activity.getMenuInflater();
-        Log.i(LOG_TAG, "ceate context menu...");
-        if (v == lv_fileList) {
-        	Log.i(LOG_TAG, "v == lv_fileList");
-        	AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) menuInfo;
-        	if (listFilesOfDirFile[acmi.position].isDirectory()) {
-        		inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
-        	} else {
-        		inflater.inflate(R.menu.file_manager_window_file_options_menu, menu);
-        	}
-        } else if (v == tv_filePath) {
-        	inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
-        }
-    }
-    
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-    	AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
-    	switch(item.getItemId()) {
-    	// TODO complete these.
-    	// for directory.
-    	case R.id.menu_createDir:
-    		return true;
-    	case R.id.menu_renameDir:
-    		return true;
-    	case R.id.menu_showDirInfo:
-    		return true;
-    	case R.id.menu_moveDir:
-    		return true;
-    	case R.id.menu_copyDirToOtherSide:
-    		return true;
-    	case R.id.menu_deleteDir:
-    		return true;
-    	// for file.
-    	case R.id.menu_renameFile:
-    		return true;
-    	case R.id.menu_showFileInfo:
-    		return true;
-    	case R.id.menu_moveFile:
-    		return true;
-    	case R.id.menu_copyFileToOtherSide:
-    		return true;
-    	case R.id.menu_deleteFile:
-    		return true;
-    	}
-    	
-    	return super.onContextItemSelected(item);
-    }
+	private boolean openFile(File file) {
+		return FSController.openFile(file, activity);
+	}
 
-    public void createDirectory(final String parentDirPath) {
-		//show a dialog to get new name.
+	public void refresh() {
+		openDirectory(dirFile);
+	}
+
+	// AREA options
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
+		MenuInflater inflater = activity.getMenuInflater();
+		Log.i(LOG_TAG, "ceate context menu...");
+		if (v == lv_fileList) {
+			AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) menuInfo;
+			Log.d(LOG_TAG, "listFilesOfDirFile: " + listFilesOfDirFile[acmi.position].getPath());
+			if (listFilesOfDirFile[acmi.position].isDirectory()) {
+				inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
+			} else {
+				inflater.inflate(R.menu.file_manager_window_file_options_menu, menu);
+			}
+		} else if (v == tv_filePath) {
+			inflater.inflate(R.menu.file_manager_window_parent_options_menu, menu);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
+		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
+		switch (item.getItemId()) {
+		case R.id.menu_parentCreateDir:
+			createDirectory(dirFile);
+			return true;
+		case R.id.menu_showParentDirInfo:
+			// TODO
+			return true;
+		case R.id.menu_createDir:
+			createDirectory(listFilesOfDirFile[acmi.position]);
+			return true;
+		case R.id.menu_renameDir:
+		case R.id.menu_renameFile:
+			openRenameDataDialog(listFilesOfDirFile[acmi.position]);
+			return true;
+		case R.id.menu_showDirInfo:
+		case R.id.menu_showFileInfo:
+			// TODO
+			return true;
+		case R.id.menu_moveDirToOtherSide:
+		case R.id.menu_moveFileToOtherSide:
+			openMoveDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
+			return true;
+		case R.id.menu_copyDirToOtherSide:
+		case R.id.menu_copyFileToOtherSide:
+			openCopyDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
+			return true;
+		case R.id.menu_deleteDir:
+		case R.id.menu_deleteFile:
+			openDeleteDataDialog(listFilesOfDirFile[acmi.position]);
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
+	public void createDirectory(final File parentDir) {
+		// show a dialog to get new name.
+		LayoutInflater inflater = LayoutInflater.from(activity);
+		View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
+		final EditText et_renameInput = (EditText) renameDialogView
+				.findViewById(R.id.input);
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setCancelable(false);
+		builder.setTitle(R.string.createDir_createNewDirectory);
+		builder.setView(renameDialogView);
+		builder.setPositiveButton(R.string.alertButton_ok,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						createDirectory(parentDir, et_renameInput.getText().toString());
+					}
+				});
+		builder.setNegativeButton(R.string.alertButton_cancel,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						Toast.makeText(activity, R.string.createDir_createDirCancel, Toast.LENGTH_SHORT).show();
+					}
+				});
+		builder.show();
+	}
+
+	private void createDirectory(File parentDir, String childDirName) {
+		if (FSController.createDirectory(parentDir, childDirName)) {
+			Toast.makeText(activity, R.string.createDir_createDirSucceed, Toast.LENGTH_LONG).show();
+			// refresh all windows.
+			// Other window may looking at same directory, so
+			// refresh all to avoid unsynchronized.
+			mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
+		} else {
+			Toast.makeText(activity, R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
+		}
+	}
+	
+	/**
+	 * Move data(dir/file) to target file.
+	 * @param movedFile source file
+	 * @param targetDir targetDirectory.
+	 */
+	private void openMoveDataDialog(final File movedFile, File targetDir) {
+    	final File destFile = new File(targetDir.getPath() + File.separator + movedFile.getName());
+    	if (destFile.exists()) {
+    		// There are same name file in target directory,
+    		// ask for replace or cancel the move action.
+    		AlertDialog.Builder builder = new AlertDialog.Builder(activity);//use to select option
+        	builder.setTitle(R.string.move_fileAlreadyExist);
+    		builder.setItems(R.array.alert_moveFileSameName, new DialogInterface.OnClickListener() {
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				switch (which) {
+    				case 0: // Replace file: 
+    					moveData(movedFile, destFile);
+    					break;
+    				case 1: // Cancel 
+    					Toast.makeText(activity, R.string.move_moveFileCancel, Toast.LENGTH_LONG);
+    					break;
+    				default:
+    					// Do nothing
+    				}
+    			}
+    		});
+    		builder.show();
+    		
+    	} else { // there is no same name file
+    		boolean result = movedFile.renameTo(destFile);
+    		if (result == true) { // copy succeed
+    			Toast.makeText(activity, R.string.move_moveFileSucceed, Toast.LENGTH_LONG).show();
+    			if (movedFile.exists()) { // if origin file still exist.
+    				movedFile.delete();
+    			}
+    		} else { //copy failure
+    			Toast.makeText(activity, R.string.move_moveFileFailure, Toast.LENGTH_LONG).show();
+    		}
+    		mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
+    	}
+    }
+	
+	private void moveData(File movedFile, File destFile) {
+		boolean result = movedFile.renameTo(destFile);
+		if (result == true) {
+			Toast.makeText(activity, R.string.move_replaceSucceed, Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(activity, R.string.move_replaceFailure, Toast.LENGTH_LONG).show();
+		}
+		mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
+	}
+
+	private void openRenameDataDialog(final File renamedData) {
+		// use to show dialog to get new file name,
+		// positive button will call function to rename file.
+		// show a dialog to get new name.
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
 		final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);  
-		builder.setCancelable(false);   
-		builder.setTitle(R.string.createDir_createNewDirectory);  
-		builder.setView(renameDialogView);  
-		builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
-			public void onClick(DialogInterface dialog, int whichButton) {  
-				if (FSController.createDirectory(parentDirPath, et_renameInput.getText().toString())) {
-					Toast.makeText(activity.getApplicationContext(), R.string.createDir_createDirSucceed, Toast.LENGTH_LONG).show();
-					// refresh all windows. 
-					// Other window may looking at same directory, so refresh all to avoid unsynchronized.
-					((IFMWindowFragmentOwner) activity).refreshAllWindow();
-				} else {
-					Toast.makeText(activity.getApplicationContext(), R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
-				}
-			}  
-		});
-		builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
+		et_renameInput.setText(renamedData.getName());
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setCancelable(false);
+		builder.setTitle(R.string.rename_renameAlertTitle);
+		builder.setView(renameDialogView);
+		builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				Toast.makeText(activity.getApplicationContext(), R.string.createDir_createDirCancel, Toast.LENGTH_SHORT).show();
-			}  
-		});  
+				renameData(renamedData, et_renameInput.getText().toString());
+			}
+		});
+		builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				//do nothing
+				Toast.makeText(activity, R.string.rename_renameFileCancel, Toast.LENGTH_SHORT).show();
+			}
+		});
 		builder.show();
 	}
-    
-//    
-//    
-//    private void openBottomOptionsDialog(int position) {//run this function when bottom listView clickItemLongClick(it will show menu to choose action)
-//    	final String selectedFilePath = bottomFilePath.get(position);
-//    	String[] s = getResources().getStringArray(R.array.alert_fileSelectedOption);
-//    	s[3] += " " + tv_topDir.getText().toString();//set the string of item
-//    	s[4] += " " + tv_topDir.getText().toString();
-//    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//		builder.setTitle(bottomFilePath.get(position));
-//		builder.setItems(s, new DialogInterface.OnClickListener() {
-//			@Override
-//			public void onClick(DialogInterface dialog, int which) {
-//				switch (which) {
-//				case 0://open file.
-//					if(new File(selectedFilePath).isDirectory()){
-//						openTopFile(true, selectedFilePath);
-//					} else {
-//						ListFileProcessor.openFile(selectedFilePath, getApplicationContext());
-//					}
-//					break;
-//				case 1://Rename file.
-//					renameFile(selectedFilePath);
-//					break;
-//				case 2://show file information
-//					ListFileProcessor.showFileInformation(selectedFilePath, FileControllerActivity.this);
-//					break;
-//				case 3://Move
-//					moveFile(selectedFilePath, tv_topDir.getText().toString());
-//					break;
-//				case 4://Copy file to other side.
-//					copyFile(selectedFilePath, tv_topDir.getText().toString());
-//					break;
-//				case 5://Delete
-//					openDeleteCheckDialog(selectedFilePath);
-//					break;
-//				case 6://Cancel
-//					//Do nothing
-//					break;
-//				default:
-//					//Do nothing
-//					break;
-//				}
-//			}
-//		});
-//		builder.show();
-//    }
-//    
-//    private void moveFile(String movedFile, String target) {
-//    	final File file = new File(movedFile);//source file
-//    	final File targetFilePath = new File(target + "/" + (new File(movedFile).getName()));
-//    	if (targetFilePath.exists()) {
-//    		/**
-//    		 * There are same name file in target directory, need to change name or cancel move!
-//    		 */
-//    		AlertDialog.Builder builder = new AlertDialog.Builder(this);//use to select option
-//        	builder.setTitle(R.string.move_fileAlreadyExist);
-//    		builder.setItems(R.array.alert_moveFileSameName, new DialogInterface.OnClickListener() {
-//    			@Override
-//    			public void onClick(DialogInterface dialog, int which) {
-//    				switch (which) {
-//    				case 0://Replace file: 
-//    					boolean result = file.renameTo(targetFilePath);
-//    					if (result == true) {
-//    						Toast.makeText(getApplicationContext(), R.string.move_replaceSucceed, Toast.LENGTH_LONG).show();
-//    					} else {
-//    						Toast.makeText(getApplicationContext(), R.string.move_replaceFailure, Toast.LENGTH_LONG).show();
-//    					}
-//    					refreshListView();
-//    					break;
-//    				case 1://Cancel 
-//    					//Do nothing
-//    					Toast.makeText(getApplicationContext(), R.string.move_moveFileCancel, Toast.LENGTH_LONG);
-//    					break;
-//    				default:
-//    					//Do nothing
-//    				}
-//    			}
-//    		});
-//    		builder.show();
-//    		
-//    	} else { //there is no same name file
-//    		boolean result = file.renameTo(targetFilePath);
-//    		if (result == true) { // copy succeed
-//    			Toast.makeText(getApplicationContext(), R.string.move_moveFileSucceed, Toast.LENGTH_LONG).show();
-//    			if ( file.exists() ) { // if origin file still exist.
-//    				file.delete();
-//    			}
-//    		} else {//copy failure
-//    			Toast.makeText(getApplicationContext(), R.string.move_moveFileFailure, Toast.LENGTH_LONG).show();
-//    		}
-//    	}
-//		refreshListView();
-//    }
-//    
-//    private void renameFile(final String renamedFilePath) {//use to show dialog to get new file name, positive button will call function to rename file.
-//    	//show a dialog to get new name.
-//    	LayoutInflater inflater = LayoutInflater.from(this);
-//    	View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
-//    	final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
-//    	et_renameInput.setText(new File(renamedFilePath).getName());
-//    	AlertDialog.Builder builder = new AlertDialog.Builder(this);  
-//        builder.setCancelable(false);   
-//        builder.setTitle(R.string.rename_renameAlertTitle);  
-//        builder.setView(renameDialogView);  
-//        builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {  
-//        			public void onClick(DialogInterface dialog, int whichButton) {  
-//        				checkFileNameAndRename(renamedFilePath, et_renameInput.getText().toString());
-//                    }  
-//                });
-//        builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {  
-//                    public void onClick(DialogInterface dialog, int whichButton) {
-//                    	//do nothing
-//                    	Toast.makeText(getApplicationContext(), R.string.rename_renameFileCancel, Toast.LENGTH_SHORT).show();
-//                    }  
-//                });  
-//        builder.show();
-//    }
-//    
-//    private void copyFile(final String copieer, final String target) { //copy file to target(directory) as same name.
-//    	new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				mHandler.sendEmptyMessage(0);
-//		    	
-//		    	String copieerFileName = new File(copieer).getName();//find the file name of copied file name
-//		    	final String completeTargetFilePath = target + "/" + copieerFileName;//[aaa/bbb/ccc.xxx]
-//		    	//Avoid replace the presence data which have the same file name in target directory
-//		    	if(new File(completeTargetFilePath).exists() == false){//there is no file have same name at target path.
-//		    		doCopyFile(copieer, completeTargetFilePath);//copy file
-//		    	} else {//have same file name in target directory.
-//		        	String[] s = getResources().getStringArray(R.array.alert_sameFileNameOption);
-//		        	s[0] += completeTargetFilePath;//setting pre-replaced file name
-//		        	int fileNameCounter=1;
-//		        	final String newFileName;
-//		        	String temp;//use to find usable fileName.
-//		        	int pointIndex = copieerFileName.lastIndexOf(".");
-////		    		Log.d("TAG", "Index of . is: " + pointIndex);
-//		        	while (true) {
-//		        		if (pointIndex != -1) {//file have attachment 
-//		        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//�s"."�@�_�ɤW
-//		        		} else {//file does not have attachment
-//		        			temp = copieerFileName + "(" + fileNameCounter + ")";
-//		        		}
-//		        		if (new File(target + "/" + temp).exists() == false) {//new file name is independence
-//		        			newFileName = temp;
-//		        			break;
-//		        		}
-//		        		fileNameCounter++;
-//		        	}
-//		        	s[1] += "\n" + newFileName;//setting new fileName to option.
-//		        	 
-//		        	AlertDialog.Builder builder = new AlertDialog.Builder(FileControllerActivity.this);//use to select option
-//		        	builder.setTitle(R.string.copy_fileSameName);
-//		    		builder.setItems(s, new DialogInterface.OnClickListener() {
-//		    			@Override
-//		    			public void onClick(DialogInterface dialog, int which) {
-//		    				switch(which){
-//		    				case 0://Replace file: 
-//		    					doCopyFile(copieer, completeTargetFilePath);
-//		    					break;
-//		    				case 1://Copied file rename as: 
-//		    					doCopyFile(copieer, target +"/"+ newFileName);
-//		    					break;
-//		    				case 2://Cancel copy
-//		    					//Do nothing
-//		    					break;
-//		    				default:
-//		    					//Do nothing
-//		    				}
-//		    			}
-//		    		});
-//		    		builder.show();
-//		    	}
-//			}
-//		}).start();
-//    	
-//    }
-//    
-//    private void openDeleteCheckDialog(final String selectedPath) {//use to delete file and directory.
-//    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//    	builder.setTitle(R.string.delete_alertTitle)
-//				.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						Toast.makeText(getApplicationContext(), R.string.action_cancel, Toast.LENGTH_SHORT).show();
-//					}
-//				});
-//    	if (new File(selectedPath).isFile()) {//if selected one is file
-//    		builder.setMessage(R.string.delete_alertDeleteFileMsg)
-//		    		.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener() {
-//						@Override
-//						public void onClick(DialogInterface dialog, int which) {
-//							pureDeleteFile(selectedPath);
-//						}
-//					})
-//    				.show();
-//    	} else { //if selected one is directory
-//    		builder.setMessage(R.string.delete_alertDeleteDirMsg)
-//		    		.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener() {
-//						@Override
-//						public void onClick(DialogInterface dialog, int which) {
-//							pureDeleteDirectory(selectedPath);
-//						}
-//					})
-//					.show();
-//    	}
-//    }
-//    
-//    //------------Be call in File Option function-----//
-//    
-//    private void checkFileNameAndRename(String renamedFilePath, String newFileName) {//check if file name is exist and rename file
-//    	File newFile = new File(new File(renamedFilePath).getParent() +"/"+ newFileName);
-//    	if(newFile.exists()) {
-//    		Toast.makeText(getApplicationContext(), newFileName + getString(R.string.rename_fileAlreadyExist), Toast.LENGTH_LONG).show();
-//    	} else {
-//    		File renamedFile = new File(renamedFilePath);
-//    		boolean result = renamedFile.renameTo(newFile);
-////    		Log.d("TAG", "rename file result: " + result );
-//    		if (result==true) {
-//    			Toast.makeText(getApplicationContext(), R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
-//    		} else {
-//    			Toast.makeText(getApplicationContext(), R.string.rename_renameFileFailure, Toast.LENGTH_SHORT).show();
-//    		}    		
-//    		refreshListView();
-//    	}
-//    }
-//    private void doCopyFile(String copieerFilePath, String targetFilePath) {//start point of copy file function.
-//    	boolean result = pureCopyFile(copieerFilePath, targetFilePath);
-//    	if (result == true) {
-//    		//show information to user.
-//    		mHandler.sendEmptyMessage(1);
-////            refreshListView();
-//    	} else {
-//    		mHandler.sendEmptyMessage(2);
-//    	}
-//    }
-//    private boolean pureCopyFile(String copieerFilePath, String targetFilePath) {//copy "copieerFilePath"(file) to "targetFilePath"(file).
-//    	File copieerFile = new File(copieerFilePath);
-//    	if (copieerFile.isFile() == true) {
-//        	FileInputStream in;
-//        	FileOutputStream out;
-//        	byte[] buffer;
-//        	try {
-//    			in = new FileInputStream(copieerFilePath);
-//    			out = new FileOutputStream(targetFilePath);
-//    			buffer = new byte[1024];
-//    	        int read;
-//    	        while ((read = in.read(buffer)) != -1) {
-//    	          out.write(buffer, 0, read);
-//    	        }
-//    	        in.close();
-//    	        out.flush();
-//    	        out.close();
-//    	        return true;
-//    		} catch (Exception e) {
-//    			Log.d("TAG", "Copy file " + copieerFilePath + " to " + targetFilePath + " ERROR");
-//    			return false;
-//    		}
-//    	} else {
-//    		File newDir = new File(targetFilePath);
-//    		newDir.mkdir();//create directory.
-//    		File[] fList = copieerFile.listFiles();
-//    		for(File f: fList){
-//    			boolean temp;
-//    			temp = pureCopyFile(f.getPath(), targetFilePath + "/" + f.getName());
-//    			if(temp == false){
-//    				return false;
-//    			}
-//    		}
-//    		return true;
-//    	}
-//    }
-//    
-//    private void pureDeleteFile(final String beDeletedFilePath) {
-//    	new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				mHandler.sendEmptyMessage(0);
-//				File f = new File(beDeletedFilePath);
-//		    	boolean result = f.delete();
-//		    	if(result == true){
-//		    		Message msg = new Message();
-//		    		Bundle bundle = new Bundle();
-//		    		bundle.putString("beDeletedFilePath", beDeletedFilePath);
-//		    		msg.setData(bundle);
-//		    		msg.what = 3;
-//		    		mHandler.sendMessage(msg);
-//		    	} else {
-//		    		Message msg = new Message();
-//		    		Bundle bundle = new Bundle();
-//		    		bundle.putString("beDeletedFilePath", beDeletedFilePath);
-//		    		msg.setData(bundle);
-//		    		msg.what = 4;
-//		    		mHandler.sendMessage(msg);
-//		    	}
-//			}
-//		}).start();
-//    }
-//    
-//    private void pureDeleteDirectory(final String beDeletedPath) {
-//    	new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				mHandler.sendEmptyMessage(0);
-//				if(deleteDirectoryNested(beDeletedPath) == true) {
-////		    		refreshListView();
-//		    		mHandler.sendEmptyMessage(5);
-//		    	} else {
-//		    		mHandler.sendEmptyMessage(6);
-//		    	}
-//			}
-//		}).start();
-//    }
-//    private boolean deleteDirectoryNested(String inputPath) {
-//    	File f = new File(inputPath);
-//    	if (f.isFile()) { //path is file
-//    		return f.delete();
-//    	} else { //path is directory
-//    		File[] fl = f.listFiles();
-//    		for (File i: fl) {
-//    			if (deleteDirectoryNested(i.getAbsolutePath()) == false) {
-//    				return false;
-//    			}
-//    		}
-//    		return f.delete();
-//    	}
-//    }
-//    
-//    //---------Create menu.-------//
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		menu.add(0, Menu.FIRST  , 1, R.string.menu_createNewDirInTop)
-//				.setIcon(R.drawable.add_folder);
-//		menu.add(0, Menu.FIRST+1, 2, R.string.menu_createNewDirInBottom)
-//				.setIcon(R.drawable.add_folder);
-//		menu.add(0, Menu.FIRST+2, 3, R.string.menu_search)
-//				.setIcon(R.drawable.search);
-//		menu.add(0, Menu.FIRST+3, 3, R.string.menu_helpTitle)
-//				.setIcon(R.drawable.help);
-//		menu.add(0, Menu.FIRST+4, 3, R.string.menu_aboutTitle)
-//				.setIcon(R.drawable.about);
-//		
-//		return super.onCreateOptionsMenu(menu);
-//	}
-//	
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		switch(item.getItemId()){
-//		case Menu.FIRST: //create a folder on top directory
-//			makeDirectory(tv_topDir.getText().toString());
-//			break;
-//		case Menu.FIRST+1: //create a folder on bottom directory
-//			makeDirectory(tv_bottomDir.getText().toString());
-//			break;
-//		case Menu.FIRST+2:
-//			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
-//			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//			startActivityForResult(intent, REQUEST_CODE_SEARCH);
-//			break;
-//		case Menu.FIRST+3: //Help
-//			showHelpDialog();
-//			break;
-//		case Menu.FIRST+4: //About...
-//			showAboutDialog();
-//			break;
-//		default:
-//			//Do nothing
-//			break;
-//		}
-//		return super.onOptionsItemSelected(item);
-//	}
-    
-    // AREA public parameter getter.
-    public File getDirectory() {
-		return this.dirFile;
+
+	// copy file to target(directory) as same name.
+	private void openCopyDataDialog(final File copieerData, final File destParentDir) {
+		File newData = new File(destParentDir.getPath() + File.separator + copieerData.getName());
+		//Avoid replace the presence data which have the same file name in target directory
+		if (!newData.exists()) { //there is no file have same name at target path.
+			copyData(copieerData, newData); //copy file
+		} else { // have same file name in target directory.
+			String[] s = getResources().getStringArray(R.array.alert_sameFileNameOption);
+			s[0] += newData.getPath(); // setting pre-replaced file name
+			
+			String originName = copieerData.getName();
+			String newName;//use to find usable fileName.
+			int fileNameCounter=1;
+			int pointIndex = originName.lastIndexOf(".");
+			while (true) {
+				if (pointIndex != -1) { // file have attachment
+					newName = originName.substring(0,pointIndex-1)
+								+ "(" + fileNameCounter + ")"
+								+ originName.substring(pointIndex);
+				} else { // file does not have attachment
+					newName = originName + "(" + fileNameCounter + ")";
+				}
+				if (!new File(destParentDir.getPath() + File.separator + newName).exists()) { //new file name is independence
+					break;
+				}
+				fileNameCounter++;
+			}
+			s[1] += "\n" + newName; // setting new fileName to option.
+			final String final_newName = newName;
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle(R.string.copy_fileSameName);
+			builder.setItems(s, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					File targetData;
+					switch (which) {
+					case 0: // Replace file:
+						targetData = new File(destParentDir.getPath() + File.separator + copieerData.getName());
+						copyData(copieerData, targetData);
+						break;
+					case 1: // Copied file rename as:
+						targetData = new File(destParentDir.getPath() + File.separator + final_newName);
+						copyData(copieerData, targetData);
+						break;
+					case 2: // Cancel copy
+						// do nothing
+						break;
+					default:
+						// do nothing
+						break;
+					}
+				}
+			});
+			builder.show();
+		}
 	}
 	
+	private void copyData(final File copieerData, final File destData) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mHandler.sendEmptyMessage(PROCESSING);
+				if (FSController.copyData(copieerData, destData)) {
+					//show information to user.
+					mHandler.sendEmptyMessage(COPY_DATA_SUCCEED);
+				} else {
+					mHandler.sendEmptyMessage(COPY_DATA_FAILED);
+				}
+			}
+		}).start();
+	}
+
+	
+	/**
+	 * use to delete file and directory.
+	 * @param selectedFile file wait for delete.
+	 */
+	private void openDeleteDataDialog(final File selectedFile) {
+		// basic dialog setting.
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle(R.string.delete_alertTitle);
+		builder.setNegativeButton(R.string.alertButton_cancel, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Toast.makeText(activity, R.string.action_cancel, Toast.LENGTH_SHORT).show();
+			}
+		});
+		builder.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				deleteData(selectedFile);
+			}
+		});
+		// set msg according deleted data type(dir or file).
+		builder.setMessage(selectedFile.isDirectory()?
+				R.string.delete_alertDeleteDirMsg: R.string.delete_alertDeleteFileMsg);
+		builder.show();
+	}
+	
+	private void deleteData(final File deletedData) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mHandler.sendEmptyMessage(PROCESSING);
+				if (FSController.deleteData(deletedData) == true) {
+					Message msg = new Message();
+					Bundle bundle = new Bundle();
+					bundle.putString(NAME_PROCESSED_DATA, deletedData.getName());
+					msg.setData(bundle);
+					msg.what = DELETE_DATA_SUCCEED;
+					mHandler.sendMessage(msg);
+				} else {
+					Message msg = new Message();
+					Bundle bundle = new Bundle();
+					bundle.putString(NAME_PROCESSED_DATA, deletedData.getName());
+					msg.setData(bundle);
+					msg.what = DELETE_DATA_FAILED;
+					mHandler.sendMessage(msg);
+				}
+			}
+		}).start();
+	}
+	
+	private void renameData(File renamedData, String newName) {
+		RenameResult ret = FSController.renameData(renamedData, newName);
+		switch (ret) {
+		case DATA_ALREADY_EXIST:
+			Toast.makeText(activity, newName + getString(R.string.rename_fileAlreadyExist), Toast.LENGTH_LONG).show();
+			break;
+		case RENAME_SUCCEED:
+			Toast.makeText(activity, R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
+			mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
+			break;
+		case RENAME_FAILED:
+			Toast.makeText(activity, R.string.rename_renameFileFailure, Toast.LENGTH_SHORT).show();
+			break;
+		}
+	}
+	
+	// AREA public parameter getter.
+	public File getDirectory() {
+		return this.dirFile;
+	}
+
 	public String getDirectoryPath() {
 		return this.dirFile.getPath();
 	}
