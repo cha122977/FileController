@@ -3,5 +3,5 @@
 	<color name="transparent">#00000000</color>
 	<color name="scrollbar_outline">#64E6FF</color>
 	<color name="scrollbar_inside">#00324B</color>
-
+	<color name="list_focus_background">#DD00425B</color>
 </resources>

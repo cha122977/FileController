@@ -3,15 +3,15 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,7 +45,7 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	private void setViews() {
 		ll_rootWindow = (LinearLayout) findViewById(R.id.rootView_MainActionBarActivity_LinearLayout);
 		
-		FragmentManager fm = getSupportFragmentManager();
+		FragmentManager fm = getFragmentManager();
 		
 		topWindow = (FileManagerWindowFragment) fm.findFragmentById(R.id.topWindow_MainActionBarActivity_Fragment);
 		bottomWindow = (FileManagerWindowFragment) fm.findFragmentById(R.id.bottomWindow_MainActionBarActivity_Fragment);

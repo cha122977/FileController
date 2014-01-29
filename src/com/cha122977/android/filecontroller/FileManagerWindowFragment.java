@@ -4,33 +4,36 @@ import java.io.File;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cha122977.android.filecontroller.FSController.RenameResult;
 
-public class FileManagerWindowFragment extends Fragment {
+public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
 
 	private static final String LOG_TAG = "FileManagerWindow";
 
@@ -125,19 +128,20 @@ public class FileManagerWindowFragment extends Fragment {
 
 		return rootView;
 	}
-
+	
 	@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
-		// initial variable first to avoid parameters are used in the following
-		// functions.
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		// initial variable first to avoid parameters are used in the following functions.
 		initialVariable();
-		setListeners();
 		
+		// set listeners.
+		setListeners();
+
 		// open default directory at last.
 		openDefaultDirectory();
 	}
-
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -163,11 +167,27 @@ public class FileManagerWindowFragment extends Fragment {
 				// TODO open keyboard and modify file path by userself.
 			}
 		});
+		
+		tv_filePath.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				showParentDirPopupMenu(v);
+				return true;
+			}
+		});
 
 		lv_fileList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				openData(listFilesOfDirFile[position]);
+			}
+		});
+		
+		lv_fileList.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				showListPopupMenu(view, position);
+				return true;
 			}
 		});
 	}
@@ -242,10 +262,6 @@ public class FileManagerWindowFragment extends Fragment {
 			}
 
 			lv_fileList.setAdapter(new FileListAdapter(activity, fList));
-
-			// register new parentDir and list.
-			registerForContextMenu(tv_filePath);
-			registerForContextMenu(lv_fileList);
 			
 			return true;
 		}
@@ -265,31 +281,36 @@ public class FileManagerWindowFragment extends Fragment {
 		openDirectory(dirFile);
 	}
 
-	// AREA options
+	// AREA options menu
 	
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
-		MenuInflater inflater = activity.getMenuInflater();
-		Log.i(LOG_TAG, "ceate context menu...");
-		if (v == lv_fileList) {
-			AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) menuInfo;
-			Log.d(LOG_TAG, "listFilesOfDirFile: " + listFilesOfDirFile[acmi.position].getPath());
-			if (listFilesOfDirFile[acmi.position].isDirectory()) {
-				inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
-			} else {
-				inflater.inflate(R.menu.file_manager_window_file_options_menu, menu);
-			}
-		} else if (v == tv_filePath) {
-			inflater.inflate(R.menu.file_manager_window_parent_options_menu, menu);
-		}
+	private void showParentDirPopupMenu(View v) {
+		PopupMenu popup = new PopupMenu(activity, v);
+		MenuInflater inflater = popup.getMenuInflater();
+		inflater.inflate(R.menu.file_manager_window_parent_options_menu, popup.getMenu());
+		popup.setOnMenuItemClickListener(this);
+		popup.show();
 	}
-
+	
+	private int selectedListFilePosition;
+	private void showListPopupMenu(View v, int position) {
+	    PopupMenu popup = new PopupMenu(activity, v);
+	    MenuInflater inflater = popup.getMenuInflater();
+	    if (listFilesOfDirFile[position].isDirectory()) {
+	    	inflater.inflate(R.menu.file_manager_window_directory_options_menu, popup.getMenu());
+	    } else {
+	    	inflater.inflate(R.menu.file_manager_window_file_options_menu, popup.getMenu());
+	    }
+	    popup.setOnMenuItemClickListener(this);
+	    selectedListFilePosition = position;
+	    
+	    popup.show();
+	}
+	
+	/**
+	 * Popup Menu item click option.
+	 */
 	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
-		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
+	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_parentCreateDir:
 			createDirectory(dirFile);
@@ -298,11 +319,11 @@ public class FileManagerWindowFragment extends Fragment {
 			// TODO
 			return true;
 		case R.id.menu_createDir:
-			createDirectory(listFilesOfDirFile[acmi.position]);
+			createDirectory(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		case R.id.menu_renameDir:
 		case R.id.menu_renameFile:
-			openRenameDataDialog(listFilesOfDirFile[acmi.position]);
+			openRenameDataDialog(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		case R.id.menu_showDirInfo:
 		case R.id.menu_showFileInfo:
@@ -310,20 +331,84 @@ public class FileManagerWindowFragment extends Fragment {
 			return true;
 		case R.id.menu_moveDirToOtherSide:
 		case R.id.menu_moveFileToOtherSide:
-			openMoveDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
+			openMoveDataDialog(listFilesOfDirFile[selectedListFilePosition], owner.getAnotherWindowDir(this));
 			return true;
 		case R.id.menu_copyDirToOtherSide:
 		case R.id.menu_copyFileToOtherSide:
-			openCopyDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
+			openCopyDataDialog(listFilesOfDirFile[selectedListFilePosition], owner.getAnotherWindowDir(this));
 			return true;
 		case R.id.menu_deleteDir:
 		case R.id.menu_deleteFile:
-			openDeleteDataDialog(listFilesOfDirFile[acmi.position]);
+			openDeleteDataDialog(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
 	}
+	
+	/**
+	 * Context Menu have bug:
+	 *   long touching the bottom list,
+	 *   create correct context menu (for bottom), but map to wrong menu item (for top).
+	 *   Thus app have strengh behavior.
+	 */
+//	@Override
+//	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+//		super.onCreateContextMenu(menu, v, menuInfo);
+//		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
+//		MenuInflater inflater = activity.getMenuInflater();
+//		Log.i(LOG_TAG, "ceate context menu...");
+//		if (v == lv_fileList) {
+//			AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) menuInfo;
+//			Log.d(LOG_TAG, "listFilesOfDirFile: " + listFilesOfDirFile[acmi.position].getPath());
+//			if (listFilesOfDirFile[acmi.position].isDirectory()) {
+//				inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
+//			} else {
+//				inflater.inflate(R.menu.file_manager_window_file_options_menu, menu);
+//			}
+//		} else if (v == tv_filePath) {
+//			inflater.inflate(R.menu.file_manager_window_parent_options_menu, menu);
+//		}
+//	}
+//
+//	@Override
+//	public boolean onContextItemSelected(MenuItem item) {
+//		AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
+//		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
+//		switch (item.getItemId()) {
+//		case R.id.menu_parentCreateDir:
+//			createDirectory(dirFile);
+//			return true;
+//		case R.id.menu_showParentDirInfo:
+//			// TODO
+//			return true;
+//		case R.id.menu_createDir:
+//			createDirectory(listFilesOfDirFile[acmi.position]);
+//			return true;
+//		case R.id.menu_renameDir:
+//		case R.id.menu_renameFile:
+//			openRenameDataDialog(listFilesOfDirFile[acmi.position]);
+//			return true;
+//		case R.id.menu_showDirInfo:
+//		case R.id.menu_showFileInfo:
+//			// TODO
+//			return true;
+//		case R.id.menu_moveDirToOtherSide:
+//		case R.id.menu_moveFileToOtherSide:
+//			openMoveDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
+//			return true;
+//		case R.id.menu_copyDirToOtherSide:
+//		case R.id.menu_copyFileToOtherSide:
+//			openCopyDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
+//			return true;
+//		case R.id.menu_deleteDir:
+//		case R.id.menu_deleteFile:
+//			openDeleteDataDialog(listFilesOfDirFile[acmi.position]);
+//			return true;
+//		default:
+//			return super.onContextItemSelected(item);
+//		}
+//	}
 
 	public void createDirectory(final File parentDir) {
 		// show a dialog to get new name.
@@ -513,7 +598,6 @@ public class FileManagerWindowFragment extends Fragment {
 			}
 		}).start();
 	}
-
 	
 	/**
 	 * use to delete file and directory.
