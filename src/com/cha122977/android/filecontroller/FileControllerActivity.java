@@ -45,17 +45,8 @@ import android.widget.Toast;
 
 public class FileControllerActivity extends Activity {
 	
-	public static final String PREFS_NAME = "UserPrefs";
-	public static final String OPEN_FIRST = "OpenAppFirst";
-
-	public static final int REQUEST_CODE_SEARCH = 11; //use to start searchActivity.
-	public static final int RESULT_CODE_OPEN_TOP = 12;
-	public static final int RESULT_CODE_OPEN_BOTTOM = 13;
-	
 	private LinearLayout ll_screen; //use to change orientation
 	
-	private final static String SDCARD_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
-	private final static String ROOT = "/";
 	ImageView iv_topDirImg, iv_bottomDirImg;
     TextView tv_topDir, tv_bottomDir; //textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView; //listView to show all the file in folder where user is.
@@ -122,7 +113,7 @@ public class FileControllerActivity extends Activity {
         	ll_screen.setOrientation(LinearLayout.HORIZONTAL);
         }
         
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
 	        
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
@@ -134,9 +125,9 @@ public class FileControllerActivity extends Activity {
         setWaitingAlertDialog(); 
         
         // if first time open app, show help dialog.
-        if (settings.getBoolean(OPEN_FIRST, true)) {
+        if (settings.getBoolean(AppConstant.OPEN_FIRST, true)) {
         	showHelpDialog();
-        	settings.edit().putBoolean(OPEN_FIRST, false).apply(); // apply() performance is better than commit.
+        	settings.edit().putBoolean(AppConstant.OPEN_FIRST, false).apply(); // apply() performance is better than commit.
         }
     }
     
@@ -148,20 +139,20 @@ public class FileControllerActivity extends Activity {
     private void openDefaultTopDirectory() {
     	if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
         	// sdcard exist
-        	openTopFile(false, SDCARD_ROOT);
+        	openTopFile(false, AppConstant.SDCARD_ROOT);
         } else {
         	// sdcard doesn't exist
-        	openTopFile(false, ROOT);
+        	openTopFile(false, AppConstant.ROOT);
         }
     }
     
     private void openDefaultBottomDirectory() {
     	if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
         	// sdcard exist
-            openBottomFile(false, SDCARD_ROOT);
+            openBottomFile(false, AppConstant.SDCARD_ROOT);
         } else {
         	// sdcard doesn't exist
-            openBottomFile(false, ROOT);
+            openBottomFile(false, AppConstant.ROOT);
         }
     }
 	
@@ -324,7 +315,7 @@ public class FileControllerActivity extends Activity {
 		    		if (indexHelper!=0 && indexHelper!=-1) {
 		    			openTopFile(ifSave, dir.substring(0, indexHelper));
 		    		} else {
-		    			openTopFile(ifSave, ROOT);
+		    			openTopFile(ifSave, AppConstant.ROOT);
 		    		}
 	    		} else { //can't read file because file cannot be read(no permission)
 	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
@@ -360,7 +351,7 @@ public class FileControllerActivity extends Activity {
 		    		if (indexHelper!=0 && indexHelper!=1) {
 		    			openBottomFile(ifSave, dir.substring(0, indexHelper));
 		    		} else {
-		    			openBottomFile(ifSave, ROOT);
+		    			openBottomFile(ifSave, AppConstant.ROOT);
 		    		}
 	    		} else { //can't read file because file cannot be read(no permission)
 	    			Toast.makeText(this, R.string.noPermission, Toast.LENGTH_SHORT).show();
@@ -768,8 +759,8 @@ public class FileControllerActivity extends Activity {
 			break;
 		case Menu.FIRST+2:
 			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivityForResult(intent, REQUEST_CODE_SEARCH);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			startActivityForResult(intent, AppConstant.REQUEST_CODE_SEARCH);
 			break;
 		case Menu.FIRST+3: //Help
 			showHelpDialog();
@@ -915,7 +906,7 @@ public class FileControllerActivity extends Activity {
 			readyToLeaveApp = false;
 			Intent intent = new Intent(FileControllerActivity.this, SearchActivity.class);
 //			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivityForResult(intent, REQUEST_CODE_SEARCH);
+			startActivityForResult(intent, AppConstant.REQUEST_CODE_SEARCH);
 			Log.d("TAG", "Just click the Search Button");
 			return false;//Override the original search button
 		}
@@ -926,9 +917,9 @@ public class FileControllerActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == REQUEST_CODE_SEARCH) {
+		if (requestCode == AppConstant.REQUEST_CODE_SEARCH) {
 			switch (resultCode) {
-			case RESULT_CODE_OPEN_TOP:
+			case AppConstant.RESULT_CODE_OPEN_TOP:
 				String path1 = data.getStringExtra("path");
 				if (new File(path1).isDirectory()) {
 					openTopFile(true, path1);
@@ -936,7 +927,7 @@ public class FileControllerActivity extends Activity {
 					openTopFile(true, new File(path1).getParent());
 				}
 				break;
-			case RESULT_CODE_OPEN_BOTTOM:
+			case AppConstant.RESULT_CODE_OPEN_BOTTOM:
 				String path2 = data.getStringExtra("path");
 				if (new File(path2).isDirectory()) {
 					openTopFile(true, path2);

@@ -48,6 +48,7 @@
     <string name="menu_search">搜尋檔案</string>
     <string name="menu_helpTitle">說 明</string>
     <string name="menu_aboutTitle">關於Cobi</string>
+    <string name="menu_finish">結束Cobi</string>
     <string name="menu_createNewDirInTop">在上方新增資料夾</string>
     <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     

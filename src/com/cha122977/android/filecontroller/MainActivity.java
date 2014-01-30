@@ -3,16 +3,17 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.util.Stack;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,13 +24,9 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class MainActionBarActivity extends ActionBarActivity implements IFMWindowFragmentOwner {
+public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	
 	private static final String LOG_TAG = "MainActionBarActivity";
-	
-	public static final int REQUEST_CODE_SEARCH = 11; //use to start searchActivity.
-	public static final int RESULT_CODE_OPEN_TOP = 12;
-	public static final int RESULT_CODE_OPEN_BOTTOM = 13;
 	
 	private LinearLayout ll_rootWindow;
 	
@@ -44,9 +41,10 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	protected void onCreate(Bundle savedInstanceState) {
 		// request window feature.
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);  
+		requestWindowFeature(Window.FEATURE_ACTION_BAR);
 		
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main_action_bar_activity_layout);
+		setContentView(R.layout.main_activity_layout);
 		
 		init();
 		setViews();
@@ -100,16 +98,17 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.action_search:
+			Intent intent = new Intent(this, SearchActivity.class);
+			/** NOTE: Don't use FLAG_ACTIVITY_NEW_TASK since it doesn't work as expected **/
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			startActivityForResult(intent, AppConstant.REQUEST_CODE_SEARCH);
+			return true;
 		case R.id.action_aboutApp:
 			showAboutDialog();
 			return true;
 		case R.id.action_help:
 			showHelpDialog();
-			return true;
-		case R.id.action_search:
-			Intent intent = new Intent(this, SearchActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivityForResult(intent, AppConstant.REQUEST_CODE_SEARCH);
 			return true;
 		case R.id.action_exist:
 			finish();
@@ -219,28 +218,31 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == REQUEST_CODE_SEARCH) {
+		if (requestCode == AppConstant.REQUEST_CODE_SEARCH) {
 			switch (resultCode) {
-			case RESULT_CODE_OPEN_TOP:
+			case AppConstant.RESULT_CODE_OPEN_TOP:
 				String topPath = data.getStringExtra("path");
 				File topFile = new File(topPath);
+				Log.d("TAG", "open " + topFile + " on top window");
 				if (topFile.isDirectory()) {
 					topWindow.openData(topFile);
 				} else {
 					topWindow.openData(topFile.getParentFile());
+					topWindow.scrollToFile(topFile);
 				}
 				break;
-			case RESULT_CODE_OPEN_BOTTOM:
+			case AppConstant.RESULT_CODE_OPEN_BOTTOM:
 				String bottomPath = data.getStringExtra("path");
 				File bottomFile = new File(bottomPath);
 				if (bottomFile.isDirectory()) {
 					bottomWindow.openData(bottomFile);
 				} else {
 					bottomWindow.openData(bottomFile.getParentFile());
+					bottomWindow.scrollToFile(bottomFile);
 				}
 				break;
 			default:
-				//Do nothing
+				super.onActivityResult(requestCode, resultCode, data);
 				break;
 			}
 		}

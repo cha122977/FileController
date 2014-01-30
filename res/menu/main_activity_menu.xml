@@ -1,21 +1,20 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cobi="http://schemas.android.com/apk/res-auto" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     
 	<item android:id="@+id/action_search"
 		android:title="@string/menu_search"
 		android:icon="@drawable/search"
-		cobi:showAsAction="always" />
+		android:showAsAction="always" />
 	<item android:id="@+id/action_help"
 		android:title="@string/menu_helpTitle"
 		android:icon="@drawable/help"
-		cobi:showAsAction="never" />
+		android:showAsAction="never" />
 	<item android:id="@+id/action_aboutApp"
 		android:title="@string/menu_aboutTitle"
 		android:icon="@drawable/about"
-		cobi:showAsAction="never" />
+		android:showAsAction="never" />
 	<item android:id="@+id/action_exist"
-		android:title="@string/menu_aboutTitle"
+		android:title="@string/menu_finish"
 		android:icon="@drawable/about"
-		cobi:showAsAction="never" />
+		android:showAsAction="never" />
 	
 </menu>

@@ -213,10 +213,10 @@ public class SearchActivity extends ListActivity{
 		public void onClick(DialogInterface dialog, int which) {
 			switch(which){
 			case 0://open in Top window
-				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_TOP, filePath);
+				setResultAndFinish(AppConstant.RESULT_CODE_OPEN_TOP, filePath);
 				break;
 			case 1://open in Bottom window
-				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, filePath);
+				setResultAndFinish(AppConstant.RESULT_CODE_OPEN_BOTTOM, filePath);
 				break;
 			case 2://Show file info
 				FSController.showFileInformation(filePath, SearchActivity.this);
@@ -255,10 +255,10 @@ public class SearchActivity extends ListActivity{
 				FSController.openFile(new File(filePath), getApplicationContext());
 				break;
 			case 1://Show in Top window
-				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_TOP, filePath);
+				setResultAndFinish(AppConstant.RESULT_CODE_OPEN_TOP, filePath);
 				break;
 			case 2://Show in Bottom window
-				setResultAndFinish(FileControllerActivity.RESULT_CODE_OPEN_BOTTOM, filePath);
+				setResultAndFinish(AppConstant.RESULT_CODE_OPEN_BOTTOM, filePath);
 				break;
 			case 3://more information
 				FSController.showFileInformation(filePath, SearchActivity.this);
@@ -289,7 +289,7 @@ public class SearchActivity extends ListActivity{
 		Intent intent = new Intent();
 		intent.putExtra("path", new File(path).getParent());
 		setResult(resultCode, intent);
-		finish();
+		finish();;
 	}
 	
 	// Delete function

@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -331,20 +330,22 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	/** End of Open File **/
 	
 	/**
-	 * Scroll listview to specify file. If the file doesn't exist, listview will scroll at top.
+	 * Scroll listview to specify file. If the file doesn't exist, listview won't scroll.
 	 * @param file
 	 */
 	public void scrollToFile(File file) {
 		String filePath = file.getAbsolutePath();
+		Log.d("TAG", "try to scroll to " + file);
 		for (int i=0; i<listFilesOfDirFile.length; i++) {
 			File comparedFile = listFilesOfDirFile[i];
-			if (filePath.equals(comparedFile.getAbsolutePath())) {
+			if (file.equals(comparedFile)) {
+				Log.d("TAG", "Find Same File");
 				lv_fileList.setSelectionFromTop(i, 0); // scroll the listview.
 				return;
 			}
 		}
+		Log.d("TAG", file + "did not find");
 	}
-	
 	
 	/** AREA options menu **/
 	

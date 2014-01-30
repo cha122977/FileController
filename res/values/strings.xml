@@ -48,6 +48,7 @@
     <string name="menu_search">Search File</string>
     <string name="menu_helpTitle">HELP</string>
     <string name="menu_aboutTitle">About....</string>
+    <string name="menu_finish">Exit Cobi</string>
     <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
     <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
     

@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <item android:id="@+id/menu_createDir"
+		android:title="@string/menu_createDirectory" />
+	<item android:id="@+id/menu_renameDir"
+		android:title="@string/menu_rename" />
+	<item android:id="@+id/menu_showDirInfo"
+		android:title="@string/menu_showInfo" />
+	<item android:id="@+id/menu_moveDirToOtherSide"
+		android:title="@string/menu_moveToOtherSide" />
+	<item android:id="@+id/menu_copyDirToOtherSide"
+		android:title="@string/menu_copyToOtherSide" />
+	<item android:id="@+id/menu_deleteDir"
+		android:title="@string/menu_delete" />
+</menu>

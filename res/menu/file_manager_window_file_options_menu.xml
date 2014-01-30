@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+	<item android:id="@+id/menu_renameFile"
+		android:title="@string/menu_rename" />
+	<item android:id="@+id/menu_showFileInfo"
+		android:title="@string/menu_showInfo" />
+	<item android:id="@+id/menu_moveFileToOtherSide"
+		android:title="@string/menu_moveToOtherSide" />
+	<item android:id="@+id/menu_copyFileToOtherSide"
+		android:title="@string/menu_copyToOtherSide" />
+	<item android:id="@+id/menu_deleteFile"
+		android:title="@string/menu_delete" />
+</menu>
