@@ -1,9 +1,11 @@
 package com.cha122977.android.filecontroller;
 
 import java.io.File;
+import java.util.Stack;
 
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -25,9 +27,18 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	
 	private static final String LOG_TAG = "MainActionBarActivity";
 	
+	public static final int REQUEST_CODE_SEARCH = 11; //use to start searchActivity.
+	public static final int RESULT_CODE_OPEN_TOP = 12;
+	public static final int RESULT_CODE_OPEN_BOTTOM = 13;
+	
 	private LinearLayout ll_rootWindow;
 	
 	private FileManagerWindowFragment topWindow, bottomWindow;
+	
+	/**
+	 * Used to save back stack history.
+	 */
+	private Stack<HistoryObject> actionHistory;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +48,13 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_action_bar_activity_layout);
 		
+		init();
 		setViews();
 		setFragment();
+	}
+	
+	private void init() {
+		actionHistory = new Stack<HistoryObject>();
 	}
 	
 	private void setViews() {
@@ -95,6 +111,9 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivityForResult(intent, AppConstant.REQUEST_CODE_SEARCH);
 			return true;
+		case R.id.action_exist:
+			finish();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -129,7 +148,37 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 			.create();
 		d.show();
 	}
-
+	
+	@Override
+	public void onBackPressed() {
+		if (actionHistory.size() == 0) {
+			openExitCheckDialog();
+		} else {
+			HistoryObject ho = actionHistory.pop();
+			(ho.fileManager).openDirectory(ho.dir);
+		}
+	}
+	
+	private void openExitCheckDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.exitDialog_title);
+		builder.setPositiveButton(R.string.exitDialog_exitButtonText, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+			}
+		});
+		builder.setNegativeButton(R.string.exitDialog_unexitButtonText, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// do nothing.
+			}
+		});
+		builder.show();
+	}
+	
+	/** implementation of IFMWindowFragmentOwner **/
+	
 	@Override
 	public void refreshAllWindow() {
 		refreshLists();
@@ -159,4 +208,53 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	public void refreshOtherWindows(FileManagerWindowFragment requester) {
 		getAnotherWindow(requester).refresh();
 	}
+
+	@Override
+	public void pushDirHistory(FileManagerWindowFragment requester, File directory) {
+		actionHistory.push(new HistoryObject(requester, directory));
+	}
+	
+	/** End of implementation of IFMWindowFragmentOwner **/
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQUEST_CODE_SEARCH) {
+			switch (resultCode) {
+			case RESULT_CODE_OPEN_TOP:
+				String topPath = data.getStringExtra("path");
+				File topFile = new File(topPath);
+				if (topFile.isDirectory()) {
+					topWindow.openData(topFile);
+				} else {
+					topWindow.openData(topFile.getParentFile());
+				}
+				break;
+			case RESULT_CODE_OPEN_BOTTOM:
+				String bottomPath = data.getStringExtra("path");
+				File bottomFile = new File(bottomPath);
+				if (bottomFile.isDirectory()) {
+					bottomWindow.openData(bottomFile);
+				} else {
+					bottomWindow.openData(bottomFile.getParentFile());
+				}
+				break;
+			default:
+				//Do nothing
+				break;
+			}
+		}
+	}
+	
+	/** History Object **/
+	private static class HistoryObject {
+		public FileManagerWindowFragment fileManager;
+		public File dir;
+		public HistoryObject(FileManagerWindowFragment requester, File directory) {
+			fileManager = requester;
+			dir = directory;
+		}
+	}
+	
+	/** End of History Object **/
 }

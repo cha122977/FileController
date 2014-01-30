@@ -49,8 +49,8 @@ public class FileControllerActivity extends Activity {
 	public static final String OPEN_FIRST = "OpenAppFirst";
 
 	public static final int REQUEST_CODE_SEARCH = 11; //use to start searchActivity.
-	public static final int RESULT_CODE_OPEN_TOP = 11;
-	public static final int RESULT_CODE_OPEN_BOTTOM = 12;
+	public static final int RESULT_CODE_OPEN_TOP = 12;
+	public static final int RESULT_CODE_OPEN_BOTTOM = 13;
 	
 	private LinearLayout ll_screen; //use to change orientation
 	
@@ -907,7 +907,7 @@ public class FileControllerActivity extends Activity {
 				}
 				refreshListView();
 			} else {
-				Toast.makeText(getApplicationContext(), R.string.doubleClickMsg, Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), R.string.clickAgainToExist, Toast.LENGTH_LONG).show();
 				readyToLeaveApp = true;
 			}
 			return false;

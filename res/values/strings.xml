@@ -28,10 +28,16 @@
     <string name="delete_deleteDataSucceed"> deleted succeed.</string>
     <string name="delete_deleteDataFailure"> deleted failure.</string>
     
+    <string name="alertButton_yes">Yes</string>
+   	<string name="alertButton_no">No</string>
     <string name="alert_waitingDialogTitle">Please wait...</string>
     <string name="alertButton_ok">OK</string>
     <string name="alertButton_cancel">Cancel</string>
     <string name="action_cancel">Cancel</string>
+    
+    <string name="exitDialog_title">Exit Cobi?</string>
+    <string name="exitDialog_exitButtonText">Yes</string>
+    <string name="exitDialog_unexitButtonText">No</string>
   
     <string name="menu_createDirectory">Create new directory</string>
     <string name="menu_rename">Rename</string>
@@ -60,7 +66,7 @@
     <string name="about_title">About....</string>
     <string name="about_msg">Write by:\n<b>cha122977</b> &amp; <b>Yu</b>\ncha122977@gmail.com\nyustudiotw@gmail.com\nhttp://yustudio.tw/\n</string>
     <string name="about_copyRight">CopyRight</string>
-    <string name="doubleClickMsg">Click again to finish</string>
+    <string name="clickAgainToExist">Click again to finish</string>
     
     <string name="fileInfo_containingFileNumber">Containing File Number: </string>
     <string name="fileInfo_size">Size: </string>

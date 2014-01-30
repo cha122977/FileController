@@ -6,10 +6,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,6 +35,8 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 
 	private static final String LOG_TAG = "FileManagerWindow";
 
+	public static final int REQUEST_CODE_OPEN_FILE = 0;
+	
 	private Activity activity;
 	private IFMWindowFragmentOwner owner;
 
@@ -161,14 +165,24 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		iv_dirImage.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				openDirectory(dirFile.getParentFile());
+				File openedFile = dirFile.getParentFile();
+				boolean succeed = openDirectory(openedFile);
+				if (succeed) {
+					owner.pushDirHistory(FileManagerWindowFragment.this, openedFile);
+				} else {
+					Toast.makeText(activity, R.string.noPermission, Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 
 		tv_filePath.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				openDirectory(dirFile.getParentFile());
+				File currentDir = dirFile;
+				boolean succeed = openData(dirFile.getParentFile());
+				if (succeed) {
+					owner.pushDirHistory(FileManagerWindowFragment.this, currentDir);
+				}
 				// TODO open keyboard and modify file path by userself.
 			}
 		});
@@ -184,7 +198,12 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		lv_fileList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				openData(listFilesOfDirFile[position]);
+				File currentDir = dirFile;
+				File openedData = listFilesOfDirFile[position];
+				boolean succeed = openData(openedData);
+				if (succeed && openedData.isDirectory()) { // only push when opened data is directory.(changed path)
+					owner.pushDirHistory(FileManagerWindowFragment.this, currentDir);
+				}
 			}
 		});
 		
@@ -211,21 +230,23 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		openDirectory(new File(defaultDirPath));
 	}
 
-	// AREA Open File
+	/** AREA Open File **/
 
 	/**
 	 * File or Directory must be opened from this function.
+	 * All of opened file must call this function, including file or directory.
 	 * 
-	 * @param file
+	 * @param data
 	 * @return true if open succeed, false else.
 	 */
-	private boolean openData(File file) {
-		if (!file.canRead()) {
+	public boolean openData(File data) {
+		Log.i(LOG_TAG, "Select file: " + data.getPath());
+		if (!data.canRead()) {
 			Toast.makeText(activity, R.string.fileCannotRead, Toast.LENGTH_SHORT).show();
 			return false;
-		} else if (!file.exists()) { // file doesn't exist. (This may happened when delete data from other app)
+		} else if (!data.exists()) { // file doesn't exist. (This may happened when delete data from other app)
 			// open parent directory insteed.
-			String parentPath = file.getParent();
+			String parentPath = data.getParent();
 			if (parentPath != null) {
 				openDirectory(new File(parentPath));
 			} else {
@@ -235,20 +256,21 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			return false;
 		}
 
-		if (file.isDirectory()) {
-			return openDirectory(file);
+		if (data.isDirectory()) {
+			return openDirectory(data);
 		} else {
-			return openFile(file);
+			return openFile(data);
 		}
 	}
 
 	/**
 	 * function to open directory's content.
-	 * 
-	 * @param dir
+	 * For complexity and architecture reason,
+	 * <b>**Only openData() and openDefaultDir() can call this function**</b>
+	 * @param dir opened directory.
 	 * @return true if open directory succeed, false else.
 	 */
-	private boolean openDirectory(File dir) {
+	public boolean openDirectory(File dir) {
 		if (dir.canRead()) {
 			File[] fList = dir.listFiles();
 
@@ -275,18 +297,56 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 
 	/**
 	 * function to open file content.
+	 * For complexity and architecture reason, <b>Only openData can call this function.</b>
 	 * @param file opened file
 	 * @return true if open file succeed, false else.
 	 */
-	private boolean openFile(File file) {
+	public boolean openFile(File file) {
 		return FSController.openFile(file, activity);
 	}
 
 	public void refresh() {
-		openDirectory(dirFile);
+		// must check if exist, because current directory may be delete possibly by other app.
+		if (dirFile.exists()) { // open when exist
+			if (dirFile.canRead()) {
+				// prepare scroll value. 
+				int topChirdPosition = lv_fileList.getFirstVisiblePosition();
+				View topVisableChild = lv_fileList.getChildAt(0);
+				int offset = topVisableChild != null?
+								topVisableChild.getTop() : 0;
+				
+				if (openDirectory(dirFile)) {
+					lv_fileList.setSelectionFromTop(topChirdPosition, offset);
+				} else { // open directory failed, open parent instead.
+					openDirectory(dirFile.getParentFile());
+				}
+			} else { // permission have been changed by other app, open the parent directory.
+				openDirectory(dirFile.getParentFile());
+			}
+		} else { // un-exist, open default directory.
+			openDefaultDirectory();
+		}
 	}
 
-	// AREA options menu
+	/** End of Open File **/
+	
+	/**
+	 * Scroll listview to specify file. If the file doesn't exist, listview will scroll at top.
+	 * @param file
+	 */
+	public void scrollToFile(File file) {
+		String filePath = file.getAbsolutePath();
+		for (int i=0; i<listFilesOfDirFile.length; i++) {
+			File comparedFile = listFilesOfDirFile[i];
+			if (filePath.equals(comparedFile.getAbsolutePath())) {
+				lv_fileList.setSelectionFromTop(i, 0); // scroll the listview.
+				return;
+			}
+		}
+	}
+	
+	
+	/** AREA options menu **/
 	
 	private void showParentDirPopupMenu(View v) {
 		PopupMenu popup = new PopupMenu(activity, v);
@@ -386,7 +446,6 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 //			createDirectory(dirFile);
 //			return true;
 //		case R.id.menu_showParentDirInfo:
-//			// TODO
 //			return true;
 //		case R.id.menu_createDir:
 //			createDirectory(listFilesOfDirFile[acmi.position]);
@@ -397,7 +456,6 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 //			return true;
 //		case R.id.menu_showDirInfo:
 //		case R.id.menu_showFileInfo:
-//			// TODO
 //			return true;
 //		case R.id.menu_moveDirToOtherSide:
 //		case R.id.menu_moveFileToOtherSide:
@@ -759,8 +817,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	}
 	
 	/** End of Show Data information **/
+	/** End of options menu **/
 	
-	// AREA public parameter getter.
+	/** AREA public parameter getter. **/
 	public File getDirectory() {
 		return this.dirFile;
 	}
@@ -768,4 +827,6 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	public String getDirectoryPath() {
 		return this.dirFile.getPath();
 	}
+	
+	/** End of public parameter getter. **/
 }

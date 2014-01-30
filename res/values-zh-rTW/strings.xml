@@ -28,13 +28,16 @@
     <string name="delete_deleteDataSucceed"> 已刪除成功</string>
     <string name="delete_deleteDataFailure"> 刪除失敗</string>
     
+    <string name="alertButton_yes">是</string>
+   	<string name="alertButton_no">否</string>
     <string name="alert_waitingDialogTitle">請稍後...</string>
     <string name="alertButton_ok">完   成</string>
     <string name="alertButton_cancel">取   消</string>
     <string name="action_cancel">取   消</string>
   
-    <string name="menu_helpTitle">說 明</string>
-    <string name="menu_aboutTitle">關於Cobi</string>
+    <string name="exitDialog_title">確定要離開Cobi嗎？</string>
+    <string name="exitDialog_exitButtonText">離開</string>
+    <string name="exitDialog_unexitButtonText">取消</string>
     
     <string name="menu_createDirectory">新增資料夾</string>
     <string name="menu_rename">重新命名</string>
@@ -43,8 +46,8 @@
     <string name="menu_copyToOtherSide">複製檔案至另一側</string>
     <string name="menu_delete">刪除檔案</string>
     <string name="menu_search">搜尋檔案</string>
-    <string name="menu_helpTitle">HELP</string>
-    <string name="menu_aboutTitle">About....</string>
+    <string name="menu_helpTitle">說 明</string>
+    <string name="menu_aboutTitle">關於Cobi</string>
     <string name="menu_createNewDirInTop">在上方新增資料夾</string>
     <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     
@@ -63,7 +66,7 @@
     <string name="about_title">關 於 Cobi</string>
     <string name="about_msg"><b>cha122977</b> &amp; <b>Yu</b>\ncha122977@gmail.com\nyustudiotw@gmail.com\nhttp://yustudio.tw/</string>
     <string name="about_copyRight">版權所有</string>
-    <string name="doubleClickMsg">再按一次返回鍵來結束程式</string>
+    <string name="clickAgainToExist">再按一次返回鍵來結束程式</string>
     
     <string name="fileInfo_containingFileNumber">檔案數： </string>
     <string name="fileInfo_size">檔案大小： </string>
