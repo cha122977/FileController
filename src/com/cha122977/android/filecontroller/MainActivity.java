@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -223,7 +222,6 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 			case AppConstant.RESULT_CODE_OPEN_TOP:
 				String topPath = data.getStringExtra("path");
 				File topFile = new File(topPath);
-				Log.d("TAG", "open " + topFile + " on top window");
 				if (topFile.isDirectory()) {
 					topWindow.openData(topFile);
 				} else {

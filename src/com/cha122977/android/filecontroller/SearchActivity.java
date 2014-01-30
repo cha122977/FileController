@@ -285,9 +285,9 @@ public class SearchActivity extends ListActivity{
 		}
 	}
 	
-	private void setResultAndFinish(int resultCode, String path){
+	private void setResultAndFinish(int resultCode, String path) {
 		Intent intent = new Intent();
-		intent.putExtra("path", new File(path).getParent());
+		intent.putExtra("path", path);
 		setResult(resultCode, intent);
 		finish();;
 	}
