@@ -33,11 +33,20 @@
     <string name="alertButton_cancel">取   消</string>
     <string name="action_cancel">取   消</string>
   
-    <string name="menu_createNewDirInTop">在上方新增資料夾</string>
-    <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
-    <string name="menu_search">搜尋檔案</string>
     <string name="menu_helpTitle">說 明</string>
     <string name="menu_aboutTitle">關於Cobi</string>
+    
+    <string name="menu_createDirectory">新增資料夾</string>
+    <string name="menu_rename">重新命名</string>
+    <string name="menu_showInfo">詳細資訊</string>
+    <string name="menu_moveToOtherSide">移動檔案至另一側</string>
+    <string name="menu_copyToOtherSide">複製檔案至另一側</string>
+    <string name="menu_delete">刪除檔案</string>
+    <string name="menu_search">搜尋檔案</string>
+    <string name="menu_helpTitle">HELP</string>
+    <string name="menu_aboutTitle">About....</string>
+    <string name="menu_createNewDirInTop">在上方新增資料夾</string>
+    <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     
     <string name="createDir_createNewDirectory">新資料夾</string>
     <string name="createDir_createDirCancel">取消新增資料夾</string>
@@ -59,7 +68,7 @@
     <string name="fileInfo_containingFileNumber">檔案數： </string>
     <string name="fileInfo_size">檔案大小： </string>
     <string name="fileInfo_lastModify">最後修改時間： </string>
-    <string name="fileInfo_unit_byte"> 位元組</string>
+    <string name="fileInfo_unit_byte"> bytes</string>
     <string name="fileInfo_unit_kByte"> KB</string>
     <string name="fileInfo_unit_mByte"> MB</string>
     <string name="fileInfo_unit_gByte"> GB</string>

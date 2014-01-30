@@ -33,11 +33,17 @@
     <string name="alertButton_cancel">Cancel</string>
     <string name="action_cancel">Cancel</string>
   
-    <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
-    <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
+    <string name="menu_createDirectory">Create new directory</string>
+    <string name="menu_rename">Rename</string>
+    <string name="menu_showInfo">Show info</string>
+    <string name="menu_moveToOtherSide">Move to other side</string>
+    <string name="menu_copyToOtherSide">Copy to other side</string>
+    <string name="menu_delete">delete</string>
     <string name="menu_search">Search File</string>
     <string name="menu_helpTitle">HELP</string>
     <string name="menu_aboutTitle">About....</string>
+    <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
+    <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
     
     <string name="createDir_createNewDirectory">New directory</string>
     <string name="createDir_createDirCancel">Create directory cancel</string>

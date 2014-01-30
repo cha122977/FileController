@@ -1,14 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fileManager="http://schemas.android.com/apk/res-auto" >
     
-	<item android:id="@+id/action_createNewTopDir"
-		android:title="@string/menu_createNewDirInTop"
-		android:icon="@drawable/add_folder"
-		fileManager:showAsAction="" />
-	<item android:id="@+id/action_createNewBottomDir"
-		android:title="@string/menu_createNewDirInBottom"
-		android:icon="@drawable/add_folder"
-		fileManager:showAsAction="never" />
 	<item android:id="@+id/action_search"
 		android:title="@string/menu_search"
 		android:icon="@drawable/search"

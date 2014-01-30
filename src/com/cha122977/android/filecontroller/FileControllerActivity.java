@@ -1,3 +1,7 @@
+/**
+ * @deprecate
+ */
+
 package com.cha122977.android.filecontroller;
 
 import java.io.File;

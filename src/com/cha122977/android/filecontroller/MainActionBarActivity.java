@@ -11,7 +11,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,12 +84,6 @@ public class MainActionBarActivity extends ActionBarActivity implements IFMWindo
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.action_createNewTopDir:
-			topWindow.createDirectory(topWindow.getDirectory());
-			return true;
-		case R.id.action_createNewBottomDir:
-			bottomWindow.createDirectory(bottomWindow.getDirectory());
-			return true;
 		case R.id.action_aboutApp:
 			showAboutDialog();
 			return true;

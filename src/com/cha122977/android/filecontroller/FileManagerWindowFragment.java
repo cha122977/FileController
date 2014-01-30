@@ -10,10 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +18,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
@@ -61,11 +57,13 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	private static final int REFRESH_OTHER_WINDWOS = -3;
 	private static final int REFRESH_ALL_LISTS = -2;
 	private static final int REFRESH = -1;
-	private static final int PROCESSING = 0;
-	private static final int COPY_DATA_SUCCEED = 1;
-	private static final int COPY_DATA_FAILED = 2; 
-	private static final int DELETE_DATA_SUCCEED = 3;
-	private static final int DELETE_DATA_FAILED = 4;
+	private static final int PROCESSING_SHOW = 0;
+	private static final int PROCESSING_HIDE = 1;
+	private static final int COPY_DATA_SUCCEED = 11;
+	private static final int COPY_DATA_FAILED = 12; 
+	private static final int DELETE_DATA_SUCCEED = 13;
+	private static final int DELETE_DATA_FAILED = 14;
+	private static final int SHOW_INFO_DIALOG = 15;
 	
 	private static final String NAME_PROCESSED_DATA = "processedData";
 	
@@ -85,28 +83,35 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			case REFRESH:
 				refresh();
 				break;
-			case PROCESSING:
+			case PROCESSING_SHOW:
 				activity.setProgressBarIndeterminateVisibility(true);
+				break;
+			case PROCESSING_HIDE:
+				activity.setProgressBarIndeterminateVisibility(false);
 				break;
 			case COPY_DATA_SUCCEED: // copy succeed
 				Toast.makeText(activity, R.string.copy_copyDataSucceed, Toast.LENGTH_SHORT).show();
-				activity.setProgressBarIndeterminateVisibility(false);
 				sendEmptyMessage(REFRESH_OTHER_WINDWOS);
+				sendEmptyMessage(PROCESSING_HIDE);
 				break;
 			case COPY_DATA_FAILED: // copy failure
 				Toast.makeText(activity, R.string.copy_copyDataFailure, Toast.LENGTH_SHORT).show();
-				activity.setProgressBarIndeterminateVisibility(false);
+				sendEmptyMessage(PROCESSING_HIDE);
 				break;
 			case DELETE_DATA_SUCCEED:
 				String deleteSucceedDataPath = msg.getData().getString(NAME_PROCESSED_DATA);
 				Toast.makeText(activity, deleteSucceedDataPath + getString(R.string.delete_deleteDataSucceed), Toast.LENGTH_LONG).show();
-				activity.setProgressBarIndeterminateVisibility(false);
 				sendEmptyMessage(SYNC_ALL_LISTS);
+				sendEmptyMessage(PROCESSING_HIDE);
 				break;
 			case DELETE_DATA_FAILED:
 				String deleteFailedDataPath = msg.getData().getString(NAME_PROCESSED_DATA);
 				Toast.makeText(activity, deleteFailedDataPath + getString(R.string.delete_deleteDataFailure), Toast.LENGTH_LONG).show();
-				activity.setProgressBarIndeterminateVisibility(false);
+				sendEmptyMessage(PROCESSING_HIDE);
+				break;
+			case SHOW_INFO_DIALOG:
+				Bundle infoArgs = msg.getData();
+				openShowInfoDialog(infoArgs.getString(INFO_TITLE), infoArgs.getInt(INFO_ICON_RES_ID), infoArgs.getString(INFO_MSG));
 				break;
 			default: // do nothing.
 				break;
@@ -307,7 +312,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	}
 	
 	/**
-	 * Popup Menu item click option.
+	 * Implementation of PopupMenu's options.
 	 */
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
@@ -316,7 +321,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			createDirectory(dirFile);
 			return true;
 		case R.id.menu_showParentDirInfo:
-			// TODO
+			showDataInfo(dirFile);
 			return true;
 		case R.id.menu_createDir:
 			createDirectory(listFilesOfDirFile[selectedListFilePosition]);
@@ -327,7 +332,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			return true;
 		case R.id.menu_showDirInfo:
 		case R.id.menu_showFileInfo:
-			// TODO
+			showDataInfo(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		case R.id.menu_moveDirToOtherSide:
 		case R.id.menu_moveFileToOtherSide:
@@ -347,6 +352,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	}
 	
 	/**
+	 * @NOTE
 	 * Context Menu have bug:
 	 *   long touching the bottom list,
 	 *   create correct context menu (for bottom), but map to wrong menu item (for top).
@@ -409,6 +415,8 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 //			return super.onContextItemSelected(item);
 //		}
 //	}
+	
+	/** Create directory **/
 
 	public void createDirectory(final File parentDir) {
 		// show a dialog to get new name.
@@ -438,14 +446,17 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	private void createDirectory(File parentDir, String childDirName) {
 		if (FSController.createDirectory(parentDir, childDirName)) {
 			Toast.makeText(activity, R.string.createDir_createDirSucceed, Toast.LENGTH_LONG).show();
-			// refresh all windows.
-			// Other window may looking at same directory, so
-			// refresh all to avoid unsynchronized.
+			// Since Other window may looking at same directory, so
+			// refresh all window to avoid unsynchronized.
 			mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
 		} else {
 			Toast.makeText(activity, R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
 		}
 	}
+	
+	/** End of Create directory **/
+	
+	/** Move data **/
 	
 	/**
 	 * Move data(dir/file) to target file.
@@ -467,7 +478,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
     					moveData(movedFile, destFile);
     					break;
     				case 1: // Cancel 
-    					Toast.makeText(activity, R.string.move_moveFileCancel, Toast.LENGTH_LONG);
+    					Toast.makeText(activity, R.string.move_moveFileCancel, Toast.LENGTH_LONG).show();
     					break;
     				default:
     					// Do nothing
@@ -499,7 +510,11 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}
 		mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
 	}
+	
+	/** End of Move data **/
 
+	/** Rename data **/
+	
 	private void openRenameDataDialog(final File renamedData) {
 		// use to show dialog to get new file name,
 		// positive button will call function to rename file.
@@ -525,6 +540,26 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		});
 		builder.show();
 	}
+	
+	private void renameData(File renamedData, String newName) {
+		RenameResult ret = FSController.renameData(renamedData, newName);
+		switch (ret) {
+		case DATA_ALREADY_EXIST:
+			Toast.makeText(activity, newName + getString(R.string.rename_fileAlreadyExist), Toast.LENGTH_LONG).show();
+			break;
+		case RENAME_SUCCEED:
+			Toast.makeText(activity, R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
+			mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
+			break;
+		case RENAME_FAILED:
+			Toast.makeText(activity, R.string.rename_renameFileFailure, Toast.LENGTH_SHORT).show();
+			break;
+		}
+	}
+	
+	/** End of Rename data **/
+	
+	/** Copy data **/
 
 	// copy file to target(directory) as same name.
 	private void openCopyDataDialog(final File copieerData, final File destParentDir) {
@@ -588,7 +623,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				mHandler.sendEmptyMessage(PROCESSING);
+				mHandler.sendEmptyMessage(PROCESSING_SHOW);
 				if (FSController.copyData(copieerData, destData)) {
 					//show information to user.
 					mHandler.sendEmptyMessage(COPY_DATA_SUCCEED);
@@ -599,11 +634,15 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}).start();
 	}
 	
+	/** End of Copy data **/
+	
+	/** Delete data **/
+	
 	/**
 	 * use to delete file and directory.
-	 * @param selectedFile file wait for delete.
+	 * @param deletedData file wait for delete.
 	 */
-	private void openDeleteDataDialog(final File selectedFile) {
+	private void openDeleteDataDialog(final File deletedData) {
 		// basic dialog setting.
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(R.string.delete_alertTitle);
@@ -616,11 +655,11 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		builder.setPositiveButton(R.string.delete_deleteButton, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				deleteData(selectedFile);
+				deleteData(deletedData);
 			}
 		});
 		// set msg according deleted data type(dir or file).
-		builder.setMessage(selectedFile.isDirectory()?
+		builder.setMessage(deletedData.isDirectory()?
 				R.string.delete_alertDeleteDirMsg: R.string.delete_alertDeleteFileMsg);
 		builder.show();
 	}
@@ -629,7 +668,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				mHandler.sendEmptyMessage(PROCESSING);
+				mHandler.sendEmptyMessage(PROCESSING_SHOW);
 				if (FSController.deleteData(deletedData) == true) {
 					Message msg = new Message();
 					Bundle bundle = new Bundle();
@@ -649,21 +688,77 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}).start();
 	}
 	
-	private void renameData(File renamedData, String newName) {
-		RenameResult ret = FSController.renameData(renamedData, newName);
-		switch (ret) {
-		case DATA_ALREADY_EXIST:
-			Toast.makeText(activity, newName + getString(R.string.rename_fileAlreadyExist), Toast.LENGTH_LONG).show();
-			break;
-		case RENAME_SUCCEED:
-			Toast.makeText(activity, R.string.rename_renameFileSucceed, Toast.LENGTH_SHORT).show();
-			mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
-			break;
-		case RENAME_FAILED:
-			Toast.makeText(activity, R.string.rename_renameFileFailure, Toast.LENGTH_SHORT).show();
-			break;
+	/** End of Delete data **/
+	
+	/** Show Data information **/
+	/** 
+	 * Calculate information of data need sometimes, so we need show dialog after calculation.
+	 * Thus we should mHandler to call "openInfoDialog" function.
+	 */
+	/**
+	 * Key set for Bundle.
+	 */
+	private static final String INFO_TITLE = "infoTitle";
+	private static final String INFO_ICON_RES_ID = "infoIconResId";
+	private static final String INFO_MSG = "infoMsg";
+	private void showDataInfo(final File selectedData) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				mHandler.sendEmptyMessage(PROCESSING_SHOW);
+				String dataInfo = getDataInfo(selectedData);
+				
+				Message msg = new Message();
+				Bundle args = new Bundle();
+				args.putString(INFO_TITLE, selectedData.getAbsolutePath());
+				args.putInt(INFO_ICON_RES_ID, selectedData.isDirectory()?
+														R.drawable.open : R.drawable.file);
+				args.putString(INFO_MSG, dataInfo);
+				msg.setData(args);
+				msg.what = SHOW_INFO_DIALOG;
+				
+				mHandler.sendMessage(msg);
+				mHandler.sendEmptyMessage(PROCESSING_HIDE);
+			}
+		}).start();
+	}
+	
+	private void openShowInfoDialog(String title, int iconResId, String msg) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle(title);
+		builder.setIcon(iconResId);
+        builder.setMessage(msg);
+        builder.setPositiveButton(R.string.alertButton_ok, null);
+        builder.setCancelable(true);
+        builder.show();
+	}
+	
+	private String getDataInfo(File selectedData) {
+		// get data size.
+		long dataSize = FSController.calculateBytesInDirectory(selectedData);
+		String size = getString(R.string.fileInfo_size)
+				+ FSController.translateBytesToHummanReadable(dataSize,
+						activity.getString(R.string.fileInfo_unit_byte),
+						activity.getString(R.string.fileInfo_unit_kByte),
+						activity.getString(R.string.fileInfo_unit_mByte),
+						activity.getString(R.string.fileInfo_unit_gByte))
+				+ "\n";
+		
+		// get last modified info.
+		String lastModified = getString(R.string.fileInfo_lastModify) + "\n"
+				+ FSController.getDataLastModifiedDate(selectedData) + "\n";
+		
+		if (selectedData.isDirectory()) {
+			// get total files number in directory.
+			int numberOfFiles = FSController.calculateFileNumberInDirectory(selectedData);
+			String filesNumber = getString(R.string.fileInfo_containingFileNumber) + numberOfFiles +"\n";
+			return filesNumber + size + lastModified;
+		} else {
+			return size + lastModified; 
 		}
 	}
+	
+	/** End of Show Data information **/
 	
 	// AREA public parameter getter.
 	public File getDirectory() {
