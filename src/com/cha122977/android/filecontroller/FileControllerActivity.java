@@ -139,7 +139,7 @@ public class FileControllerActivity extends Activity {
     private void openDefaultTopDirectory() {
     	if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
         	// sdcard exist
-        	openTopFile(false, AppConstant.SDCARD_ROOT);
+        	openTopFile(false, AppConstant.PRIMARY_STORAGE_ROOT);
         } else {
         	// sdcard doesn't exist
         	openTopFile(false, AppConstant.ROOT);
@@ -149,7 +149,7 @@ public class FileControllerActivity extends Activity {
     private void openDefaultBottomDirectory() {
     	if (Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
         	// sdcard exist
-            openBottomFile(false, AppConstant.SDCARD_ROOT);
+            openBottomFile(false, AppConstant.PRIMARY_STORAGE_ROOT);
         } else {
         	// sdcard doesn't exist
             openBottomFile(false, AppConstant.ROOT);
@@ -295,7 +295,7 @@ public class FileControllerActivity extends Activity {
 		    	}
 		    	File[] fList = f.listFiles();
 		    	
-		    	fList = FSController.filterCannotWriteFile(fList);//filter the file which can't read and write
+		    	fList = FSController.filterCannotReadFile(fList);//filter the file which can't read and write
 		    	
 		    	fList = FSController.reSort(fList); //reSort FileList
 		    	topFilePath.clear(); //clear the list
@@ -332,7 +332,7 @@ public class FileControllerActivity extends Activity {
 	        	}
 	    		File[] fList = f.listFiles();
 	    		
-	    		fList = FSController.filterCannotWriteFile(fList);//filter the file which can't read and write
+	    		fList = FSController.filterCannotReadFile(fList);//filter the file which can't read and write
 	    		
 	    		fList = FSController.reSort(fList);//reSort FileList
 	        	bottomFilePath.clear();//clear the list

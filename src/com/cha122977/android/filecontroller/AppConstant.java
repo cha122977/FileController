@@ -4,9 +4,9 @@ import android.os.Environment;
 
 public class AppConstant {
 
-	public final static String SDCARD_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
-	public final static String ROOT = "/";
-	
+	public final static String PRIMARY_STORAGE_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
+	public final static String ROOT = Environment.getRootDirectory().getAbsolutePath();
+
 	public static final String PREFS_NAME = "UserPrefs";
 	public static final String OPEN_FIRST = "OpenAppFirst";
 
@@ -14,4 +14,5 @@ public class AppConstant {
 	public static final int RESULT_CODE_OPEN_TOP = 12;
 	public static final int RESULT_CODE_OPEN_BOTTOM = 13;
 
+	public static final String KEY_FILE_PATH = "path"; 
 }

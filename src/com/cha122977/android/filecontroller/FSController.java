@@ -211,10 +211,10 @@ public class FSController {
 		return type;
 	}
 	
-	public static File[] filterCannotWriteFile(File[] beFilteredFile){//use to filter the file which cannot be write
+	public static File[] filterCannotReadFile(File[] beFilteredFile){//use to filter the file which cannot be write
 		List<File> l = new ArrayList<File>();
-    	for(File f: beFilteredFile){
-    		if(f.canWrite()){
+    	for (File f: beFilteredFile) {
+    		if (f.canRead()) {
     			l.add(f);
     		}
 		}

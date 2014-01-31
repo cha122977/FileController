@@ -20,14 +20,14 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class SearchActivity extends ListActivity{
 	
 	private EditText et_searchName;
-	private Button bt_searchButton;
+	private ImageButton ib_searchButton;
 	
 	private Stack<String> visitedHistory; // history of visited directories 
 	
@@ -52,26 +52,34 @@ public class SearchActivity extends ListActivity{
 	
 	private void setViews(){
 		et_searchName = (EditText) findViewById(R.id.searchNameEdit);
-		bt_searchButton = (Button) findViewById(R.id.searchButton);
+		ib_searchButton = (ImageButton) findViewById(R.id.searchImageButton);
 	}
 	
 	private void setListeners(){
-		bt_searchButton.setOnClickListener(new OnClickListener(){
+		ib_searchButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+				String searchedDir = AppConstant.PRIMARY_STORAGE_ROOT;
+				String esdState = Environment.getExternalStorageState();
+				if (esdState.equals(Environment.MEDIA_REMOVED)) { // no external root.
+					searchedDir = AppConstant.ROOT;
+				}
 				String keyWord = et_searchName.getText().toString();
-				startSearch(externalRoot, keyWord);
+				startSearch(searchedDir, keyWord);
 			}
 		});
 		
 		et_searchName.setOnKeyListener(new OnKeyListener(){
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN){
-					String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+				if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+					String searchedDir = AppConstant.PRIMARY_STORAGE_ROOT;
+					String esdState = Environment.getExternalStorageState();
+					if (esdState.equals(Environment.MEDIA_REMOVED)) { // no external root.
+						searchedDir = AppConstant.ROOT;
+					}
 					String keyWord = et_searchName.getText().toString();
-					startSearch(externalRoot, keyWord);
+					startSearch(searchedDir, keyWord);
 					return true;
 				}
 				return false;
@@ -130,11 +138,11 @@ public class SearchActivity extends ListActivity{
 	}
 	
 	private void startSearch(String targetDirectory, final String keyWord){
-		if(keyWord.equals("") || keyWord==null){//check if user enter the file name
-			Toast.makeText(getApplicationContext(), R.string.search_no_text, Toast.LENGTH_SHORT).show();
+		if (keyWord.equals("") || keyWord==null) { // check if user enter the file name
+			Toast.makeText(this, R.string.search_no_text, Toast.LENGTH_SHORT).show();
 		} else {
 			final File file = new File(targetDirectory);
-			if(file != null){//make sure
+			if (file.exists()) { // make sure
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -160,19 +168,23 @@ public class SearchActivity extends ListActivity{
 	
 	private ArrayList<String> deepSearch(File targetDirectory, String keyWord){
 		ArrayList<String> result = new ArrayList<String>();
-		//shadow search
+		// shadow search, search current directory only.
 		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
-		listfile = FSController.filterCannotWriteFile(listfile);
-		for(File f: listfile){
-			result.add(f.getAbsolutePath());
+		if (listfile != null) {
+			listfile = FSController.filterCannotReadFile(listfile);
+			for (File f: listfile) {
+				result.add(f.getAbsolutePath());
+			}
 		}
 		
-		//deep search(use recursive method)
+		//deep search(use recursive method), search inner directory.
 		listfile = targetDirectory.listFiles();
-		listfile = FSController.filterCannotWriteFile(listfile);
-		for(File f: listfile){
-			if(f.isDirectory()){
-				result.addAll(deepSearch(f, keyWord));
+		if (listfile != null) {
+			listfile = FSController.filterCannotReadFile(listfile);
+			for (File f: listfile) {
+				if (f.isDirectory()) {
+					result.addAll(deepSearch(f, keyWord));
+				}
 			}
 		}
 		return result;
@@ -287,7 +299,7 @@ public class SearchActivity extends ListActivity{
 	
 	private void setResultAndFinish(int resultCode, String path) {
 		Intent intent = new Intent();
-		intent.putExtra("path", path);
+		intent.putExtra(AppConstant.KEY_FILE_PATH, path);
 		setResult(resultCode, intent);
 		finish();;
 	}

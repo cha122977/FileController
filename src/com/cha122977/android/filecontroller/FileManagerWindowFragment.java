@@ -220,7 +220,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		if (Environment.getExternalStorageState().equals(
 				android.os.Environment.MEDIA_MOUNTED)) {
 			// sdcard exist
-			defaultDirPath = AppConstant.SDCARD_ROOT;
+			defaultDirPath = AppConstant.PRIMARY_STORAGE_ROOT;
 		} else {
 			// sdcard doesn't exist
 			defaultDirPath = AppConstant.ROOT;
@@ -234,6 +234,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	/**
 	 * File or Directory must be opened from this function.
 	 * All of opened file must call this function, including file or directory.
+	 * Note: "DON'T" push back stack in this function.
 	 * 
 	 * @param data
 	 * @return true if open succeed, false else.
@@ -333,18 +334,21 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	 * Scroll listview to specify file. If the file doesn't exist, listview won't scroll.
 	 * @param file
 	 */
-	public void scrollToFile(File file) {
-		String filePath = file.getAbsolutePath();
+	public void scrollToFile(File file, int topOffset) {
 		Log.d("TAG", "try to scroll to " + file);
 		for (int i=0; i<listFilesOfDirFile.length; i++) {
 			File comparedFile = listFilesOfDirFile[i];
 			if (file.equals(comparedFile)) {
 				Log.d("TAG", "Find Same File");
-				lv_fileList.setSelectionFromTop(i, 0); // scroll the listview.
+				lv_fileList.setSelectionFromTop(i, topOffset); // scroll the listview.
 				return;
 			}
 		}
 		Log.d("TAG", file + "did not find");
+	}
+	
+	public void scrollToFile(File file) {
+		scrollToFile(file, 0);
 	}
 	
 	/** AREA options menu **/
@@ -821,10 +825,17 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	/** End of options menu **/
 	
 	/** AREA public parameter getter. **/
+	/**
+	 * get current opened directory.
+	 * @return current directory file
+	 */
 	public File getDirectory() {
 		return this.dirFile;
 	}
-
+	/**
+	 * get current opened directory's path.
+	 * @return path of current directory.
+	 */
 	public String getDirectoryPath() {
 		return this.dirFile.getPath();
 	}

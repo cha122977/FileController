@@ -147,16 +147,6 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 		d.show();
 	}
 	
-	@Override
-	public void onBackPressed() {
-		if (actionHistory.size() == 0) {
-			openExitCheckDialog();
-		} else {
-			HistoryObject ho = actionHistory.pop();
-			(ho.fileManager).openDirectory(ho.dir);
-		}
-	}
-	
 	private void openExitCheckDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.exitDialog_title);
@@ -218,31 +208,45 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == AppConstant.REQUEST_CODE_SEARCH) {
+			FileManagerWindowFragment opener = null;
+			File openedFile = null;
 			switch (resultCode) {
 			case AppConstant.RESULT_CODE_OPEN_TOP:
-				String topPath = data.getStringExtra("path");
-				File topFile = new File(topPath);
-				if (topFile.isDirectory()) {
-					topWindow.openData(topFile);
-				} else {
-					topWindow.openData(topFile.getParentFile());
-					topWindow.scrollToFile(topFile);
-				}
+				opener = topWindow;
+				openedFile = new File(data.getStringExtra(AppConstant.KEY_FILE_PATH));
 				break;
 			case AppConstant.RESULT_CODE_OPEN_BOTTOM:
-				String bottomPath = data.getStringExtra("path");
-				File bottomFile = new File(bottomPath);
-				if (bottomFile.isDirectory()) {
-					bottomWindow.openData(bottomFile);
-				} else {
-					bottomWindow.openData(bottomFile.getParentFile());
-					bottomWindow.scrollToFile(bottomFile);
-				}
+				opener = bottomWindow;
+				openedFile = new File(data.getStringExtra(AppConstant.KEY_FILE_PATH));
 				break;
 			default:
 				super.onActivityResult(requestCode, resultCode, data);
-				break;
+				return;
 			}
+			
+			File currentDir = opener.getDirectory();
+			if (openedFile.isDirectory()) {
+				if (opener.openData(openedFile)) { // open directory succeed.
+					pushDirHistory(opener, currentDir); // push previous to history.
+				}
+			} else {
+				if (opener.openData(openedFile.getParentFile())) {
+					opener.scrollToFile(openedFile); // opened data is file, thus scroll to it.
+					pushDirHistory(opener, currentDir); // push previous to history.
+				}
+			}
+		}
+	}
+	
+	/** AREA implementation of back stack **/
+	
+	@Override
+	public void onBackPressed() {
+		if (actionHistory.size() == 0) {
+			openExitCheckDialog();
+		} else {
+			HistoryObject ho = actionHistory.pop();
+			(ho.fileManager).openDirectory(ho.dir);
 		}
 	}
 	
@@ -257,4 +261,5 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	}
 	
 	/** End of History Object **/
+	/** End of implementation of back stack **/
 }
