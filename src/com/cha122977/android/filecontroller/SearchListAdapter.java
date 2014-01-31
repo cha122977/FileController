@@ -31,9 +31,6 @@ public class SearchListAdapter extends BaseAdapter {
 			case NOTIFY_CHANGED:
 				notifyDataSetChanged();
 				break;
-			default:
-				super.handleMessage(msg);
-				break;
 			}
 		}
 	};
@@ -69,6 +66,9 @@ public class SearchListAdapter extends BaseAdapter {
 		mIcon7=BitmapFactory.decodeResource(context.getResources(), R.drawable.text);
 		
 		mIcon_m1=BitmapFactory.decodeResource(context.getResources(), R.drawable.unknown_image);
+		
+		
+		
 		processScaledAllImage();
 	}
 	
@@ -219,7 +219,6 @@ public class SearchListAdapter extends BaseAdapter {
 							if (fileIcon.get(i) == null) { // only scaled when there is no icon.
 								Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
 								fileIcon.set(i, bm != null? bm: mIcon_m1);
-								
 								mHandler.sendEmptyMessage(NOTIFY_CHANGED);
 							}
 						}

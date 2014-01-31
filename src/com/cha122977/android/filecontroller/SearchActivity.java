@@ -54,7 +54,7 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 				setProgressBarIndeterminateVisibility(true);
 				break;
 			case PROGRESS_HIDE:
-				if (msg.obj == getListView().getAdapter()) {
+				if (numberOfSearchingThread == 0) { // if all searching thread are complete
 					setProgressBarIndeterminateVisibility(false);
 				}
 				break;
@@ -352,6 +352,9 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 	
 	/** search function **/
 	
+	private Object searchingThreadLock = new Object();
+	private int numberOfSearchingThread = 0;
+	
 	private void startSearch(String targetDirectory, final String keyWord){
 		if (keyWord.equals("") || keyWord==null) { // check if user enter the file name
 			Toast.makeText(this, R.string.search_no_text, Toast.LENGTH_SHORT).show();
@@ -372,14 +375,17 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				synchronized (searchingThreadLock) {
+					numberOfSearchingThread++;
+				}
 				mHandler.sendEmptyMessage(PROGRESS_SHOW);
-				newDeepSearch(targetDirectory, keyWord, newAdapter);
-				Message msg = new Message();
 				
-				// bind new adapter to check whether hide the progress icon.
-				msg.obj = newAdapter;
-				msg.what = PROGRESS_HIDE;
-				mHandler.sendMessage(msg);
+				newDeepSearch(targetDirectory, keyWord, newAdapter);
+				
+				synchronized (searchingThreadLock) {
+					numberOfSearchingThread--;
+				}
+				mHandler.sendEmptyMessage(PROGRESS_HIDE);
 			}
 		}).start();
 	}
@@ -390,7 +396,7 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 		if (listfile != null) {
 			listfile = FSController.filterCannotReadFile(listfile);
 			for (final File f: listfile) {
-				runOnUiThread(new Runnable() {
+				runOnUiThread(new Runnable() { // only UI thread can change adapter, or VM throws illegalState.
 					@Override
 					public void run() {
 						adapter.addFilePath(f.getAbsolutePath());
@@ -405,36 +411,12 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 		if (listfile != null) {
 			listfile = FSController.filterCannotReadFile(listfile);
 			for (File f: listfile) {
-				if (f.isDirectory()) {
+				if (f.isDirectory()) { // search recursively.
 					newDeepSearch(f, keyWord, adapter);
 				}
 			}
 		}
 	}
-	
-	private ArrayList<String> deepSearch(File targetDirectory, String keyWord) {
-		ArrayList<String> result = new ArrayList<String>();
-		// shadow search, search current directory only.
-		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
-		if (listfile != null) {
-			listfile = FSController.filterCannotReadFile(listfile);
-			for (File f: listfile) {
-				result.add(f.getAbsolutePath());
-			}
-		}
-		
-		// deep search(use recursive method), search inner directory.
-		listfile = targetDirectory.listFiles();
-		if (listfile != null) {
-			listfile = FSController.filterCannotReadFile(listfile);
-			for (File f: listfile) {
-				if (f.isDirectory()) {
-					result.addAll(deepSearch(f, keyWord));
-				}
-			}
-		}
-		return result;
-	}	
 	
 	/**
 	 * Used to filter the files name.
@@ -466,13 +448,8 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 		}
 		visitedHistory.pop(); // delete current directory(unused)
 		if (visitedHistory.isEmpty()) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					startDeepSearch(new File(AppConstant.PRIMARY_STORAGE_ROOT), 
-							et_searchName.getText().toString());
-				}
-			}).start();
+			startDeepSearch(new File(AppConstant.PRIMARY_STORAGE_ROOT), 
+					et_searchName.getText().toString());
 		} else {
 			openDirectory(visitedHistory.peek());
 		}
