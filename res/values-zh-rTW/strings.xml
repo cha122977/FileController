@@ -49,6 +49,8 @@
     <string name="menu_helpTitle">說 明</string>
     <string name="menu_aboutTitle">關於Cobi</string>
     <string name="menu_finish">結束Cobi</string>
+    <string name="menu_showInTopWindow">顯示在上方視窗</string>
+	<string name="menu_showInBottomWindow">顯示在下方視窗</string>
     <string name="menu_createNewDirInTop">在上方新增資料夾</string>
     <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     
@@ -98,25 +100,6 @@
 	<!-- use when move file and target directory have same name file -->
     <string-array name="alert_moveFileSameName">
         <item>取代該檔案</item>
-        <item>取消</item>
-    </string-array>
-    
-    <!--  use in SearchActivity to maintain user option when clicked one is directory -->
-    <string-array name="alert_searchListDirectoryOption">
-        <item>顯示在上方視窗</item>
-        <item>顯示在下方視窗</item>
-        <item>顯示檔案資訊</item>
-        <item>刪除</item>
-        <item>取消</item>
-    </string-array>
-    
-    <!--  use in SearchActivity to maintain user option when clicked one is file-->
-    <string-array name="alert_searchListFileOption">
-        <item>打開檔案</item>
-        <item>顯示在上方視窗</item>
-        <item>顯示在下方視窗</item>
-        <item>顯示檔案資訊</item>
-        <item>刪除</item>
         <item>取消</item>
     </string-array>
 </resources>

@@ -260,9 +260,7 @@ public class FSController {
     }
     
 	/* function used to show file information*/
-    public static void showFileInformation(String selectedFilePath, Context context){
-    	DecimalFormat df = new DecimalFormat("0.00");
-    	
+	public static void showFileInformation(String selectedFilePath, Context context){
     	File f = new File(selectedFilePath);
     	AlertDialog.Builder builder = new AlertDialog.Builder(context);  
     	builder.setTitle(f.getAbsoluteFile()+"");

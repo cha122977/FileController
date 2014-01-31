@@ -49,6 +49,8 @@
     <string name="menu_helpTitle">HELP</string>
     <string name="menu_aboutTitle">About....</string>
     <string name="menu_finish">Exit Cobi</string>
+	<string name="menu_showInTopWindow">Show in top window</string>
+	<string name="menu_showInBottomWindow">Show in bottom window</string>
     <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
     <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
     
@@ -104,22 +106,4 @@
         <item>Cancel</item>
     </string-array>
     
-    <!--  use in SearchActivity to maintain user option when clicked one is directory -->
-    <string-array name="alert_searchListDirectoryOption">
-        <item>Show in Top Window</item>
-        <item>Show in Bottom Window</item>
-        <item>Show information</item>
-        <item>Delete</item>
-        <item>Cancel</item>
-    </string-array>
-    
-    <!--  use in SearchActivity to maintain user option when clicked one is file-->
-    <string-array name="alert_searchListFileOption">
-        <item>Open</item>
-        <item>Show in Top Window</item>
-        <item>Show in Bottom Window</item>
-        <item>Show information</item>
-        <item>Delete</item>
-        <item>Cancel</item>
-    </string-array>
 </resources>

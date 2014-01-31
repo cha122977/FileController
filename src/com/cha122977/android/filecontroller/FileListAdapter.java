@@ -4,12 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cha122977.android.filecontroller.FSController.MimeType;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,21 +17,24 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cha122977.android.filecontroller.FSController.MimeType;
+
 public class FileListAdapter extends BaseAdapter {
 	
 	private static final int NOTIFY_CHANGED = 0;
 	
+	@SuppressLint("HandlerLeak")
 	Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			switch(msg.what){
+			switch (msg.what) {
 			case NOTIFY_CHANGED:
 				notifyDataSetChanged();
 				break;
 			default:
-				//do nothing
+				super.handleMessage(msg);
+				break;
 			}
-			super.handleMessage(msg);
 		}
 	};
 	
@@ -40,6 +43,7 @@ public class FileListAdapter extends BaseAdapter {
 	private ArrayList<String> filePath;
 	private List<Bitmap> fileIcon;
 	
+	@SuppressLint("unused")
 	private Bitmap mIcon1;//opened folder
 	private Bitmap mIcon2;//folder
 	private Bitmap mIcon3;//file
@@ -115,6 +119,7 @@ public class FileListAdapter extends BaseAdapter {
 		} else {
 			holder = (ViewHolder)convertView.getTag();
 		}
+		Log.d("TAG", "width:" + holder.icon.getWidth() + ", height:" + holder.icon.getHeight());
 		
 		File f = new File(filePath.get(position).toString());
 		switch (FSController.getMimeType(f)) {

@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	
+	@SuppressWarnings("unused")
 	private static final String LOG_TAG = "MainActionBarActivity";
 	
 	private LinearLayout ll_rootWindow;

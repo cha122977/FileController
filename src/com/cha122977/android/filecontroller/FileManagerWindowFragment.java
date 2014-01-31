@@ -68,7 +68,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	private static final int DELETE_DATA_FAILED = 14;
 	private static final int SHOW_INFO_DIALOG = 15;
 	
-	private static final String NAME_PROCESSED_DATA = "processedData";
+	private static final String NAME_PROCESSED_DATA = AppConstant.KEY_FILE_PATH;
 	
 	private Handler mHandler = new Handler() {
 		@Override
@@ -114,7 +114,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 				break;
 			case SHOW_INFO_DIALOG:
 				Bundle infoArgs = msg.getData();
-				openShowInfoDialog(infoArgs.getString(INFO_TITLE), infoArgs.getInt(INFO_ICON_RES_ID), infoArgs.getString(INFO_MSG));
+				openShowInfoDialog(infoArgs.getString(KEY_INFO_TITLE), infoArgs.getInt(KEY_INFO_ICON_RES_ID), infoArgs.getString(KEY_INFO_MSG));
 				break;
 			default: // do nothing.
 				break;
@@ -412,7 +412,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			openDeleteDataDialog(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		default:
-			return super.onContextItemSelected(item);
+			return false;
 		}
 	}
 	
@@ -479,7 +479,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 //		}
 //	}
 	
-	/** Create directory **/
+	/*** Create directory ***/
 
 	public void createDirectory(final File parentDir) {
 		// show a dialog to get new name.
@@ -517,9 +517,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}
 	}
 	
-	/** End of Create directory **/
+	/*** End of Create directory ***/
 	
-	/** Move data **/
+	/*** Move data ***/
 	
 	/**
 	 * Move data(dir/file) to target file.
@@ -574,9 +574,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		mHandler.sendEmptyMessage(SYNC_ALL_LISTS);
 	}
 	
-	/** End of Move data **/
+	/*** End of Move data ***/
 
-	/** Rename data **/
+	/*** Rename data ***/
 	
 	private void openRenameDataDialog(final File renamedData) {
 		// use to show dialog to get new file name,
@@ -620,7 +620,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}
 	}
 	
-	/** End of Rename data **/
+	/*** End of Rename data ***/
 	
 	/** Copy data **/
 
@@ -697,9 +697,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}).start();
 	}
 	
-	/** End of Copy data **/
+	/*** End of Copy data ***/
 	
-	/** Delete data **/
+	/*** Delete data ***/
 	
 	/**
 	 * use to delete file and directory.
@@ -751,9 +751,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}).start();
 	}
 	
-	/** End of Delete data **/
+	/*** End of Delete data ***/
 	
-	/** Show Data information **/
+	/*** Show Data information ***/
 	/** 
 	 * Calculate information of data need sometimes, so we need show dialog after calculation.
 	 * Thus we should mHandler to call "openInfoDialog" function.
@@ -761,9 +761,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	/**
 	 * Key set for Bundle.
 	 */
-	private static final String INFO_TITLE = "infoTitle";
-	private static final String INFO_ICON_RES_ID = "infoIconResId";
-	private static final String INFO_MSG = "infoMsg";
+	private static final String KEY_INFO_TITLE = "infoTitle";
+	private static final String KEY_INFO_ICON_RES_ID = "infoIconResId";
+	private static final String KEY_INFO_MSG = "infoMsg";
 	private void showDataInfo(final File selectedData) {
 		new Thread(new Runnable() {
 			@Override
@@ -773,10 +773,10 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 				
 				Message msg = new Message();
 				Bundle args = new Bundle();
-				args.putString(INFO_TITLE, selectedData.getAbsolutePath());
-				args.putInt(INFO_ICON_RES_ID, selectedData.isDirectory()?
+				args.putString(KEY_INFO_TITLE, selectedData.getAbsolutePath());
+				args.putInt(KEY_INFO_ICON_RES_ID, selectedData.isDirectory()?
 														R.drawable.open : R.drawable.file);
-				args.putString(INFO_MSG, dataInfo);
+				args.putString(KEY_INFO_MSG, dataInfo);
 				msg.setData(args);
 				msg.what = SHOW_INFO_DIALOG;
 				
@@ -821,7 +821,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}
 	}
 	
-	/** End of Show Data information **/
+	/*** End of Show Data information ***/
 	/** End of options menu **/
 	
 	/** AREA public parameter getter. **/

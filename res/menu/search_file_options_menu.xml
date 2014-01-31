@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item android:id="@+id/menu_showInTopWindow"
+		android:title="@string/menu_showInTopWindow" />
+    <item android:id="@+id/menu_showInBottomWindow"
+		android:title="@string/menu_showInBottomWindow" />
+	<item android:id="@+id/menu_showFileInfo"
+		android:title="@string/menu_showInfo" />
+	<item android:id="@+id/menu_deleteFile"
+		android:title="@string/menu_delete" />
+	
+</menu>

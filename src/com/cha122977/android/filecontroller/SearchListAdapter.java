@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.cha122977.android.filecontroller.FSController.MimeType;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,17 +21,20 @@ import android.widget.TextView;
 
 public class SearchListAdapter extends BaseAdapter {
 	
+	private static final int NOTIFY_CHANGED = 0;
+	
+	@SuppressLint("HandlerLeak")
 	Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case 0:
+			case NOTIFY_CHANGED:
 				notifyDataSetChanged();
 				break;
 			default:
-				//do nothing
+				super.handleMessage(msg);
+				break;
 			}
-			super.handleMessage(msg);
 		}
 	};
 	
@@ -113,7 +117,7 @@ public class SearchListAdapter extends BaseAdapter {
 			holder.icon.setImageBitmap(mIcon5);
 			break;
 		case IMAGE://image
-			if(fileIcon.get(position) == null){
+			if (fileIcon.get(position) == null) {
 				holder.icon.setImageBitmap(mIcon6);
 			} else {
 				holder.icon.setImageBitmap(fileIcon.get(position));
@@ -130,54 +134,33 @@ public class SearchListAdapter extends BaseAdapter {
 		holder.filePath.setText(f.getAbsolutePath());
 		return convertView;
 	}
+	
 	static class ViewHolder {
 		ImageView icon;
 		TextView fileName;
 		TextView filePath;
 	}
 	
-	private void processScaledImage() {//just for set scaled image. if we set all icon here, performance will bad. 
+	private boolean isAdapterDropped = false;
+	
+	public void drop() {
+		isAdapterDropped = true;
+	}
+	
+	private void processScaledImage() { // just for set scaled image. if we set all icon here, performance will bad. 
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				for (int i=0; i<filePath.size(); i++) {
+					if (isAdapterDropped) {
+						return;
+					}
 					String fp = filePath.get(i);
 					if (FSController.getMimeType(new File(fp)) == MimeType.IMAGE) {
-						try {
-							BitmapFactory.Options options = new BitmapFactory.Options();
-							options.inJustDecodeBounds = true; //limit the image to bounds
-							BitmapFactory.decodeFile(fp, options);//get the height & width of image(save in options)
-							
-							final int newHeight = mIcon6.getHeight();
-							final int newWidth  = mIcon6.getWidth();
-							
-							int width=options.outWidth;
-					        int height=options.outHeight;
-							
-					        int scaledPower = 1;
-					        
-					        while (height/2 >= newHeight || width/2 >= newWidth) {
-					        	scaledPower++;
-					        	height /= 2;
-					        	width  /= 2;
-					        }
-					        
-					        options = new BitmapFactory.Options();//new options
-					        options.inSampleSize=scaledPower;
-					        Bitmap vBitmap = BitmapFactory.decodeFile(fp, options);
-					        
-							if (vBitmap == null) { // no such this bitmap.
-								fileIcon.set(i, mIcon_m1); // set to unknown icon
-								continue;
-							}
-							// scaled Bitmap 
-							Bitmap vB2 = Bitmap.createScaledBitmap(vBitmap, mIcon6.getHeight(), mIcon6.getWidth(), true);
-							fileIcon.set(i, vB2);//add icon to fileIcon.
-							mHandler.sendEmptyMessage(0);//notify data set change
-						} catch (Exception e) {
-							fileIcon.set(i, mIcon_m1);
-							continue;
-						}
+						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
+						fileIcon.set(i, bm != null? bm: mIcon_m1);
+						
+						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
 					}
 				}
 			}
