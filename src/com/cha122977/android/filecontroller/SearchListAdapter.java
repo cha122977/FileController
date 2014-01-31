@@ -69,7 +69,7 @@ public class SearchListAdapter extends BaseAdapter {
 		mIcon7=BitmapFactory.decodeResource(context.getResources(), R.drawable.text);
 		
 		mIcon_m1=BitmapFactory.decodeResource(context.getResources(), R.drawable.unknown_image);
-		processScaledImage();//run the thread to create scaledImage
+		processScaledAllImage();
 	}
 	
 	@Override
@@ -119,6 +119,7 @@ public class SearchListAdapter extends BaseAdapter {
 		case IMAGE://image
 			if (fileIcon.get(position) == null) {
 				holder.icon.setImageBitmap(mIcon6);
+				processScaledImage(position);
 			} else {
 				holder.icon.setImageBitmap(fileIcon.get(position));
 			}
@@ -147,7 +148,31 @@ public class SearchListAdapter extends BaseAdapter {
 		isAdapterDropped = true;
 	}
 	
-	private void processScaledImage() { // just for set scaled image. if we set all icon here, performance will bad. 
+	// just for set scaled visable image
+	private void processScaledImage(final int position) {	
+		Thread scaleThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (isAdapterDropped) {
+					return;
+				}
+				String fp = filePath.get(position);
+				synchronized (SyncLock) {
+					if (fileIcon.get(position) == null) { // maybe scaled from other thread, thus ignore scaling.
+						// MimiType already checked when call this function. So skip to check if image.
+						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
+						fileIcon.set(position, bm != null? bm: mIcon_m1);
+						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+					}
+				}
+			}
+		});
+		scaleThread.setPriority(Thread.NORM_PRIORITY+1); // set priority higher than normal.
+		scaleThread.start();
+	}
+	
+	//just for set scaled image. if we set all icon here, performance will bad.
+	private void processScaledAllImage() {  
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -157,13 +182,19 @@ public class SearchListAdapter extends BaseAdapter {
 					}
 					String fp = filePath.get(i);
 					if (FSController.getMimeType(new File(fp)) == MimeType.IMAGE) {
-						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
-						fileIcon.set(i, bm != null? bm: mIcon_m1);
-						
-						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+						synchronized (SyncLock) {
+							if (fileIcon.get(i) == null) { // only scaled when there is no icon.
+								Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
+								fileIcon.set(i, bm != null? bm: mIcon_m1);
+								
+								mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+							}
+						}
 					}
 				}
 			}
-		}).start();
+		}).start(); // Run as normal priority.
 	}
+	
+	private Object SyncLock = new Object();
 }

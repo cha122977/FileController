@@ -390,7 +390,7 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 			}
 		}
 		
-		//deep search(use recursive method), search inner directory.
+		// deep search(use recursive method), search inner directory.
 		listfile = targetDirectory.listFiles();
 		if (listfile != null) {
 			listfile = FSController.filterCannotReadFile(listfile);

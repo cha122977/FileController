@@ -9,7 +9,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,7 +87,7 @@ public class FileListAdapter extends BaseAdapter {
 		
 		mIcon_m1=Utility.decodeSampledBitmapFromResource(context.getResources(), R.drawable.unknown_image, 48, 48);
 		
-		processScaledImage();//run the thread to create scaledImage
+		processScaledAllImage(); //run the thread to create scaledImage
 	}
 	
 	@Override
@@ -109,7 +108,7 @@ public class FileListAdapter extends BaseAdapter {
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
-		if (convertView==null) {
+		if (convertView == null) {
 			convertView = mLayoutInflater.inflate(R.layout.file_list_row, null);
 			holder = new ViewHolder();
 			holder.icon = (ImageView)convertView.findViewById(R.id.icon);
@@ -119,7 +118,6 @@ public class FileListAdapter extends BaseAdapter {
 		} else {
 			holder = (ViewHolder)convertView.getTag();
 		}
-		Log.d("TAG", "width:" + holder.icon.getWidth() + ", height:" + holder.icon.getHeight());
 		
 		File f = new File(filePath.get(position).toString());
 		switch (FSController.getMimeType(f)) {
@@ -138,6 +136,7 @@ public class FileListAdapter extends BaseAdapter {
 		case IMAGE://image
 			if (fileIcon.get(position) == null) {
 				holder.icon.setImageBitmap(mIcon6);
+				processScaledImage(position);
 			} else {
 				holder.icon.setImageBitmap(fileIcon.get(position));
 			}
@@ -163,7 +162,31 @@ public class FileListAdapter extends BaseAdapter {
 		isAdapterDropped = true;
 	}
 	
-	private void processScaledImage() { //just for set scaled image. if we set all icon here, performance will bad. 
+	// just for set scaled visable image
+	private void processScaledImage(final int position) {	
+		Thread scaleThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (isAdapterDropped) {
+					return;
+				}
+				String fp = filePath.get(position);
+				synchronized (SyncLock) {
+					if (fileIcon.get(position) == null) { // maybe scaled from other thread, thus ignore scaling.
+						// MimiType already checked when call this function. So skip to check if image.
+						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
+						fileIcon.set(position, bm != null? bm: mIcon_m1);
+						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+					}
+				}
+			}
+		});
+		scaleThread.setPriority(Thread.NORM_PRIORITY+1); // set priority higher than normal.
+		scaleThread.start();
+	}
+	
+	//just for set scaled image. if we set all icon here, performance will bad.
+	private void processScaledAllImage() {  
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -173,13 +196,19 @@ public class FileListAdapter extends BaseAdapter {
 					}
 					String fp = filePath.get(i);
 					if (FSController.getMimeType(new File(fp)) == MimeType.IMAGE) {
-						Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
-						fileIcon.set(i, bm != null? bm: mIcon_m1);
-						
-						mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+						synchronized (SyncLock) {
+							if (fileIcon.get(i) == null) { // only scaled when there is no icon.
+								Bitmap bm = Utility.decodeSampledBitmapFromFilePath(fp, 48, 48);
+								fileIcon.set(i, bm != null? bm: mIcon_m1);
+								
+								mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+							}
+						}
 					}
 				}
 			}
-		}).start();
+		}).start(); // Run as normal priority.
 	}
+	
+	private Object SyncLock = new Object();
 }
