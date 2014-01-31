@@ -1,6 +1,7 @@
 package com.cha122977.android.filecontroller;
 
 import java.io.File;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,6 +31,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.cha122977.android.filecontroller.FSController.RenameResult;
 
 public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnMenuItemClickListener, OnSharedPreferenceChangeListener {
@@ -435,80 +437,23 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	}
 	
 	/**
-	 * @NOTE
+	 * @NOTE Don't use ContextMenu in this fragment.
 	 * Context Menu have bug:
 	 *   long touching the bottom list,
 	 *   create correct context menu (for bottom), but map to wrong menu item (for top).
 	 *   Thus app have strengh behavior.
 	 */
-//	@Override
-//	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-//		super.onCreateContextMenu(menu, v, menuInfo);
-//		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
-//		MenuInflater inflater = activity.getMenuInflater();
-//		Log.i(LOG_TAG, "ceate context menu...");
-//		if (v == lv_fileList) {
-//			AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) menuInfo;
-//			Log.d(LOG_TAG, "listFilesOfDirFile: " + listFilesOfDirFile[acmi.position].getPath());
-//			if (listFilesOfDirFile[acmi.position].isDirectory()) {
-//				inflater.inflate(R.menu.file_manager_window_directory_options_menu, menu);
-//			} else {
-//				inflater.inflate(R.menu.file_manager_window_file_options_menu, menu);
-//			}
-//		} else if (v == tv_filePath) {
-//			inflater.inflate(R.menu.file_manager_window_parent_options_menu, menu);
-//		}
-//	}
-//
-//	@Override
-//	public boolean onContextItemSelected(MenuItem item) {
-//		AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
-//		Log.i(LOG_TAG, "ID: " + FileManagerWindowFragment.this.getId());
-//		switch (item.getItemId()) {
-//		case R.id.menu_parentCreateDir:
-//			createDirectory(dirFile);
-//			return true;
-//		case R.id.menu_showParentDirInfo:
-//			return true;
-//		case R.id.menu_createDir:
-//			createDirectory(listFilesOfDirFile[acmi.position]);
-//			return true;
-//		case R.id.menu_renameDir:
-//		case R.id.menu_renameFile:
-//			openRenameDataDialog(listFilesOfDirFile[acmi.position]);
-//			return true;
-//		case R.id.menu_showDirInfo:
-//		case R.id.menu_showFileInfo:
-//			return true;
-//		case R.id.menu_moveDirToOtherSide:
-//		case R.id.menu_moveFileToOtherSide:
-//			openMoveDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
-//			return true;
-//		case R.id.menu_copyDirToOtherSide:
-//		case R.id.menu_copyFileToOtherSide:
-//			openCopyDataDialog(listFilesOfDirFile[acmi.position], owner.getAnotherWindowDir(this));
-//			return true;
-//		case R.id.menu_deleteDir:
-//		case R.id.menu_deleteFile:
-//			openDeleteDataDialog(listFilesOfDirFile[acmi.position]);
-//			return true;
-//		default:
-//			return super.onContextItemSelected(item);
-//		}
-//	}
 	
 	/*** Create directory ***/
 
 	public void showCreateDirectoryDialog(final File parentDir) {
 		// show a dialog to get new name.
-		LayoutInflater inflater = LayoutInflater.from(activity);
-		View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
-		final EditText et_renameInput = (EditText) renameDialogView
-				.findViewById(R.id.input);
+		final EditText et_renameInput = new EditText(activity);
+		et_renameInput.setPadding(20, 0, 20, 0);
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setCancelable(false);
 		builder.setTitle(R.string.createDir_createNewDirectory);
-		builder.setView(renameDialogView);
+		builder.setView(et_renameInput);
 		builder.setPositiveButton(R.string.alertButton_ok,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -600,14 +545,13 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		// use to show dialog to get new file name,
 		// positive button will call function to rename file.
 		// show a dialog to get new name.
-		LayoutInflater inflater = LayoutInflater.from(activity);
-		View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
-		final EditText et_renameInput = (EditText)renameDialogView.findViewById(R.id.input);
+		final EditText et_renameInput = new EditText(activity);
+		et_renameInput.setPadding(20, 0, 20, 0);
 		et_renameInput.setText(renamedData.getName());
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setCancelable(false);
 		builder.setTitle(R.string.rename_renameAlertTitle);
-		builder.setView(renameDialogView);
+		builder.setView(et_renameInput);
 		builder.setPositiveButton(R.string.alertButton_ok, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				renameData(renamedData, et_renameInput.getText().toString());

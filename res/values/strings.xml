@@ -30,7 +30,6 @@
     
     <string name="alertButton_yes">Yes</string>
    	<string name="alertButton_no">No</string>
-    <string name="alert_waitingDialogTitle">Please wait...</string>
     <string name="alertButton_ok">OK</string>
     <string name="alertButton_cancel">Cancel</string>
     <string name="action_cancel">Cancel</string>
@@ -85,17 +84,6 @@
     
     <string name="preferences_showHiddenFiles_title">Show hidden files</string>
     <string name="preferences_showHiddenFiles_summary">Show hidden files in window and search result.</string>
-    
-	<!-- use in Long Click List View Item function -->
-    <string-array name="alert_fileSelectedOption">
-        <item>Open </item>
-        <item>Rename</item>
-        <item>Show information</item>
-        <item>Move to: </item>
-        <item>Copy to: </item>
-        <item>Delete</item>
-        <item>Cancel</item>
-    </string-array>
     
     <!-- use when copy file and target directory have same name file -->
     <string-array name="alert_sameFileNameOption">

@@ -30,7 +30,6 @@
     
     <string name="alertButton_yes">是</string>
    	<string name="alertButton_no">否</string>
-    <string name="alert_waitingDialogTitle">請稍後...</string>
     <string name="alertButton_ok">完   成</string>
     <string name="alertButton_cancel">取   消</string>
     <string name="action_cancel">取   消</string>
@@ -85,17 +84,6 @@
     
     <string name="preferences_showHiddenFiles_title">顯示隱藏檔</string>
     <string name="preferences_showHiddenFiles_summary">將隱藏檔顯示在畫面及搜尋結果上</string>
-    
-	<!-- use in Long Click List View Item function -->
-    <string-array name="alert_fileSelectedOption">
-        <item>開啟</item>
-        <item>重新命名</item>
-        <item>詳細資訊</item>
-        <item>移動到：</item>
-        <item>複製到：</item>
-        <item>刪除</item>
-        <item>取消</item>
-    </string-array>
     
     <!-- use when copy file and target directory have same name file -->
     <string-array name="alert_sameFileNameOption">
