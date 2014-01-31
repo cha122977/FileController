@@ -8,8 +8,10 @@ import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -51,6 +53,19 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 		setFragment();
 	}
 	
+	private static final String OPEN_FIRST = "OpenAppFirst";
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean firstUseApp = sp.getBoolean(OPEN_FIRST, true);
+		if (firstUseApp) {
+			showHelpDialog(); // open help dialog if use app first time.
+			sp.edit().putBoolean(OPEN_FIRST, false).commit();
+		}
+	}
+	
 	private void init() {
 		actionHistory = new Stack<HistoryObject>();
 	}
@@ -71,11 +86,6 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	}
 	
 	private void setFragment() {
-	}
-	
-	private void refreshLists() {
-		topWindow.refresh();
-		bottomWindow.refresh();
 	}
 	
 	@Override
@@ -173,7 +183,8 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	
 	@Override
 	public void refreshAllWindow() {
-		refreshLists();
+		topWindow.refresh();
+		bottomWindow.refresh();
 	}
 	
 	@Override

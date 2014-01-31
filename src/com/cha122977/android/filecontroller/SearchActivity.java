@@ -3,7 +3,6 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Stack;
 
 import android.annotation.SuppressLint;
@@ -11,13 +10,14 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +34,8 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItemClickListener {
+public class SearchActivity extends ListActivity implements
+		PopupMenu.OnMenuItemClickListener, OnSharedPreferenceChangeListener {
 	
 	private EditText et_searchName;
 	private ImageButton ib_searchButton;
@@ -95,6 +96,14 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 	}
 	
 	@Override
+	protected void onDestroy() {
+	    super.onPause();
+	    // unregister sharedPreferecnes callback
+	    PreferenceManager.getDefaultSharedPreferences(this)
+	            .unregisterOnSharedPreferenceChangeListener(this);
+	}
+	
+	@Override
 	public void onConfigurationChanged(Configuration newConfig) {//use to change the orientation of view.
     	super.onConfigurationChanged(newConfig);    	
     	if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -104,8 +113,14 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
     	}
 	}
 	
+	private boolean flag_showHiddenFiles = false;
+	
 	private void init() {
 		visitedHistory = new Stack<String>();
+		// get preferecnes.
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		flag_showHiddenFiles = sp.getBoolean(AppConstant.KEY_IF_SHOW_HIDDEN_FILES, false);
+		sp.registerOnSharedPreferenceChangeListener(this); // register preference change listener.
 	}
 	
 	private void setViews() {
@@ -168,7 +183,11 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 	
 	private void openDirectory(String filePath) {
 		searchResultPathList = new ArrayList<String>();
-		for(File f: new File(filePath).listFiles()) {
+		File[] files = new File(filePath).listFiles();
+		if (flag_showHiddenFiles == false) {
+			files = FSController.filterHiddenFiles(files);
+		}
+		for (File f: files) {
 			searchResultPathList.add(f.getPath());
 		}
 		setListAdapter(new SearchListAdapter(this, searchResultPathList));
@@ -397,8 +416,11 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 	private void newDeepSearch(File targetDirectory, String keyWord, final SearchListAdapter adapter) {
 		// shadow search, search current directory only.
 		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
+		if (flag_showHiddenFiles == false) {
+			listfile = FSController.filterHiddenFiles(listfile);
+		}
+		listfile = FSController.filterCannotReadFiles(listfile);
 		if (listfile != null) {
-			listfile = FSController.filterCannotReadFile(listfile);
 			for (final File f: listfile) {
 				runOnUiThread(new Runnable() { // only UI thread can change adapter, or VM throws illegalState.
 					@Override
@@ -412,8 +434,12 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 		
 		// deep search(use recursive method), search inner directory.
 		listfile = targetDirectory.listFiles();
+		if (flag_showHiddenFiles == false) {
+			listfile = FSController.filterHiddenFiles(listfile);
+		}
+		listfile = FSController.filterCannotReadFiles(listfile);
 		if (listfile != null) {
-			listfile = FSController.filterCannotReadFile(listfile);
+			listfile = FSController.filterCannotReadFiles(listfile);
 			for (File f: listfile) {
 				if (f.isDirectory()) { // search recursively.
 					newDeepSearch(f, keyWord, adapter);
@@ -479,6 +505,12 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 			openDirectory(visitedHistory.peek());
 		}
 	}
-
 	/** End of back stack implementation **/
+	
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if (key.equals(AppConstant.KEY_IF_SHOW_HIDDEN_FILES)) {
+			flag_showHiddenFiles = sharedPreferences.getBoolean(AppConstant.KEY_IF_SHOW_HIDDEN_FILES, false);
+		}
+	}
 }

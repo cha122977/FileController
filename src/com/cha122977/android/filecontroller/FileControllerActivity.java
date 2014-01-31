@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -47,6 +48,8 @@ public class FileControllerActivity extends Activity {
 	
 	private LinearLayout ll_screen; //use to change orientation
 	
+	private static final String OPEN_FIRST = "OpenAppFirst";
+	
 	ImageView iv_topDirImg, iv_bottomDirImg;
     TextView tv_topDir, tv_bottomDir; //textView to show where folder user is.
 	ListView lv_topListView, lv_bottomListView; //listView to show all the file in folder where user is.
@@ -55,6 +58,7 @@ public class FileControllerActivity extends Activity {
 	
 	AlertDialog waitingAlertDialog;
 	
+	@SuppressLint("HandlerLeak")
 	private Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -113,7 +117,7 @@ public class FileControllerActivity extends Activity {
         	ll_screen.setOrientation(LinearLayout.HORIZONTAL);
         }
         
-        SharedPreferences settings = getSharedPreferences(AppConstant.PREFS_NAME, 0);
+        SharedPreferences settings = getPreferences(MODE_PRIVATE);
 	        
         setViews();//connect view object to layout widget(in .xml file).
         initial();//construct need object.
@@ -125,9 +129,9 @@ public class FileControllerActivity extends Activity {
         setWaitingAlertDialog(); 
         
         // if first time open app, show help dialog.
-        if (settings.getBoolean(AppConstant.OPEN_FIRST, true)) {
+        if (settings.getBoolean(OPEN_FIRST, true)) {
         	showHelpDialog();
-        	settings.edit().putBoolean(AppConstant.OPEN_FIRST, false).apply(); // apply() performance is better than commit.
+        	settings.edit().putBoolean(OPEN_FIRST, false).apply(); // apply() performance is better than commit.
         }
     }
     
@@ -295,7 +299,7 @@ public class FileControllerActivity extends Activity {
 		    	}
 		    	File[] fList = f.listFiles();
 		    	
-		    	fList = FSController.filterCannotReadFile(fList);//filter the file which can't read and write
+		    	fList = FSController.filterCannotReadFiles(fList);//filter the file which can't read and write
 		    	
 		    	fList = FSController.reSort(fList); //reSort FileList
 		    	topFilePath.clear(); //clear the list
@@ -332,7 +336,7 @@ public class FileControllerActivity extends Activity {
 	        	}
 	    		File[] fList = f.listFiles();
 	    		
-	    		fList = FSController.filterCannotReadFile(fList);//filter the file which can't read and write
+	    		fList = FSController.filterCannotReadFiles(fList);//filter the file which can't read and write
 	    		
 	    		fList = FSController.reSort(fList);//reSort FileList
 	        	bottomFilePath.clear();//clear the list
@@ -473,8 +477,7 @@ public class FileControllerActivity extends Activity {
     					refreshListView();
     					break;
     				case 1://Cancel 
-    					//Do nothing
-    					Toast.makeText(getApplicationContext(), R.string.move_moveFileCancel, Toast.LENGTH_LONG);
+    					Toast.makeText(getApplicationContext(), R.string.move_moveFileCancel, Toast.LENGTH_LONG).show();
     					break;
     				default:
     					//Do nothing

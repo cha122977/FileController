@@ -211,12 +211,17 @@ public class FSController {
 		return type;
 	}
 	
-	public static File[] filterCannotReadFile(File[] beFilteredFile){//use to filter the file which cannot be write
-		if (beFilteredFile == null) { // null check.
+	/**
+	 * use to filter the files which cannot be write
+	 * @param beFilteredFiles files wait for filter
+	 * @return files after filter
+	 */
+	public static File[] filterCannotReadFiles(File[] beFilteredFiles) { 
+		if (beFilteredFiles == null) { // null check.
 			return null;
 		}
 		List<File> l = new ArrayList<File>();
-    	for (File f: beFilteredFile) {
+    	for (File f: beFilteredFiles) {
     		if (f.canRead()) {
     			l.add(f);
     		}
@@ -225,6 +230,26 @@ public class FSController {
     	l.toArray(result);
     	return result;
     }
+	
+	/**
+	 * use to filter the hidden files
+	 * @param beFilteredFiles
+	 * @return
+	 */
+	public static File[] filterHiddenFiles(File[] beFilteredFiles) {
+		if (beFilteredFiles == null) { // null check.
+			return null;
+		}
+		List<File> l = new ArrayList<File>();
+    	for (File f: beFilteredFiles) {
+    		if (!f.getName().startsWith(".")) { // if NOT start with "." (this file is not hidden)
+    			l.add(f);
+    		}
+		}
+    	File[] result = new File[l.size()];
+    	l.toArray(result);
+    	return result;
+	}
     
     public static File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 
     	ArrayList<File> list = new ArrayList<File>();

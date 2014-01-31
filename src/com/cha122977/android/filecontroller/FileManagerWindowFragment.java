@@ -1,15 +1,18 @@
 package com.cha122977.android.filecontroller;
 
 import java.io.File;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -27,14 +30,13 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.cha122977.android.filecontroller.FSController.RenameResult;
 
-public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
+public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnMenuItemClickListener, OnSharedPreferenceChangeListener {
 
 	private static final String LOG_TAG = "FileManagerWindow";
 
-	public static final int REQUEST_CODE_OPEN_FILE = 0;
+	private boolean flag_showHiddenFiles = false;
 	
 	private Activity activity;
 	private IFMWindowFragmentOwner owner;
@@ -70,6 +72,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	
 	private static final String NAME_PROCESSED_DATA = AppConstant.KEY_FILE_PATH;
 	
+	@SuppressLint("HandlerLeak")
 	private Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -141,7 +144,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		// initial variable first to avoid parameters are used in the following functions.
-		initialVariable();
+		init();
 		
 		// set listeners.
 		setListeners();
@@ -156,8 +159,19 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		mHandler.sendEmptyMessage(REFRESH);
 	}
 	
-	private void initialVariable() {
-
+	@Override
+	public void onDestroy() {
+	    super.onPause();
+	    // unregister sharedPreferecnes callback
+	    PreferenceManager.getDefaultSharedPreferences(activity)
+	            .unregisterOnSharedPreferenceChangeListener(this);
+	}
+	
+	private void init() {
+		// get preferecnes.
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
+		flag_showHiddenFiles = sp.getBoolean(AppConstant.KEY_IF_SHOW_HIDDEN_FILES, false);
+		sp.registerOnSharedPreferenceChangeListener(this); // register preference change listener.
 	}
 
 	private void setListeners() {
@@ -274,6 +288,10 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		if (dir.canRead()) {
 			File[] fList = dir.listFiles();
 
+			if (flag_showHiddenFiles == false) {
+				fList = FSController.filterHiddenFiles(fList);
+			}
+			
 			fList = FSController.reSort(fList); // reSort FileList
 
 			// set variable.
@@ -309,7 +327,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		// must check if exist, because current directory may be delete possibly by other app.
 		if (dirFile.exists()) { // open when exist
 			if (dirFile.canRead()) {
-				// prepare scroll value. 
+				// prepare scroll feature's variables. 
 				int topChirdPosition = lv_fileList.getFirstVisiblePosition();
 				View topVisableChild = lv_fileList.getChildAt(0);
 				int offset = topVisableChild != null?
@@ -841,4 +859,12 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	}
 	
 	/** End of public parameter getter. **/
+	
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if (key.equals(AppConstant.KEY_IF_SHOW_HIDDEN_FILES)) {
+			flag_showHiddenFiles = sharedPreferences.getBoolean(AppConstant.KEY_IF_SHOW_HIDDEN_FILES, false);
+			refresh();
+		}
+	}
 }

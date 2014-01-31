@@ -40,6 +40,7 @@ public class SearchListAdapter extends BaseAdapter {
 	private List<String> filePath;
 	private List<Bitmap> fileIcon;
 	
+	@SuppressWarnings("unused")
 	private Bitmap mIcon1; // opened folder
 	private Bitmap mIcon2; // folder
 	private Bitmap mIcon3; // file
