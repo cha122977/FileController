@@ -58,6 +58,7 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		/** Show help dialog when use app first time **/
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean firstUseApp = sp.getBoolean(OPEN_FIRST, true);
 		if (firstUseApp) {
@@ -124,7 +125,7 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 			finish();
 			return true;
 		case R.id.action_searchSetting:
-			startActivityForResult(new Intent(this, SettingActivity.class), AppConstant.REQUEST_CODE_SETTING);
+			startActivity(new Intent(this, SettingActivity.class));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

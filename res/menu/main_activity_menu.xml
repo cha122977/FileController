@@ -1,5 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     
+    <item android:id="@+id/action_searchSetting"
+		android:title="@string/menu_openSearchSetting"
+		android:showAsAction="never" />
 	<item android:id="@+id/action_search"
 		android:title="@string/menu_search"
 		android:icon="@drawable/search"
@@ -11,9 +14,6 @@
 	<item android:id="@+id/action_aboutApp"
 		android:title="@string/menu_aboutTitle"
 		android:icon="@drawable/about"
-		android:showAsAction="never" />
-	<item android:id="@+id/action_searchSetting"
-		android:title="@string/menu_openSearchSetting"
 		android:showAsAction="never" />
 	<item android:id="@+id/action_exist"
 		android:title="@string/menu_finish"

@@ -373,13 +373,13 @@ public class SearchActivity extends ListActivity implements
 	
 	/** End of implementation of menu options. **/ 
 	
-	/** search function **/
+	/** AREA Search function **/
 	
 	private Object searchingThreadLock = new Object();
 	private int numberOfSearchingThread = 0;
 	
 	private void startSearch(String targetDirectory, final String keyWord){
-		if (keyWord.equals("") || keyWord==null) { // check if user enter the file name
+		if (keyWord.equals("") || keyWord == null) { // check if user enter the file name
 			Toast.makeText(this, R.string.search_no_text, Toast.LENGTH_SHORT).show();
 		} else {
 			final File file = new File(targetDirectory);
@@ -403,7 +403,7 @@ public class SearchActivity extends ListActivity implements
 				}
 				mHandler.sendEmptyMessage(PROGRESS_SHOW);
 				
-				newDeepSearch(targetDirectory, keyWord, newAdapter);
+				deepSearchAndNotify(targetDirectory, keyWord, newAdapter);
 				
 				synchronized (searchingThreadLock) {
 					numberOfSearchingThread--;
@@ -413,7 +413,13 @@ public class SearchActivity extends ListActivity implements
 		}).start();
 	}
 	
-	private void newDeepSearch(File targetDirectory, String keyWord, final SearchListAdapter adapter) {
+	/**
+	 * Search files and notify adapter to change the function.
+	 * @param targetDirectory directory to search
+	 * @param keyWord search keyword
+	 * @param adapter adapter which handle the result.
+	 */
+	private void deepSearchAndNotify(File targetDirectory, String keyWord, final SearchListAdapter adapter) {
 		// shadow search, search current directory only.
 		File[] listfile = targetDirectory.listFiles(new FileNameFilter(keyWord));
 		if (flag_showHiddenFiles == false) {
@@ -442,7 +448,7 @@ public class SearchActivity extends ListActivity implements
 			listfile = FSController.filterCannotReadFiles(listfile);
 			for (File f: listfile) {
 				if (f.isDirectory()) { // search recursively.
-					newDeepSearch(f, keyWord, adapter);
+					deepSearchAndNotify(f, keyWord, adapter);
 				}
 			}
 		}
@@ -451,7 +457,6 @@ public class SearchActivity extends ListActivity implements
 	/**
 	 * Used to filter the files name.
 	 * @author cha122977
-	 *
 	 */
 	private class FileNameFilter implements FileFilter {
 		private String acceptableName;
@@ -469,6 +474,8 @@ public class SearchActivity extends ListActivity implements
 		}
 	}
 	
+	/** End of Search function **/
+	
 	/** AREA activity action **/
 
 	@Override
@@ -481,7 +488,7 @@ public class SearchActivity extends ListActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_searchSetting:
-			startActivityForResult(new Intent(this, SettingActivity.class), AppConstant.REQUEST_CODE_SETTING);
+			startActivity(new Intent(this, SettingActivity.class));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
