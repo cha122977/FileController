@@ -117,7 +117,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 				break;
 			case SHOW_INFO_DIALOG:
 				Bundle infoArgs = msg.getData();
-				openShowInfoDialog(infoArgs.getString(KEY_INFO_TITLE), infoArgs.getInt(KEY_INFO_ICON_RES_ID), infoArgs.getString(KEY_INFO_MSG));
+				showInfoDialog(infoArgs.getString(KEY_INFO_TITLE), infoArgs.getInt(KEY_INFO_ICON_RES_ID), infoArgs.getString(KEY_INFO_MSG));
 				break;
 			default: // do nothing.
 				break;
@@ -401,17 +401,17 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_parentCreateDir:
-			createDirectory(dirFile);
+			showCreateDirectoryDialog(dirFile);
 			return true;
 		case R.id.menu_showParentDirInfo:
 			showDataInfo(dirFile);
 			return true;
 		case R.id.menu_createDir:
-			createDirectory(listFilesOfDirFile[selectedListFilePosition]);
+			showCreateDirectoryDialog(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		case R.id.menu_renameDir:
 		case R.id.menu_renameFile:
-			openRenameDataDialog(listFilesOfDirFile[selectedListFilePosition]);
+			showRenameDataDialog(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		case R.id.menu_showDirInfo:
 		case R.id.menu_showFileInfo:
@@ -419,15 +419,15 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			return true;
 		case R.id.menu_moveDirToOtherSide:
 		case R.id.menu_moveFileToOtherSide:
-			openMoveDataDialog(listFilesOfDirFile[selectedListFilePosition], owner.getAnotherWindowDir(this));
+			showMoveDataDialog(listFilesOfDirFile[selectedListFilePosition], owner.getAnotherWindowDir(this));
 			return true;
 		case R.id.menu_copyDirToOtherSide:
 		case R.id.menu_copyFileToOtherSide:
-			openCopyDataDialog(listFilesOfDirFile[selectedListFilePosition], owner.getAnotherWindowDir(this));
+			showCopyDataDialog(listFilesOfDirFile[selectedListFilePosition], owner.getAnotherWindowDir(this));
 			return true;
 		case R.id.menu_deleteDir:
 		case R.id.menu_deleteFile:
-			openDeleteDataDialog(listFilesOfDirFile[selectedListFilePosition]);
+			showDeleteDataDialog(listFilesOfDirFile[selectedListFilePosition]);
 			return true;
 		default:
 			return false;
@@ -499,7 +499,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	
 	/*** Create directory ***/
 
-	public void createDirectory(final File parentDir) {
+	public void showCreateDirectoryDialog(final File parentDir) {
 		// show a dialog to get new name.
 		LayoutInflater inflater = LayoutInflater.from(activity);
 		View renameDialogView = inflater.inflate(R.layout.rename_dialog, null);
@@ -544,7 +544,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	 * @param movedFile source file
 	 * @param targetDir targetDirectory.
 	 */
-	private void openMoveDataDialog(final File movedFile, File targetDir) {
+	private void showMoveDataDialog(final File movedFile, File targetDir) {
     	final File destFile = new File(targetDir.getPath() + File.separator + movedFile.getName());
     	if (destFile.exists()) {
     		// There are same name file in target directory,
@@ -596,7 +596,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 
 	/*** Rename data ***/
 	
-	private void openRenameDataDialog(final File renamedData) {
+	private void showRenameDataDialog(final File renamedData) {
 		// use to show dialog to get new file name,
 		// positive button will call function to rename file.
 		// show a dialog to get new name.
@@ -643,7 +643,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	/** Copy data **/
 
 	// copy file to target(directory) as same name.
-	private void openCopyDataDialog(final File copieerData, final File destParentDir) {
+	private void showCopyDataDialog(final File copieerData, final File destParentDir) {
 		File newData = new File(destParentDir.getPath() + File.separator + copieerData.getName());
 		//Avoid replace the presence data which have the same file name in target directory
 		if (!newData.exists()) { //there is no file have same name at target path.
@@ -723,7 +723,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 	 * use to delete file and directory.
 	 * @param deletedData file wait for delete.
 	 */
-	private void openDeleteDataDialog(final File deletedData) {
+	private void showDeleteDataDialog(final File deletedData) {
 		// basic dialog setting.
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(R.string.delete_alertTitle);
@@ -804,7 +804,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		}).start();
 	}
 	
-	private void openShowInfoDialog(String title, int iconResId, String msg) {
+	private void showInfoDialog(String title, int iconResId, String msg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(title);
 		builder.setIcon(iconResId);

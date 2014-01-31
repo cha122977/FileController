@@ -6,6 +6,7 @@ import java.util.Stack;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -132,6 +133,17 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 		}
 	}
 	
+	private void showHelpDialog() {		
+		LayoutInflater inflater = LayoutInflater.from(this);
+		View view = inflater.inflate(R.layout.alertdialog_help, null);
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(view);
+		builder.setPositiveButton(R.string.alertButton_ok, null);
+		builder.create();
+		builder.show();
+	}
+	
 	private void showAboutDialog() {
 		// Linkify the message
 	    SpannableString s = new SpannableString(getResources().getString(R.string.about_msg));
@@ -151,18 +163,7 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 		msgView.setMovementMethod(LinkMovementMethod.getInstance());
 	}
 	
-	private void showHelpDialog() {		
-		LayoutInflater inflater = LayoutInflater.from(this);
-		View view = inflater.inflate(R.layout.alertdialog_help, null);
-		
-		AlertDialog d = new AlertDialog.Builder(this)
-			.setView(view)
-			.setPositiveButton(R.string.alertButton_ok, null)
-			.create();
-		d.show();
-	}
-	
-	private void openExitCheckDialog() {
+	private void showExitCheckDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.exitDialog_title);
 		builder.setPositiveButton(R.string.exitDialog_exitButtonText, new DialogInterface.OnClickListener() {
@@ -259,7 +260,7 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 	@Override
 	public void onBackPressed() {
 		if (actionHistory.size() == 0) {
-			openExitCheckDialog();
+			showExitCheckDialog();
 		} else {
 			HistoryObject ho = actionHistory.pop();
 			(ho.fileManager).openDirectory(ho.dir);
