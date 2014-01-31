@@ -520,4 +520,6 @@ public class SearchActivity extends ListActivity implements
 			flag_showHiddenFiles = sharedPreferences.getBoolean(AppConstant.KEY_IF_SHOW_HIDDEN_FILES, false);
 		}
 	}
+
+	/** End of back stack implementation **/
 }
