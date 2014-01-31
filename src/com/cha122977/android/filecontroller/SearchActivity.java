@@ -69,9 +69,17 @@ public class SearchActivity extends ListActivity{
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN){
-					String externalRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+					String searchedDir;
+					if ((Environment.getExternalStorageState()).equals(Environment.MEDIA_REMOVED)) {
+						searchedDir = Environment.getRootDirectory().getAbsolutePath();
+						if (searchedDir == null) { // double check
+							searchedDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+						}
+					} else {
+						searchedDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+					}
 					String keyWord = et_searchName.getText().toString();
-					startSearch(externalRoot, keyWord);
+					startSearch(searchedDir, keyWord);
 					return true;
 				}
 				return false;
