@@ -51,7 +51,7 @@
     <string name="menu_finish">Exit Cobi</string>
 	<string name="menu_showInTopWindow">Show in top window</string>
 	<string name="menu_showInBottomWindow">Show in bottom window</string>
-	<string name="menu_openSearchSetting">Search setting</string>
+	<string name="menu_openSearchSetting">Setting</string>
     <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
     <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
     
@@ -82,6 +82,9 @@
     
     <string name="fileCannotRead">Cannot read this file.</string>
     <string name="fileDoesNotExists">File does not exist.</string>
+    
+    <string name="preferences_showHiddenFiles_title">Show hidden files</string>
+    <string name="preferences_showHiddenFiles_summary">Show hidden files in window and search result.</string>
     
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">

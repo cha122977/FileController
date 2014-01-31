@@ -12,9 +12,11 @@
 		android:title="@string/menu_aboutTitle"
 		android:icon="@drawable/about"
 		android:showAsAction="never" />
+	<item android:id="@+id/action_searchSetting"
+		android:title="@string/menu_openSearchSetting"
+		android:showAsAction="never" />
 	<item android:id="@+id/action_exist"
 		android:title="@string/menu_finish"
-		android:icon="@drawable/about"
 		android:showAsAction="never" />
 	
 </menu>

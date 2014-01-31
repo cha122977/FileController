@@ -51,7 +51,7 @@
     <string name="menu_finish">結束Cobi</string>
     <string name="menu_showInTopWindow">顯示在上方視窗</string>
 	<string name="menu_showInBottomWindow">顯示在下方視窗</string>
-	<string name="menu_openSearchSetting">搜尋設定</string>
+	<string name="menu_openSearchSetting">設定</string>
     <string name="menu_createNewDirInTop">在上方新增資料夾</string>
     <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     
@@ -79,6 +79,12 @@
     <string name="fileInfo_unit_kByte"> KB</string>
     <string name="fileInfo_unit_mByte"> MB</string>
     <string name="fileInfo_unit_gByte"> GB</string>
+    
+    <string name="fileCannotRead">無法讀取該檔案</string>
+    <string name="fileDoesNotExists">檔案不存在</string>
+    
+    <string name="preferences_showHiddenFiles_title">顯示隱藏檔</string>
+    <string name="preferences_showHiddenFiles_summary">將隱藏檔顯示在畫面及搜尋結果上</string>
     
 	<!-- use in Long Click List View Item function -->
     <string-array name="alert_fileSelectedOption">

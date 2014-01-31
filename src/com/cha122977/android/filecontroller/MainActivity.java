@@ -113,6 +113,9 @@ public class MainActivity extends Activity implements IFMWindowFragmentOwner {
 		case R.id.action_exist:
 			finish();
 			return true;
+		case R.id.action_searchSetting:
+			startActivityForResult(new Intent(this, SettingActivity.class), AppConstant.REQUEST_CODE_SETTING);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

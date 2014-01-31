@@ -455,7 +455,7 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_searchSetting:
-			// TODO
+			startActivityForResult(new Intent(this, SettingActivity.class), AppConstant.REQUEST_CODE_SETTING);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
