@@ -212,6 +212,9 @@ public class FSController {
 	}
 	
 	public static File[] filterCannotReadFile(File[] beFilteredFile){//use to filter the file which cannot be write
+		if (beFilteredFile == null) { // null check.
+			return null;
+		}
 		List<File> l = new ArrayList<File>();
     	for (File f: beFilteredFile) {
     		if (f.canRead()) {

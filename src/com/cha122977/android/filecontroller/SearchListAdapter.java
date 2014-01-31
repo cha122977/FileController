@@ -55,7 +55,7 @@ public class SearchListAdapter extends BaseAdapter {
 	
 	public SearchListAdapter(Context context, List<String> filePath) {
 		mLayoutInflater = LayoutInflater.from(context);
-		this.filePath=filePath;
+		this.filePath = filePath;
 		fileIcon = new ArrayList<Bitmap>();
 		for (int i=0; i<filePath.size(); i++) {
 			fileIcon.add(i, null);
@@ -72,68 +72,101 @@ public class SearchListAdapter extends BaseAdapter {
 		processScaledAllImage();
 	}
 	
+	private Object addSyncLock = new Object();
+	
+	public void addFilePath(String addedPath) {
+		synchronized(addSyncLock) {
+			this.filePath.add(addedPath);
+			this.fileIcon.add(null);
+			mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+		}
+	}
+	
+	public void addFiles(List<String> addedPaths) {
+		synchronized(addSyncLock) {
+			this.filePath.addAll(addedPaths);
+
+			ArrayList<Bitmap> newIcons = new ArrayList<Bitmap>();
+			for (int i=0; i<addedPaths.size(); i++) {
+				newIcons.add(i, null);
+			}
+			this.fileIcon.addAll(newIcons);
+			mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+			
+			mHandler.sendEmptyMessage(NOTIFY_CHANGED);
+		}
+	}
+	
 	@Override
 	public int getCount() {
-		return filePath.size();
+		synchronized (addSyncLock) {
+			return filePath.size();
+		}
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return filePath.get(position);
+		synchronized (addSyncLock) {
+			return filePath.get(position);
+		}
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return position;
+		synchronized (addSyncLock) {
+			return position;
+		}
 	}
 
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		ViewHolder holder;
-		if (convertView==null) {
-			convertView = mLayoutInflater.inflate(R.layout.search_list_row, null);
-			holder = new ViewHolder();
-			holder.icon = (ImageView)convertView.findViewById(R.id.fileIcon);
-			holder.fileName = (TextView)convertView.findViewById(R.id.fileName);
-			holder.filePath = (TextView)convertView.findViewById(R.id.filePath);
-			convertView.setTag(holder);
+		synchronized (addSyncLock) {
+			ViewHolder holder;
+			if (convertView==null) {
+				convertView = mLayoutInflater.inflate(R.layout.search_list_row, null);
+				holder = new ViewHolder();
+				holder.icon = (ImageView)convertView.findViewById(R.id.fileIcon);
+				holder.fileName = (TextView)convertView.findViewById(R.id.fileName);
+				holder.filePath = (TextView)convertView.findViewById(R.id.filePath);
+				convertView.setTag(holder);
 
-		} else {
-			holder = (ViewHolder)convertView.getTag();
-		}
-		
-		File f = new File(filePath.get(position).toString());
-		switch (FSController.getMimeType(f)) {
-		case DIRECTORY://directory
-			holder.icon.setImageBitmap(mIcon2);
-			break;
-		case UNKNOWN://file(unknown)
-			holder.icon.setImageBitmap(mIcon3);
-			break;
-		case AUDIO://audio
-			holder.icon.setImageBitmap(mIcon4);
-			break;
-		case VIDEO://video
-			holder.icon.setImageBitmap(mIcon5);
-			break;
-		case IMAGE://image
-			if (fileIcon.get(position) == null) {
-				holder.icon.setImageBitmap(mIcon6);
-				processScaledImage(position);
 			} else {
-				holder.icon.setImageBitmap(fileIcon.get(position));
+				holder = (ViewHolder)convertView.getTag();
 			}
-			break;
-		case TEXT://text
-			holder.icon.setImageBitmap(mIcon7);
-			break;
-		default://actually, this will not happen.
-			holder.icon.setImageBitmap(mIcon3);
-			break;
+
+			File f = new File(filePath.get(position).toString());
+			switch (FSController.getMimeType(f)) {
+			case DIRECTORY://directory
+				holder.icon.setImageBitmap(mIcon2);
+				break;
+			case UNKNOWN://file(unknown)
+				holder.icon.setImageBitmap(mIcon3);
+				break;
+			case AUDIO://audio
+				holder.icon.setImageBitmap(mIcon4);
+				break;
+			case VIDEO://video
+				holder.icon.setImageBitmap(mIcon5);
+				break;
+			case IMAGE://image
+				if (fileIcon.get(position) == null) {
+					holder.icon.setImageBitmap(mIcon6);
+					processScaledImage(position);
+				} else {
+					holder.icon.setImageBitmap(fileIcon.get(position));
+				}
+				break;
+			case TEXT://text
+				holder.icon.setImageBitmap(mIcon7);
+				break;
+			default://actually, this will not happen.
+				holder.icon.setImageBitmap(mIcon3);
+				break;
+			}
+			holder.fileName.setText(f.getName());
+			holder.filePath.setText(f.getAbsolutePath());
+			return convertView;
 		}
-		holder.fileName.setText(f.getName());
-		holder.filePath.setText(f.getAbsolutePath());
-		return convertView;
 	}
 	
 	static class ViewHolder {
