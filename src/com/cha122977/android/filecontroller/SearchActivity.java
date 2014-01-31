@@ -3,6 +3,7 @@ package com.cha122977.android.filecontroller;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Stack;
 
 import android.annotation.SuppressLint;
@@ -15,7 +16,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -439,6 +443,27 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 		}
 	}
 	
+	/** AREA activity action **/
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.search_activity_menu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_searchSetting:
+			// TODO
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	/** End of activity action **/
+	
 	/** AREA back stack implementation **/
 	@Override
 	public void onBackPressed() {
@@ -454,6 +479,6 @@ public class SearchActivity extends ListActivity implements PopupMenu.OnMenuItem
 			openDirectory(visitedHistory.peek());
 		}
 	}
-	
-	
+
+	/** End of back stack implementation **/
 }
