@@ -51,6 +51,7 @@
     <string name="menu_finish">Exit Cobi</string>
 	<string name="menu_showInTopWindow">Show in top window</string>
 	<string name="menu_showInBottomWindow">Show in bottom window</string>
+	<string name="menu_openSearchSetting">Search setting</string>
     <string name="menu_createNewDirInTop">Create new directory in TOP.</string>
     <string name="menu_createNewDirInBottom">Create new directory at BOTTOM.</string>
     

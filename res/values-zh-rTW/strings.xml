@@ -51,6 +51,7 @@
     <string name="menu_finish">結束Cobi</string>
     <string name="menu_showInTopWindow">顯示在上方視窗</string>
 	<string name="menu_showInBottomWindow">顯示在下方視窗</string>
+	<string name="menu_openSearchSetting">搜尋設定</string>
     <string name="menu_createNewDirInTop">在上方新增資料夾</string>
     <string name="menu_createNewDirInBottom">在下方新增資料夾</string>
     
