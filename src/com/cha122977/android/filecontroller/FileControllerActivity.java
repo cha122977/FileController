@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -132,7 +133,7 @@ public class FileControllerActivity extends Activity {
         // if first time open app, show help dialog.
         if (settings.getBoolean(OPEN_FIRST, true)) {
         	showHelpDialog();
-        	settings.edit().putBoolean(OPEN_FIRST, false).apply(); // apply() performance is better than commit.
+        	settings.edit().putBoolean(OPEN_FIRST, false).commit(); // apply() performance is better than commit.
         }
     }
     
@@ -302,10 +303,13 @@ public class FileControllerActivity extends Activity {
 		    	
 		    	fList = ListFileProcessor.filterCannotWriteFile(fList);//filter the file which can't read and write
 		    	
-		    	fList = ListFileProcessor.reSort(fList); //reSort FileList
+		    	fList = ListFileProcessor.reSort(fList); // reSort FileList
+		    	
 		    	topFilePath.clear(); //clear the list
-		    	for(File i: fList) {
-		    		topFilePath.add(i.getPath());
+		    	if (fList != null) {
+			    	for(File i: fList) {
+			    		topFilePath.add(i.getPath());
+			    	}
 		    	}
 		    	tv_topDir.setText(dir);
 		    	
@@ -340,9 +344,12 @@ public class FileControllerActivity extends Activity {
 	    		fList = ListFileProcessor.filterCannotWriteFile(fList);//filter the file which can't read and write
 	    		
 	    		fList = ListFileProcessor.reSort(fList);//reSort FileList
+	    		
 	        	bottomFilePath.clear();//clear the list
-	        	for (File i: fList) {
-	        		bottomFilePath.add(i.getPath());
+	        	if (fList != null) {
+	        		for (File i: fList) {
+	        			bottomFilePath.add(i.getPath());
+	        		}
 	        	}
 	        	tv_bottomDir.setText(dir);
 	        	
@@ -868,15 +875,23 @@ public class FileControllerActivity extends Activity {
     	File newDir = new File(sourceDir + "/" + newDirName);
 //    	Log.d("TAG", newDir.getAbsolutePath() + "");
     	if(newDir.mkdir()==true){
-    		newDir.setReadable(true);
-    		newDir.setWritable(true);
-    		newDir.setExecutable(true);
+    		initNewDir(newDir);
     		Toast.makeText(getApplicationContext(), R.string.createDir_createDirSucceed, Toast.LENGTH_LONG).show();
     	} else {
     		Toast.makeText(getApplicationContext(), R.string.createDir_createDirFailure, Toast.LENGTH_LONG).show();
     	}
     	refreshListView();
     }
+	
+	@SuppressLint("NewApi")
+	private void initNewDir(File dir) {
+		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+		if (currentapiVersion > 8) {
+			dir.setReadable(true);
+			dir.setWritable(true);
+			dir.setExecutable(true);
+		}
+	}
 	
 	//-----general function---//
 	private void refreshListView() { //refresh the file in list view(actually, reload)

@@ -16,6 +16,9 @@ import android.util.Log;
 
 public class ListFileProcessor {
 	public static File[] filterCannotWriteFile(File[] beFilteredFile){//use to filter the file which cannot be write
+		if (beFilteredFile == null) {
+			return null;
+		}
 		List<File> l = new ArrayList<File>();
     	for(File f: beFilteredFile){
     		if(f.canWrite()){
@@ -27,7 +30,10 @@ public class ListFileProcessor {
     	return result;
     }
     
-    public static File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front 
+    public static File[] reSort(File[] fileList){//Bubble Sort of file list. which ignore Case and put directory at front
+    	if (fileList == null) {
+    		return null;
+    	}
     	ArrayList<File> list = new ArrayList<File>();
 		for (File f: fileList) {
 			list.add(f);
