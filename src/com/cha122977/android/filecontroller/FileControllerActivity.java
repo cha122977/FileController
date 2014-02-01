@@ -548,9 +548,9 @@ public class FileControllerActivity extends Activity {
 		        	int pointIndex = copieerFileName.lastIndexOf(".");
 //		    		Log.d("TAG", "Index of . is: " + pointIndex);
 		        	while (true) {
-		        		if (pointIndex != -1) {//file have attachment 
-		        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);//�s"."�@�_�ɤW
-		        		} else {//file does not have attachment
+		        		if (pointIndex != -1 && pointIndex != 0) {//file have attachment 
+		        			temp = copieerFileName.substring(0,pointIndex-1) + "(" + fileNameCounter + ")" + copieerFileName.substring(pointIndex);
+		        		} else {//file does not have attachment or it is hidden file with no attachment.
 		        			temp = copieerFileName + "(" + fileNameCounter + ")";
 		        		}
 		        		if (new File(target + "/" + temp).exists() == false) {//new file name is independence
@@ -561,7 +561,7 @@ public class FileControllerActivity extends Activity {
 		        	}
 		        	s[1] += "\n" + newFileName;//setting new fileName to option.
 		        	 
-		        	AlertDialog.Builder builder = new AlertDialog.Builder(FileControllerActivity.this);//use to select option
+		        	final AlertDialog.Builder builder = new AlertDialog.Builder(FileControllerActivity.this);//use to select option
 		        	builder.setTitle(R.string.copy_fileSameName);
 		    		builder.setItems(s, new DialogInterface.OnClickListener() {
 		    			@Override
@@ -581,7 +581,12 @@ public class FileControllerActivity extends Activity {
 		    				}
 		    			}
 		    		});
-		    		builder.show();
+		    		runOnUiThread(new Runnable() { // UI component should run on UI thread.
+						@Override
+						public void run() {
+							builder.show();
+						}
+					});
 		    	}
 			}
 		}).start();
