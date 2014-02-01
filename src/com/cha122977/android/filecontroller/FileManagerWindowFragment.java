@@ -601,7 +601,7 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			int fileNameCounter=1;
 			int pointIndex = originName.lastIndexOf(".");
 			while (true) {
-				if (pointIndex != -1) { // file have attachment
+				if (pointIndex != -1 && pointIndex != 0) { // file have extension, and it is NOT hidden file without extendsion.
 					newName = originName.substring(0,pointIndex-1)
 								+ "(" + fileNameCounter + ")"
 								+ originName.substring(pointIndex);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.cha122977.android.filecontroller"
-    android:versionCode="26"
-    android:versionName="2.2" >
+    android:versionCode="28"
+    android:versionName="2.21" >
 
     <uses-sdk android:minSdkVersion="11"
         android:targetSdkVersion="19"/>
@@ -10,7 +10,8 @@
 
     <application
         android:icon="@drawable/cobi_logo"
-        android:label="@string/app_name" 
+        android:label="@string/app_name"
+        android:allowBackup="true" 
          >
         <activity android:name=".FileControllerActivity"
             android:label="@string/app_name" 
@@ -27,9 +28,6 @@
         <activity android:name=".SearchActivity"
             android:configChanges="orientation|screenSize"
             android:parentActivityName=".MainActivity" >
-            <meta-data
-            	android:name="android.support.PARENT_ACTIVITY"
-            	android:value=".MainActionBarActivity" />
         </activity>
         <activity android:name=".SettingActivity">
         </activity>
