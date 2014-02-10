@@ -181,6 +181,9 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 			@Override
 			public void onClick(View view) {
 				File openedFile = dirFile.getParentFile();
+				if (openedFile == null) {
+					return;
+				}
 				boolean succeed = openDirectory(openedFile);
 				if (succeed) {
 					owner.pushDirHistory(FileManagerWindowFragment.this, openedFile);
@@ -193,10 +196,15 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		tv_filePath.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				File currentDir = dirFile;
-				boolean succeed = openData(dirFile.getParentFile());
+				File openedFile = dirFile.getParentFile();
+				if (openedFile == null) { // avoid no parent directory case.
+					return;
+				}
+				boolean succeed = openDirectory(openedFile);
 				if (succeed) {
-					owner.pushDirHistory(FileManagerWindowFragment.this, currentDir);
+					owner.pushDirHistory(FileManagerWindowFragment.this, openedFile);
+				} else {
+					Toast.makeText(activity, R.string.noPermission, Toast.LENGTH_SHORT).show();
 				}
 				// TODO open keyboard and modify file path by userself.
 			}
