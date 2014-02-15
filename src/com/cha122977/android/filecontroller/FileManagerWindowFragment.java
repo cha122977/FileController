@@ -180,13 +180,14 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		iv_dirImage.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				File openedFile = dirFile.getParentFile();
+				File originalFile = dirFile;
+				File openedFile = originalFile.getParentFile();
 				if (openedFile == null) {
 					return;
 				}
 				boolean succeed = openDirectory(openedFile);
 				if (succeed) {
-					owner.pushDirHistory(FileManagerWindowFragment.this, openedFile);
+					owner.pushDirHistory(FileManagerWindowFragment.this, originalFile);
 				} else {
 					Toast.makeText(activity, R.string.noPermission, Toast.LENGTH_SHORT).show();
 				}
@@ -196,13 +197,14 @@ public class FileManagerWindowFragment extends Fragment implements PopupMenu.OnM
 		tv_filePath.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				File openedFile = dirFile.getParentFile();
+				File originalFile = dirFile;
+				File openedFile = originalFile.getParentFile();
 				if (openedFile == null) { // avoid no parent directory case.
 					return;
 				}
 				boolean succeed = openDirectory(openedFile);
 				if (succeed) {
-					owner.pushDirHistory(FileManagerWindowFragment.this, openedFile);
+					owner.pushDirHistory(FileManagerWindowFragment.this, originalFile);
 				} else {
 					Toast.makeText(activity, R.string.noPermission, Toast.LENGTH_SHORT).show();
 				}
