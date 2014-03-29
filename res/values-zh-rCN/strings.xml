@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cobi</string>
+    <string name="isFile">这是档案</string>
+    <string name="noPermission">没有读取权限</string>
+    
+    <string name="rename_renameAlertTitle">重新命名档案</string>
+    <string name="rename_renameFileCancel">取消命名</string>
+    <string name="rename_fileAlreadyExist"> 已经存在，使用其它名称。 </string>
+    <string name="rename_renameFileSucceed">重命名成功</string>
+    <string name="rename_renameFileFailure">重命名失败</string>
+    
+    <string name="move_replaceSucceed">取代成功</string>
+    <string name="move_replaceFailure">取代失败</string>
+    <string name="move_moveFileSucceed">移动档案成功</string>
+    <string name="move_moveFileFailure">移动档案失败</string>
+    <string name="move_moveFileCancel">取消移动档案</string>
+    <string name="move_fileAlreadyExist">该档案名称已存在</string>
+    
+    <string name="copy_fileSameName">该档案名称已存在</string>
+<string name="copy_copyDataSucceed">烤贝档案成功</string>
+    <string name="copy_copyDataFailure">取消复制档案</string>
+    
+    <string name="delete_alertTitle">删除档案</string>
+    <string name="delete_alertDeleteFileMsg">档案将永久删除</string>
+    <string name="delete_alertDeleteDirMsg">资料夹内的资料将永久删除，此动作将无法还原。 </string>
+    <string name="delete_deleteButton">删除</string>
+    <string name="delete_deleteDataSucceed"> 已删除成功</string>
+    <string name="delete_deleteDataFailure"> 删除失败</string>
+    
+    <string name="alertButton_yes">是</string>
+   <string name="alertButton_no">否</string>
+    <string name="alertButton_ok">完 成</string>
+    <string name="alertButton_cancel">取消</string>
+    <string name="action_cancel">取 消</string>
+  
+    <string name="exitDialog_title">确定要离开Cobi吗？ </string>
+    <string name="exitDialog_exitButtonText">离开</string>
+    <string name="exitDialog_unexitButtonText">取消</string>
+    
+    <string name="menu_createDirectory">新增资料夹</string>
+    <string name="menu_rename">重新命名</string>
+    <string name="menu_showInfo">详细资讯</string>
+    <string name="menu_moveToOtherSide">移动档案至另一侧</string>
+    <string name="menu_copyToOtherSide">烤贝档案至另一侧</string>
+    <string name="menu_delete">删除档案</string>
+    <string name="menu_search">搜寻档案</string>
+    <string name="menu_helpTitle">说 明</string>
+    <string name="menu_aboutTitle">关于Cobi</string>
+    <string name="menu_finish">结束Cobi</string>
+    <string name="menu_showInTopWindow">显示在上方视窗</string>
+<string name="menu_showInBottomWindow">显示在下方视窗</string>
+<string name="menu_openSearchSetting">设定</string>
+    <string name="menu_createNewDirInTop">在上方新增资料夹</string>
+    <string name="menu_createNewDirInBottom">在下方新增资料夹</string>
+    
+    <string name="createDir_createNewDirectory">新资料夹</string>
+    <string name="createDir_createDirCancel">取消新增资料夹</string>
+    <string name="createDir_createDirSucceed">新建新资料夹成功</string>
+    <string name="createDir_createDirFailure">新建新资料夹失败</string>
+    
+    <string name="search_activity_title">搜寻档案</string>
+    <string name="search_no_text">请输入档名关键字</string>
+    <string name="search_input_hint">在此输入关键字</string>
+    
+    <string name="help_title">说 明</string>
+    <string name="help_msg">　　画面上下方同时开启两个资料夹视窗，可以将档案移动、复制到另一侧的资料夹中。 \n　　轻点一下档案来移动、烤贝档案，长按档案则可以直接打开该档案。 \n　　点选资料夹来进入下一层，点选资料夹路径则可以回到上一层；长按资料夹来打开资料夹管理选单。 \n　　若要搜寻档案，在选单中选择或按下搜寻纽。 </string>
+    
+    <string name="about_title">关 于 Cobi</string>
+    <string name="about_msg"><b>cha122977</b> &amp; <b>Yu</b>\ncha122977@gmail.com\nyustudiotw@gmail.com\nhttp://yustudio.tw/</string >
+    <string name="about_copyRight">版权所有</string>
+    <string name="clickAgainToExist">再按一次返回键来结束程式</string>
+    
+    <string name="fileInfo_containingFileNumber">档案数： </string>
+    <string name="fileInfo_size">档案大小： </string>
+    <string name="fileInfo_lastModify">最后修改时间： </string>
+    <string name="fileInfo_unit_byte"> bytes</string>
+    <string name="fileInfo_unit_kByte"> KB</string>
+    <string name="fileInfo_unit_mByte"> MB</string>
+    <string name="fileInfo_unit_gByte"> GB</string>
+    
+    <string name="fileCannotRead">无法读取该档案</string>
+    <string name="fileDoesNotExists">档案不存在</string>
+    
+    <string name="preferences_showHiddenFiles_title">显示隐藏档</string>
+    <string name="preferences_showHiddenFiles_summary">将隐藏档显示在画面及搜寻结果上</string>
+    
+    <!-- use when copy file and target directory have same name file -->
+    <string-array name="alert_sameFileNameOption">
+        <item>取代该档案</item>
+        <item>烤贝并重命名为：</item>
+        <item>取消复制</item>
+    </string-array>
+    
+<!-- use when move file and target directory have same name file -->
+    <string-array name="alert_moveFileSameName">
+        <item>取代该档案</item>
+        <item>取消</item>
+    </string-array>
+</resources>
