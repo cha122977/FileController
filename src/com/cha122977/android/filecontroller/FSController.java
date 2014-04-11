@@ -87,13 +87,19 @@ public class FSController {
 	}
 	
 	public static boolean deleteData(File deletedData) {
+		if (!deletedData.exists()) {
+			return false;
+		}
 		if (deletedData.isFile()) { // data is file
-			if (deletedData.exists() && deletedData.canWrite()) {
+			if (deletedData.canWrite()) {
 				return deletedData.delete();
 			}
 			return false;
 		} else { // data is directory
 			File[] childData = deletedData.listFiles();
+			if (childData == null) { // double confirm.
+				return false;
+			}
 			for (File file: childData) {
 				// delete all children first.
 				if (deleteData(file) == false) { // if delete any child failed, return false immediately.
