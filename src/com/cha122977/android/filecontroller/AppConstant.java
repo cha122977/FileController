@@ -4,6 +4,8 @@ import android.os.Environment;
 
 public class AppConstant {
 
+	public static final int ICON_SIZE = 48;
+	
 	public final static String PRIMARY_STORAGE_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath();
 	public final static String ROOT = Environment.getRootDirectory().getAbsolutePath();
 
